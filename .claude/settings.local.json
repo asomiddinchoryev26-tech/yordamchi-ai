@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"c:\\\\Projects\\\\Yordamchi AI\"; npx tsc --noEmit 2>&1; Write-Host \"TypeScript: $LASTEXITCODE\")",
+      "PowerShell(cd \"c:\\\\Projects\\\\Yordamchi AI\"; npx tsc --noEmit 2>&1; Write-Host \"Exit: $LASTEXITCODE\")",
+      "PowerShell(cd \"c:\\\\Projects\\\\Yordamchi AI\"; npx tsc --noEmit 2>&1 | Select-Object -First 3; Write-Host \"TS: $LASTEXITCODE\")",
+      "PowerShell(New-Item *)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(cd \"C:\\\\Projects\\\\Yordamchi AI\"; $psi = New-Object System.Diagnostics.ProcessStartInfo; $psi.FileName = \"cmd.exe\"; $psi.Arguments = \"/c npx vite --port 5175 > C:\\\\Temp\\\\vite_out.txt 2>&1\"; $psi.WorkingDirectory = \"C:\\\\Projects\\\\Yordamchi AI\"; $psi.UseShellExecute = $false; $psi.CreateNoWindow = $true; $proc = [System.Diagnostics.Process]::Start\\($psi\\); Start-Sleep -Seconds 8; Get-Content \"C:\\\\Temp\\\\vite_out.txt\" -ErrorAction SilentlyContinue | Select-Object -First 20)",
+      "PowerShell(if \\(-not \\(Test-Path \"C:\\\\Temp\"\\)\\) { New-Item -ItemType Directory \"C:\\\\Temp\" }; cd \"C:\\\\Projects\\\\Yordamchi AI\"; Start-Process cmd.exe -ArgumentList \"/c npx vite --port 5175 > C:\\\\Temp\\\\vite_out.txt 2>&1\" -WorkingDirectory \"C:\\\\Projects\\\\Yordamchi AI\" -WindowStyle Hidden; Start-Sleep -Seconds 10; Get-Content \"C:\\\\Temp\\\\vite_out.txt\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Start-Sleep -Seconds 2; $r = Invoke-WebRequest -Uri \"http://localhost:5175\" -TimeoutSec 10 -UseBasicParsing; \"HTTP $\\($r.StatusCode\\) — $\\($r.Content.Length\\) bayt HTML qaytdi\")",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:5175/src/pages/admin/TeachersPage.tsx\" -TimeoutSec 8 -UseBasicParsing -ErrorAction SilentlyContinue; if \\($r\\) { \"HTTP $\\($r.StatusCode\\)\" } else { \"File orqali emas, bundle orqali ishlaydi\" })",
+      "PowerShell(cd \"C:\\\\Projects\\\\Yordamchi AI\"; $env:NODE_OPTIONS=\"--max-old-space-size=4096\"; npx tsc --noEmit --skipLibCheck 2>&1 | Select-Object -First 50)",
+      "PowerShell(cd \"C:\\\\Projects\\\\Yordamchi AI\"; $env:NODE_OPTIONS=\"--max-old-space-size=4096\"; npx tsc --noEmit --skipLibCheck 2>&1)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(winget install *)"
+    ]
+  }
+}
