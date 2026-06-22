@@ -31,6 +31,14 @@ const ROLE_PATH: Record<UserRole, string> = {
   admin:   PATHS.ADMIN.ROOT,
 }
 
+// Left panel feature bullets — kept static (branding panel)
+const FEATURE_BULLETS = [
+  "AI yordamida shaxsiy o'rganish",
+  'Interaktiv darslar va testlar',
+  "O'qituvchilar bilan bevosita aloqa",
+  'Real vaqtda tahlil va hisobotlar',
+]
+
 export default function LoginPage() {
   const auth     = useAuth()
   const navigate = useNavigate()
@@ -56,24 +64,17 @@ export default function LoginPage() {
     setFormLoading(false)
   }
 
-  const FEATURE_KEYS = [
-    "AI yordamida shaxsiy o'rganish",
-    'Interaktiv darslar va testlar',
-    "O'qituvchilar bilan bevosita aloqa",
-    'Real vaqtda tahlil va hisobotlar',
-  ]
-
   return (
-    <div className="min-h-screen flex dark:bg-gray-950">
+    <div className="min-h-screen flex flex-col lg:flex-row dark:bg-gray-950">
 
-      {/* ══ Chap panel — branding (faqat desktop) ══ */}
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col overflow-hidden
-                      bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
+      {/* ══ Left panel — branding (lg+ only) ══ */}
+      <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 relative flex-col overflow-hidden
+                      bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex-shrink-0">
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-white/5" />
-        <div className="absolute top-1/3  -right-28 w-80 h-80 rounded-full bg-white/5" />
-        <div className="absolute -bottom-20 left-1/3  w-72 h-72 rounded-full bg-white/5" />
+        <div className="absolute top-1/3 -right-28 w-80 h-80 rounded-full bg-white/5" />
+        <div className="absolute -bottom-20 left-1/3 w-72 h-72 rounded-full bg-white/5" />
 
-        <div className="relative z-10 flex flex-col h-full px-12 py-10">
+        <div className="relative z-10 flex flex-col h-full px-10 xl:px-12 py-10">
           <div className="flex items-center gap-3">
             <img src={logoSrc} alt="YordamchiAI logo" className="w-10 h-10 rounded-xl shadow-lg" />
             <span className="text-xl font-bold text-white tracking-tight">YordamchiAI</span>
@@ -83,15 +84,15 @@ export default function LoginPage() {
             <p className="text-blue-300 text-xs font-semibold mb-4 uppercase tracking-widest">
               Xush kelibsiz
             </p>
-            <h1 className="text-4xl font-bold text-white leading-snug mb-5">
+            <h1 className="text-3xl xl:text-4xl font-bold text-white leading-snug mb-5">
               Bilim olamiga<br />qadam qo&apos;ying
             </h1>
-            <p className="text-blue-200 text-base leading-relaxed mb-10 max-w-xs">
+            <p className="text-blue-200 text-sm xl:text-base leading-relaxed mb-10 max-w-xs">
               Zamonaviy AI texnologiyalari bilan ta&apos;lim olish, o&apos;rgatish va
               boshqarish — barchasi bir joyda.
             </p>
-            <ul className="space-y-4">
-              {FEATURE_KEYS.map(feature => (
+            <ul className="space-y-3.5">
+              {FEATURE_BULLETS.map(feature => (
                 <li key={feature} className="flex items-start gap-3">
                   <div className="mt-0.5 w-5 h-5 rounded-full bg-blue-500/30 border border-blue-400/40
                                   flex items-center justify-center flex-shrink-0">
@@ -107,30 +108,32 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ══ O'ng panel — forma ══ */}
-      <div className="w-full lg:w-1/2 flex flex-col bg-white dark:bg-gray-900">
-        {/* Mobil header */}
-        <div className="lg:hidden flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 shadow-md">
+      {/* ══ Right panel — form ══ */}
+      <div className="flex-1 flex flex-col bg-white dark:bg-gray-900 min-h-screen lg:min-h-0">
+
+        {/* Mobile header */}
+        <div className="lg:hidden flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-4 shadow-md flex-shrink-0">
           <img src={logoSrc} alt="YordamchiAI logo" className="w-8 h-8 rounded-lg" />
-          <span className="text-lg font-bold text-white">YordamchiAI</span>
+          <span className="text-base font-bold text-white">YordamchiAI</span>
         </div>
 
-        <div className="flex-1 flex items-center justify-center px-6 py-12 sm:px-12">
-          <div className="w-full max-w-md">
+        {/* Form container */}
+        <div className="flex-1 flex items-start lg:items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+          <div className="w-full max-w-sm sm:max-w-md">
 
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.loginTitle}</h2>
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-50">{t.loginTitle}</h2>
               <p className="text-gray-500 dark:text-gray-400 mt-1.5 text-sm">{t.loginSubtitle}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
 
               {/* Rol tanlash */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t.selectRole}
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {ROLES.map(r => {
                     const Icon   = r.icon
                     const active = role === r.value
@@ -140,15 +143,15 @@ export default function LoginPage() {
                         type="button"
                         onClick={() => setRole(r.value)}
                         className={cn(
-                          'flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border-2',
+                          'flex flex-col items-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 px-1 sm:px-2 rounded-xl border-2',
                           'text-xs font-semibold transition-all duration-200 select-none',
                           active
                             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
                             : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-blue-200 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400',
                         )}
                       >
-                        <Icon className={cn('w-5 h-5', active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500')} />
-                        {t[r.labelKey]}
+                        <Icon className={cn('w-4 h-4 sm:w-5 sm:h-5', active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500')} />
+                        <span className="truncate w-full text-center">{t[r.labelKey]}</span>
                       </button>
                     )
                   })}
@@ -161,7 +164,7 @@ export default function LoginPage() {
                   {t.emailLabel}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <input
                     id="email"
                     type="email"
@@ -170,7 +173,7 @@ export default function LoginPage() {
                     onChange={e => { setEmail(e.target.value); auth.clearError() }}
                     placeholder="sizning@email.com"
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
                                bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
                                placeholder:text-gray-400 dark:placeholder:text-gray-500
                                focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
@@ -185,7 +188,7 @@ export default function LoginPage() {
                   {t.passwordLabel}
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
@@ -194,7 +197,7 @@ export default function LoginPage() {
                     onChange={e => { setPassword(e.target.value); auth.clearError() }}
                     placeholder="••••••••"
                     autoComplete="current-password"
-                    className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
+                    className="w-full pl-9 pr-11 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
                                bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
                                placeholder:text-gray-400 dark:placeholder:text-gray-500
                                focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
@@ -204,7 +207,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
                     aria-label={showPassword ? 'Parolni yashirish' : "Parolni ko'rsatish"}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-0.5"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -212,21 +215,21 @@ export default function LoginPage() {
               </div>
 
               {/* Eslab qol + Parolni unutdim */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2.5 cursor-pointer group">
+              <div className="flex items-center justify-between gap-2">
+                <label className="flex items-center gap-2 cursor-pointer group flex-shrink-0">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={e => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 accent-blue-600 cursor-pointer"
                   />
-                  <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors select-none">
+                  <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors select-none whitespace-nowrap">
                     {t.rememberMeLabel}
                   </span>
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors whitespace-nowrap flex-shrink-0"
                 >
                   {t.forgotPasswordQuestion}
                 </Link>
@@ -234,7 +237,7 @@ export default function LoginPage() {
 
               {/* Xato xabari */}
               {auth.error && (
-                <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
                   <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                   <p className="text-sm text-red-700 dark:text-red-400 leading-snug">{auth.error}</p>
                 </div>
@@ -262,7 +265,7 @@ export default function LoginPage() {
             </form>
 
             {/* Divider */}
-            <div className="relative my-7">
+            <div className="relative my-5 sm:my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-100 dark:border-gray-700" />
               </div>

@@ -71,14 +71,7 @@ export default function TeacherLayout() {
     : t.noGroup
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-20 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
 
       <Sidebar
         isOpen={sidebarOpen}
@@ -126,7 +119,7 @@ export default function TeacherLayout() {
         }
       />
 
-      <div className="lg:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
         <Navbar
           onMenuClick={() => setSidebarOpen(true)}
           notificationCount={0}
@@ -135,7 +128,7 @@ export default function TeacherLayout() {
           avatarGradient="bg-gradient-to-br from-indigo-500 to-blue-600"
           searchPlaceholder={t.teacherSearchPlaceholder}
         />
-        <main className="flex-1 p-4 lg:p-6">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

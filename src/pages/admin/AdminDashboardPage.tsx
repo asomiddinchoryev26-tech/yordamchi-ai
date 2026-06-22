@@ -197,10 +197,10 @@ export default function AdminDashboardPage() {
   const monthlyMax = Math.max(...monthly.map(m=>m.count), 1)
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 sm:space-y-6 pb-6">
 
       {/* ── Header ── */}
-      <div className="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 rounded-2xl p-6 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 rounded-2xl p-4 sm:p-6 overflow-hidden">
         <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/5" />
         <div className="relative z-10 flex items-center justify-between gap-6">
           <div>
@@ -344,16 +344,17 @@ export default function AdminDashboardPage() {
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             {loading ? (
-              <div className="p-6 space-y-3">
+              <div className="p-4 sm:p-6 space-y-3">
                 {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse" />)}
               </div>
             ) : (
               <>
-                <table className="w-full text-sm hidden sm:table">
+                <div className="overflow-x-auto hidden sm:block">
+                <table className="w-full text-sm min-w-[540px]">
                   <thead>
                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
                       {['Foydalanuvchi','Email','Rol','Holat',"Qo'shildi"].map(h => (
-                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-5 last:pr-5">{h}</th>
+                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-4 last:pr-4 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -363,29 +364,30 @@ export default function AdminDashboardPage() {
                       const letter = (u.full_name??u.email??'?').charAt(0).toUpperCase()
                       return (
                         <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                          <td className="py-3 px-5">
-                            <div className="flex items-center gap-2.5">
-                              <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-gradient-to-br',
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className={cn('w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-gradient-to-br',
                                 u.role==='student'?'from-blue-500 to-indigo-600':u.role==='teacher'?'from-indigo-500 to-violet-600':'from-emerald-500 to-teal-600'
                               )} style={{color:'white'}}>{letter}</div>
-                              <span className="font-medium text-gray-900 dark:text-gray-100">{u.full_name ?? '—'}</span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[120px]">{u.full_name ?? '—'}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-5 text-gray-500 dark:text-gray-400 text-xs">{u.email}</td>
-                          <td className="py-3 px-5"><span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', role?.cls)}>{role?.label}</span></td>
-                          <td className="py-3 px-5">
-                            <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full',
+                          <td className="py-3 px-4 text-gray-500 dark:text-gray-400 text-xs max-w-[150px] truncate">{u.email}</td>
+                          <td className="py-3 px-4 whitespace-nowrap"><span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', role?.cls)}>{role?.label}</span></td>
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
                               u.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
                               {u.status==='active'?'Faol':'Nofaol'}
                             </span>
                           </td>
-                          <td className="py-3 px-5 text-xs text-gray-400 dark:text-gray-500">{fmtDate(u.created_at)}</td>
+                          <td className="py-3 px-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{fmtDate(u.created_at)}</td>
                         </tr>
                       )
                     })}
                   </tbody>
                 </table>
+                </div>
                 <div className="sm:hidden divide-y divide-gray-100 dark:divide-gray-700">
                   {filteredUsers.map(u => {
                     const letter = (u.full_name??u.email??'?').charAt(0).toUpperCase()
@@ -471,14 +473,15 @@ export default function AdminDashboardPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${students.length} ta so'nggi talaba`}</p>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             {loading ? (
-              <div className="p-6 space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"/>)}</div>
+              <div className="p-4 sm:p-6 space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"/>)}</div>
             ) : (
               <>
-                <table className="w-full text-sm hidden sm:table">
+                <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[500px]">
                   <thead>
                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
                       {['Talaba','Email','Guruh','Holat',"Qo'shildi"].map(h=>(
-                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-5">{h}</th>
+                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-4 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -487,31 +490,32 @@ export default function AdminDashboardPage() {
                       const letter = (s.full_name??s.email??'T').charAt(0).toUpperCase()
                       return (
                         <tr key={s.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                          <td className="py-3 px-5">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white bg-gradient-to-br from-blue-500 to-indigo-600">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white bg-gradient-to-br from-blue-500 to-indigo-600">
                                 {letter}
                               </div>
-                              <span className="font-medium text-gray-900 dark:text-gray-100">{s.full_name??'—'}</span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[100px]">{s.full_name??'—'}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-5 text-gray-500 dark:text-gray-400 text-xs">{s.email}</td>
-                          <td className="py-3 px-5">
+                          <td className="py-3 px-4 text-gray-500 dark:text-gray-400 text-xs max-w-[130px] truncate">{s.email}</td>
+                          <td className="py-3 px-4 whitespace-nowrap">
                             <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg">{s.group_name}</span>
                           </td>
-                          <td className="py-3 px-5">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
                               s.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
                               {s.status==='active'?'Faol':'Nofaol'}
                             </span>
                           </td>
-                          <td className="py-3 px-5 text-xs text-gray-400 dark:text-gray-500">{fmtDate(s.created_at)}</td>
+                          <td className="py-3 px-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{fmtDate(s.created_at)}</td>
                         </tr>
                       )
                     })}
                   </tbody>
                 </table>
+                </div>
                 {students.length === 0 && <div className="p-10 text-center text-sm text-gray-400">Talabalar yo'q</div>}
               </>
             )}

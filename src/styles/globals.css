@@ -83,5 +83,14 @@
     color: hsl(var(--foreground));
     margin: 0;
     transition: background-color 0.2s ease, color 0.2s ease;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Minimum touch target size */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 }

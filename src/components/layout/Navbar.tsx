@@ -57,19 +57,19 @@ export function Navbar({
   }
 
   return (
-    <header className="sticky top-0 z-10 h-16 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 px-4 lg:px-6 flex-shrink-0">
+    <header className="sticky top-0 z-10 h-14 sm:h-16 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 flex-shrink-0">
 
       {/* Mobile hamburger */}
       <button
         type="button"
         onClick={onMenuClick}
-        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
         aria-label={t.openMenu}
       >
         <Menu className="w-5 h-5" />
       </button>
 
-      {/* Search */}
+      {/* Search — hidden on xs, visible sm+ */}
       <div className="flex-1 max-w-sm hidden sm:block">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -81,19 +81,20 @@ export function Navbar({
         </div>
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      {/* Right side controls */}
+      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
 
         {/* Theme toggle */}
         <button
           type="button"
           onClick={toggleTheme}
-          className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
           aria-label={theme === 'dark' ? t.lightMode : t.darkMode}
           title={theme === 'dark' ? t.lightMode : t.darkMode}
         >
           {theme === 'dark'
-            ? <Sun className="w-4 h-4" />
-            : <Moon className="w-4 h-4" />
+            ? <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           }
         </button>
 
@@ -102,11 +103,11 @@ export function Navbar({
           <button
             type="button"
             onClick={() => setLangOpen(v => !v)}
-            className="h-9 px-2.5 flex items-center gap-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-xs font-bold"
+            className="h-8 sm:h-9 px-2 sm:px-2.5 flex items-center gap-1 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-xs font-bold flex-shrink-0"
             aria-label={t.language}
             aria-expanded={langOpen}
           >
-            <Globe className="w-3.5 h-3.5" />
+            <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>{currentLang?.short ?? 'UZ'}</span>
             <ChevronDown className={cn('w-3 h-3 transition-transform duration-200', langOpen && 'rotate-180')} />
           </button>
@@ -120,7 +121,7 @@ export function Navbar({
                   onMouseDown={e => e.preventDefault()}
                   onClick={() => handleLangSelect(lang.code)}
                   className={cn(
-                    'w-full px-3 py-2 text-left text-sm transition-colors',
+                    'w-full px-3 py-2.5 text-left text-sm transition-colors',
                     language === lang.code
                       ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
@@ -136,12 +137,12 @@ export function Navbar({
         {/* Notifications */}
         <button
           type="button"
-          className="relative w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
           aria-label={t.notifications}
         >
-          <Bell className="w-4 h-4" />
+          <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           {notificationCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-[18px] h-[18px] bg-red-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center leading-none">
+            <span className="absolute -top-1 -right-1 w-[17px] h-[17px] bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center leading-none">
               {notificationCount > 9 ? '9+' : notificationCount}
             </span>
           )}
@@ -149,7 +150,7 @@ export function Navbar({
 
         {/* Avatar */}
         <div
-          className={cn('w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm cursor-pointer shadow-sm', avatarGradient)}
+          className={cn('w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm cursor-pointer shadow-sm flex-shrink-0', avatarGradient)}
           title={userName}
           aria-label={userName}
         >

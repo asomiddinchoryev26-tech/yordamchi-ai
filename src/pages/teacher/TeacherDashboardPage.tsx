@@ -270,11 +270,12 @@ export default function TeacherDashboardPage() {
               </div>
             ) : (
               <>
-                <table className="w-full text-sm hidden sm:table">
+                <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[440px]">
                   <thead>
                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
                       {['#','Talaba','Guruh','Davomat','Holat'].map(h=>(
-                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-5">{h}</th>
+                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-4 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -283,29 +284,29 @@ export default function TeacherDashboardPage() {
                       const attPct = s.att_total > 0 ? Math.round((s.att_present/s.att_total)*100) : null
                       return (
                         <tr key={s.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
-                          <td className="py-3 px-5 text-gray-400 text-xs font-medium">{i+1}</td>
-                          <td className="py-3 px-5">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white bg-gradient-to-br from-blue-500 to-indigo-600">
+                          <td className="py-3 px-4 text-gray-400 text-xs font-medium">{i+1}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white bg-gradient-to-br from-blue-500 to-indigo-600">
                                 {(s.full_name??s.email??'T').charAt(0).toUpperCase()}
                               </div>
-                              <span className="font-medium text-gray-900 dark:text-gray-100 truncate">{s.full_name ?? '—'}</span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[100px]">{s.full_name ?? '—'}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-5">
-                            <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit">
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg flex items-center gap-1 w-fit">
                               <GraduationCap className="w-3 h-3" />{s.group_name}
                             </span>
                           </td>
-                          <td className="py-3 px-5">
+                          <td className="py-3 px-4 whitespace-nowrap">
                             {attPct !== null
-                              ? <span className={cn('text-sm font-bold px-2.5 py-0.5 rounded-lg', avgColor(attPct))}>{attPct}%</span>
+                              ? <span className={cn('text-sm font-bold px-2 py-0.5 rounded-lg', avgColor(attPct))}>{attPct}%</span>
                               : <span className="text-xs text-gray-400">—</span>
                             }
                           </td>
-                          <td className="py-3 px-5">
-                            <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full',
-                              s.status==='active'?'bg-emerald-100 text-emerald-700':'bg-gray-100 text-gray-500'
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
+                              s.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
                               {s.status==='active'?'Faol':'Nofaol'}
                             </span>
@@ -315,22 +316,6 @@ export default function TeacherDashboardPage() {
                     })}
                   </tbody>
                 </table>
-                <div className="sm:hidden divide-y divide-gray-100">
-                  {filtered.map(s => {
-                    const attPct = s.att_total > 0 ? Math.round((s.att_present/s.att_total)*100) : null
-                    return (
-                      <div key={s.id} className="flex items-center gap-3 p-4">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white bg-gradient-to-br from-blue-500 to-indigo-600">
-                          {(s.full_name??s.email??'T').charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{s.full_name??'—'}</p>
-                          <p className="text-xs text-gray-400">{s.group_name}</p>
-                        </div>
-                        {attPct !== null && <span className={cn('text-sm font-bold px-2 py-0.5 rounded-lg', avgColor(attPct))}>{attPct}%</span>}
-                      </div>
-                    )
-                  })}
                 </div>
               </>
             )}

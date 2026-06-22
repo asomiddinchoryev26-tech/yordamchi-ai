@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, Outlet } from 'react-router-dom'
-import { Sun, Moon, Globe, ChevronDown } from 'lucide-react'
+import { Sun, Moon, Globe, ChevronDown, Menu, X, ArrowRight } from 'lucide-react'
 import { PATHS } from '@/routes/paths'
 import { APP_NAME } from '@/utils/constants'
 import logoSrc from '@/assets/images/logo.svg'
@@ -15,13 +15,15 @@ const LANG_OPTIONS: { code: Language; label: string; short: string }[] = [
 ]
 
 export default function MainLayout() {
-  const { theme, setTheme } = useTheme()
-  const { language, setLanguage, t } = useLanguage()
-  const [langOpen, setLangOpen] = useState(false)
-  const langRef = useRef<HTMLDivElement>(null)
+  const { theme, setTheme }             = useTheme()
+  const { language, setLanguage, t }    = useLanguage()
+  const [langOpen,   setLangOpen]       = useState(false)
+  const [mobileOpen, setMobileOpen]     = useState(false)
+  const langRef                         = useRef<HTMLDivElement>(null)
 
   const currentLang = LANG_OPTIONS.find(l => l.code === language)
 
+  // Desktop language dropdown — click-outside to close
   useEffect(() => {
     if (!langOpen) return
     function handleOutside(e: MouseEvent) {
@@ -33,6 +35,12 @@ export default function MainLayout() {
     return () => document.removeEventListener('mousedown', handleOutside)
   }, [langOpen])
 
+  // Close mobile menu on route change (body scroll lock)
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
+
   function toggleTheme() {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
@@ -42,23 +50,30 @@ export default function MainLayout() {
     setLangOpen(false)
   }
 
+  function handleMobileLangSelect(code: Language) {
+    setLanguage(code)
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
 
-      {/* ── Header ── */}
-      <header className="sticky top-0 z-10 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link to={PATHS.HOME} className="flex items-center gap-2.5 group">
+      {/* ══ HEADER ══════════════════════════════════════════════════════════ */}
+      <header className="sticky top-0 z-40 border-b border-gray-100 dark:border-gray-800 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+
+          {/* Logo */}
+          <Link to={PATHS.HOME} className="flex items-center gap-2 flex-shrink-0 group">
             <img src={logoSrc} alt={APP_NAME} className="w-8 h-8 rounded-lg" />
-            <span className="font-bold text-gray-900 dark:text-gray-100 text-lg tracking-tight group-hover:text-blue-600 transition-colors">
+            <span className="font-bold text-gray-900 dark:text-gray-100 text-lg tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {APP_NAME}
             </span>
           </Link>
 
-          <nav className="flex items-center gap-2 sm:gap-3">
+          {/* ── Desktop nav (md+) ── */}
+          <nav className="hidden md:flex items-center gap-2">
             <Link
               to={PATHS.PRICING}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hidden sm:block"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               {t.pricing}
             </Link>
@@ -71,10 +86,7 @@ export default function MainLayout() {
               aria-label={theme === 'dark' ? t.lightMode : t.darkMode}
               title={theme === 'dark' ? t.lightMode : t.darkMode}
             >
-              {theme === 'dark'
-                ? <Sun className="w-4 h-4" />
-                : <Moon className="w-4 h-4" />
-              }
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             {/* Language switcher */}
@@ -115,7 +127,7 @@ export default function MainLayout() {
 
             <Link
               to={PATHS.LOGIN}
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               {t.login}
             </Link>
@@ -126,17 +138,124 @@ export default function MainLayout() {
               {t.register}
             </Link>
           </nav>
+
+          {/* ── Mobile right side: theme + hamburger ── */}
+          <div className="flex md:hidden items-center gap-2">
+            {/* Theme quick-toggle (always visible on mobile) */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+              aria-label={theme === 'dark' ? t.lightMode : t.darkMode}
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
+            {/* Hamburger */}
+            <button
+              type="button"
+              onClick={() => setMobileOpen(v => !v)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+              aria-label={mobileOpen ? t.close : t.openMenu}
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* ── Mobile drawer ─────────────────────────────────────────────── */}
+        {/* Backdrop */}
+        <div
+          className={cn(
+            'fixed inset-0 bg-black/40 md:hidden transition-opacity duration-300',
+            mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+          )}
+          style={{ top: '64px', zIndex: 38 }}
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+
+        {/* Drawer panel */}
+        <div
+          className={cn(
+            'fixed left-0 right-0 md:hidden bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 shadow-xl transition-all duration-300 ease-out overflow-hidden',
+            mobileOpen ? 'max-h-[calc(100vh-64px)] opacity-100' : 'max-h-0 opacity-0',
+          )}
+          style={{ top: '64px', zIndex: 39 }}
+        >
+          <div className="max-w-6xl mx-auto px-4 py-5 space-y-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+
+            {/* Language switcher — full width 3 buttons */}
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5" /> {t.language}
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {LANG_OPTIONS.map(lang => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => handleMobileLangSelect(lang.code)}
+                    className={cn(
+                      'py-2.5 rounded-xl text-sm font-semibold border-2 transition-all',
+                      language === lang.code
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-blue-200 dark:hover:border-blue-700',
+                    )}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gray-100 dark:bg-gray-800" />
+
+            {/* Nav links */}
+            <div className="space-y-1">
+              <Link
+                to={PATHS.PRICING}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+              >
+                {t.pricing}
+              </Link>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gray-100 dark:bg-gray-800" />
+
+            {/* Auth buttons */}
+            <div className="space-y-2.5 pb-2">
+              <Link
+                to={PATHS.LOGIN}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                {t.login}
+              </Link>
+              <Link
+                to={PATHS.REGISTER}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors shadow-md"
+              >
+                {t.register} <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
 
       {/* ── Page content ── */}
-      <main className="flex-1">
+      <main className="flex-1 min-w-0">
         <Outlet />
       </main>
 
       {/* ── Footer ── */}
       <footer className="border-t border-gray-100 dark:border-gray-800 py-8 px-4 bg-white dark:bg-gray-950">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="flex items-center gap-2">
             <img src={logoSrc} alt="" className="w-6 h-6 rounded-md" aria-hidden="true" />
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{APP_NAME}</span>
