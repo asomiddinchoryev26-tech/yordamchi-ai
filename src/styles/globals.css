@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind v4: dark: variantini .dark CLASS bilan ishlash uchun */
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -79,5 +82,6 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     margin: 0;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }

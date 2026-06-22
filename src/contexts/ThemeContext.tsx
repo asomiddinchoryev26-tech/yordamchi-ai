@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
-type Theme = 'light' | 'dark' | 'system'
+type Theme = 'light' | 'dark'
 
 interface ThemeContextValue {
   theme: Theme
@@ -9,18 +9,22 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
+function getInitialTheme(): Theme {
+  try {
+    const saved = localStorage.getItem('theme')
+    if (saved === 'light' || saved === 'dark') return saved
+    // 'system' yoki bo'sh bo'lsa — tizim preferencesini tekshir
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem('theme') as Theme) ?? 'system'
-  })
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
 
   useEffect(() => {
-    const root = document.documentElement
-    const isDark =
-      theme === 'dark' ||
-      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-
-    root.classList.toggle('dark', isDark)
+    document.documentElement.classList.toggle('dark', theme === 'dark')
     localStorage.setItem('theme', theme)
   }, [theme])
 

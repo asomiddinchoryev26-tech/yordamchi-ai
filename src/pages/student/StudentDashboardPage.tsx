@@ -171,8 +171,8 @@ export default function StudentDashboardPage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mening Dashboardim</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{auth.user?.name ?? 'Talaba'} • Real ma&apos;lumotlar</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mening Dashboardim</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{auth.user?.name ?? 'Talaba'} • Real ma&apos;lumotlar</p>
         </div>
         <div className="flex gap-3">
           {[
@@ -180,22 +180,22 @@ export default function StudentDashboardPage() {
             { l:'Testlar',   v: loading ? '...' : `${passedTests}/${totalTests}` },
             { l:'Davomat', v: loading ? '...' : attPct !== null ? `${attPct}%` : '—' },
           ].map(s => (
-            <div key={s.l} className="bg-white rounded-xl border border-gray-100 px-4 py-2.5 text-center min-w-[72px]">
-              <p className="text-lg font-bold text-gray-900 leading-none">{s.v}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">{s.l}</p>
+            <div key={s.l} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 px-4 py-2.5 text-center min-w-[72px]">
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-none">{s.v}</p>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{s.l}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── Tabs ── */}
-      <div className="flex gap-1 p-1 bg-gray-100 rounded-2xl overflow-x-auto">
+      <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-x-auto">
         {TABS.map(t => {
           const Icon = t.icon; const active = tab === t.key
           return (
             <button key={t.key} type="button" onClick={() => setTab(t.key)}
               className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0',
-                active ? 'bg-white text-blue-600 shadow-sm font-semibold' : 'text-gray-500 hover:text-gray-700 hover:bg-white/60',
+                active ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/60',
               )}
             >
               <Icon className="w-4 h-4" />{t.label}
@@ -212,7 +212,7 @@ export default function StudentDashboardPage() {
               {[1,2,3,4].map(i=><div key={i} className="h-44 bg-gray-100 rounded-2xl animate-pulse"/>)}
             </div>
           ) : groups.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
               <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
               <p className="text-sm text-gray-400">Hali hech qanday kursga qo&apos;shilmadingiz</p>
             </div>
@@ -221,7 +221,7 @@ export default function StudentDashboardPage() {
               {groups.map(c => {
                 const attPct = c.att_total > 0 ? Math.round((c.att_present/c.att_total)*100) : null
                 return (
-                  <div key={c.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                  <div key={c.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between mb-3">
                       <span className="text-3xl">{c.subject?.icon ?? '📚'}</span>
                       <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full',
@@ -239,7 +239,7 @@ export default function StudentDashboardPage() {
                       {attPct !== null && <span className={cn('font-bold', attPct>=80?'text-emerald-600':attPct>=60?'text-amber-600':'text-red-600')}>{attPct}% davomat</span>}
                     </div>
                     {attPct !== null && (
-                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+                      <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
                         <div className={cn('h-full rounded-full', attPct>=80?'bg-emerald-500':attPct>=60?'bg-amber-500':'bg-red-500')} style={{width:`${attPct}%`}} />
                       </div>
                     )}
@@ -278,8 +278,8 @@ export default function StudentDashboardPage() {
 
           {/* Guruh bo'yicha davomat */}
           {!loading && groups.some(g=>g.att_total>0) && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-5">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+              <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
                 <CheckSquare className="w-4 h-4 text-blue-600" /> Guruh bo&apos;yicha davomat
               </h2>
               <div className="space-y-4">
@@ -295,7 +295,7 @@ export default function StudentDashboardPage() {
                           {pct}%
                         </span>
                       </div>
-                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div className={cn('h-full rounded-full', pct>=80?'bg-emerald-500':pct>=60?'bg-amber-500':'bg-red-500')} style={{width:`${pct}%`}} />
                       </div>
                     </div>
@@ -307,8 +307,8 @@ export default function StudentDashboardPage() {
 
           {/* Davomat taqsimoti */}
           {attStats && attStats.total > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="text-base font-bold text-gray-900 mb-4">Davomat taqsimoti</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+              <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-4">Davomat taqsimoti</h2>
               <div className="space-y-2.5">
                 {([
                   {key:'present',label:'Kelgan',    color:'bg-emerald-500'},
@@ -335,7 +335,7 @@ export default function StudentDashboardPage() {
           )}
 
           {!loading && !attStats?.total && groups.length === 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
               <TrendingUp className="w-10 h-10 text-gray-200 mx-auto mb-3" />
               <p className="text-sm text-gray-400">Hali taraqqiyot ma&apos;lumoti yo&apos;q</p>
             </div>
@@ -349,7 +349,7 @@ export default function StudentDashboardPage() {
           {loading ? (
             <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-16 bg-gray-100 rounded-2xl animate-pulse"/>)}</div>
           ) : tests.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
               <FileText className="w-10 h-10 text-gray-200 mx-auto mb-3" />
               <p className="text-sm text-gray-400">Hali hech qanday test topshirmadingiz</p>
               <button onClick={() => navigate(PATHS.STUDENT.TESTS)} className="mt-4 text-sm text-blue-600 font-medium hover:underline">
@@ -359,7 +359,7 @@ export default function StudentDashboardPage() {
           ) : (
             <>
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 text-center">
                   <p className="text-2xl font-bold text-gray-900">{totalTests}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Topshirildi</p>
                 </div>
@@ -373,7 +373,7 @@ export default function StudentDashboardPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/50">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Test natijalari</p>
                 </div>
@@ -389,7 +389,7 @@ export default function StudentDashboardPage() {
                           {pct}%
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{t.title}</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{t.title}</p>
                           <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
                             <span>{t.group_name}</span>
                             <span>·</span>
@@ -461,8 +461,8 @@ export default function StudentDashboardPage() {
               </div>
 
               {tests.length > 0 && (
-                <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                  <h2 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                  <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
                     <Trophy className="w-4 h-4 text-amber-500" /> So&apos;nggi yutuqlar
                   </h2>
                   <div className="space-y-3">
@@ -472,7 +472,7 @@ export default function StudentDashboardPage() {
                         <div key={t.test_id} className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                           <span className="text-2xl flex-shrink-0">🏅</span>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{t.title}</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{t.title}</p>
                             <p className="text-xs text-gray-500">{t.group_name} • {fmtDate(t.submitted_at)}</p>
                           </div>
                           <span className={cn('text-sm font-bold px-2.5 py-1 rounded-lg flex-shrink-0', scoreColor(pct))}>

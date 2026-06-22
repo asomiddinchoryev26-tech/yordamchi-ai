@@ -11,27 +11,20 @@ import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
 import type { UserRole } from '@/types/auth.types'
 import logoSrc from '@/assets/images/logo.svg'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface RoleOption {
   value: UserRole
-  label: string
   icon:  ComponentType<{ className?: string }>
+  labelKey: 'studentRole' | 'teacherRole' | 'adminRole'
 }
 
 const ROLES: RoleOption[] = [
-  { value: 'student', label: 'Talaba',      icon: GraduationCap },
-  { value: 'teacher', label: "O'qituvchi",  icon: BookOpen      },
-  { value: 'admin',   label: 'Admin',        icon: Shield        },
+  { value: 'student', icon: GraduationCap, labelKey: 'studentRole' },
+  { value: 'teacher', icon: BookOpen,      labelKey: 'teacherRole'  },
+  { value: 'admin',   icon: Shield,        labelKey: 'adminRole'    },
 ]
 
-const FEATURES: string[] = [
-  "AI yordamida shaxsiy o'rganish",
-  'Interaktiv darslar va testlar',
-  "O'qituvchilar bilan bevosita aloqa",
-  'Real vaqtda tahlil va hisobotlar',
-]
-
-// Kirish muvaffaqiyatli bo'lganda yo'naltirish
 const ROLE_PATH: Record<UserRole, string> = {
   student: PATHS.STUDENT.ROOT,
   teacher: PATHS.TEACHER.ROOT,
@@ -42,6 +35,7 @@ export default function LoginPage() {
   const auth     = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { t }    = useLanguage()
 
   const [email,        setEmail]        = useState('')
   const [password,     setPassword]     = useState('')
@@ -53,21 +47,24 @@ export default function LoginPage() {
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     setFormLoading(true)
-
     const user = await auth.login({ email, password, rememberMe })
-
     if (user) {
-      // Login'dan oldin so'ralgan sahifaga qaytish yoki rol sahifasiga o'tish
       type LocState = { from?: { pathname: string } }
       const from = (location.state as LocState | null)?.from?.pathname
       navigate(from ?? ROLE_PATH[user.role], { replace: true })
     }
-
     setFormLoading(false)
   }
 
+  const FEATURE_KEYS = [
+    "AI yordamida shaxsiy o'rganish",
+    'Interaktiv darslar va testlar',
+    "O'qituvchilar bilan bevosita aloqa",
+    'Real vaqtda tahlil va hisobotlar',
+  ]
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex dark:bg-gray-950">
 
       {/* ══ Chap panel — branding (faqat desktop) ══ */}
       <div className="hidden lg:flex lg:w-1/2 relative flex-col overflow-hidden
@@ -94,7 +91,7 @@ export default function LoginPage() {
               boshqarish — barchasi bir joyda.
             </p>
             <ul className="space-y-4">
-              {FEATURES.map(feature => (
+              {FEATURE_KEYS.map(feature => (
                 <li key={feature} className="flex items-start gap-3">
                   <div className="mt-0.5 w-5 h-5 rounded-full bg-blue-500/30 border border-blue-400/40
                                   flex items-center justify-center flex-shrink-0">
@@ -106,12 +103,12 @@ export default function LoginPage() {
             </ul>
           </div>
 
-          <p className="text-blue-400/70 text-xs">© 2026 YordamchiAI. Barcha huquqlar himoyalangan.</p>
+          <p className="text-blue-400/70 text-xs">© 2026 YordamchiAI. {t.allRightsReserved}.</p>
         </div>
       </div>
 
       {/* ══ O'ng panel — forma ══ */}
-      <div className="w-full lg:w-1/2 flex flex-col bg-white">
+      <div className="w-full lg:w-1/2 flex flex-col bg-white dark:bg-gray-900">
         {/* Mobil header */}
         <div className="lg:hidden flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4 shadow-md">
           <img src={logoSrc} alt="YordamchiAI logo" className="w-8 h-8 rounded-lg" />
@@ -122,18 +119,16 @@ export default function LoginPage() {
           <div className="w-full max-w-md">
 
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Hisobga kirish</h2>
-              <p className="text-gray-500 mt-1.5 text-sm">
-                Platformaga kirish uchun ma&apos;lumotlaringizni kiriting.
-              </p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{t.loginTitle}</h2>
+              <p className="text-gray-500 dark:text-gray-400 mt-1.5 text-sm">{t.loginSubtitle}</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
               {/* Rol tanlash */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rolni tanlang
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t.selectRole}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {ROLES.map(r => {
@@ -148,12 +143,12 @@ export default function LoginPage() {
                           'flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border-2',
                           'text-xs font-semibold transition-all duration-200 select-none',
                           active
-                            ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
-                            : 'border-gray-200 text-gray-500 hover:border-blue-200 hover:bg-blue-50/50 hover:text-blue-600',
+                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm'
+                            : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-blue-200 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400',
                         )}
                       >
-                        <Icon className={cn('w-5 h-5', active ? 'text-blue-600' : 'text-gray-400')} />
-                        {r.label}
+                        <Icon className={cn('w-5 h-5', active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500')} />
+                        {t[r.labelKey]}
                       </button>
                     )
                   })}
@@ -162,8 +157,8 @@ export default function LoginPage() {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Email manzil
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  {t.emailLabel}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -175,8 +170,9 @@ export default function LoginPage() {
                     onChange={e => { setEmail(e.target.value); auth.clearError() }}
                     placeholder="sizning@email.com"
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white
-                               text-sm text-gray-900 placeholder:text-gray-400
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
+                               bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
+                               placeholder:text-gray-400 dark:placeholder:text-gray-500
                                focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
                                transition-colors"
                   />
@@ -185,8 +181,8 @@ export default function LoginPage() {
 
               {/* Parol */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Parol
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  {t.passwordLabel}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -198,8 +194,9 @@ export default function LoginPage() {
                     onChange={e => { setPassword(e.target.value); auth.clearError() }}
                     placeholder="••••••••"
                     autoComplete="current-password"
-                    className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-gray-200 bg-white
-                               text-sm text-gray-900 placeholder:text-gray-400
+                    className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
+                               bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
+                               placeholder:text-gray-400 dark:placeholder:text-gray-500
                                focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
                                transition-colors"
                   />
@@ -207,7 +204,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
                     aria-label={showPassword ? 'Parolni yashirish' : "Parolni ko'rsatish"}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -221,25 +218,25 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={e => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 accent-blue-600 cursor-pointer"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 accent-blue-600 cursor-pointer"
                   />
-                  <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors select-none">
-                    Meni eslab qol
+                  <span className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors select-none">
+                    {t.rememberMeLabel}
                   </span>
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors"
                 >
-                  Parolni unutdingizmi?
+                  {t.forgotPasswordQuestion}
                 </Link>
               </div>
 
               {/* Xato xabari */}
               {auth.error && (
-                <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-200">
+                <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
                   <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700 leading-snug">{auth.error}</p>
+                  <p className="text-sm text-red-700 dark:text-red-400 leading-snug">{auth.error}</p>
                 </div>
               )}
 
@@ -257,7 +254,7 @@ export default function LoginPage() {
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    Kirish
+                    {t.login}
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -267,20 +264,20 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="relative my-7">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-100" />
+                <div className="w-full border-t border-gray-100 dark:border-gray-700" />
               </div>
               <div className="relative flex justify-center">
-                <span className="px-3 bg-white text-xs text-gray-400">yoki</span>
+                <span className="px-3 bg-white dark:bg-gray-900 text-xs text-gray-400 dark:text-gray-500">{t.orDivider}</span>
               </div>
             </div>
 
-            <p className="text-center text-sm text-gray-500">
-              Hisobingiz yo&apos;qmi?{' '}
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+              {t.noAccount}{' '}
               <Link
                 to="/register"
                 className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-colors"
               >
-                Ro&apos;yxatdan o&apos;ting
+                {t.signUpLink}
               </Link>
             </p>
 

@@ -11,48 +11,49 @@ import { Navbar } from '@/components/layout/Navbar'
 import type { SidebarNavSection } from '@/components/layout/Sidebar'
 import { PATHS } from '@/routes/paths'
 import { supabase } from '@/lib/supabase'
-
-const NAV_SECTIONS: SidebarNavSection[] = [
-  {
-    title: 'Asosiy',
-    items: [
-      { label: 'Dashboard', to: PATHS.ADMIN.ROOT, icon: Home },
-    ],
-  },
-  {
-    title: "O'quvchilar",
-    items: [
-      { label: 'Talabalar',     to: PATHS.ADMIN.STUDENTS, icon: Users         },
-      { label: "O'qituvchilar", to: PATHS.ADMIN.TEACHERS, icon: GraduationCap },
-      { label: 'Guruhlar',      to: PATHS.ADMIN.GROUPS,   icon: Layers        },
-    ],
-  },
-  {
-    title: "Ta'lim jarayoni",
-    items: [
-      { label: 'Fanlar',   to: PATHS.ADMIN.SUBJECTS,   icon: BookMarked  },
-      { label: 'Darslar',  to: PATHS.ADMIN.LESSONS,    icon: BookOpen    },
-      { label: 'Davomat',  to: PATHS.ADMIN.ATTENDANCE, icon: CheckSquare },
-      { label: 'Testlar',  to: PATHS.ADMIN.TESTS,      icon: FileText    },
-    ],
-  },
-  {
-    title: 'Tizim',
-    items: [
-      { label: 'Hisobotlar', to: PATHS.ADMIN.REPORTS,  icon: BarChart2 },
-      { label: 'Sozlamalar', to: PATHS.ADMIN.SETTINGS, icon: Settings  },
-    ],
-  },
-]
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const auth     = useAuth()
   const navigate = useNavigate()
+  const { t }    = useLanguage()
   const userName = auth.user?.name ?? 'Administrator'
   const initial  = userName.charAt(0).toUpperCase()
 
-  // ── Real statistika ────────────────────────────────────────────────────────
+  const NAV_SECTIONS: SidebarNavSection[] = [
+    {
+      title: t.mainSection,
+      items: [
+        { label: t.dashboard, to: PATHS.ADMIN.ROOT, icon: Home },
+      ],
+    },
+    {
+      title: t.studentsSection,
+      items: [
+        { label: t.students,  to: PATHS.ADMIN.STUDENTS, icon: Users         },
+        { label: t.teachers,  to: PATHS.ADMIN.TEACHERS, icon: GraduationCap },
+        { label: t.groups,    to: PATHS.ADMIN.GROUPS,   icon: Layers        },
+      ],
+    },
+    {
+      title: t.learningSection,
+      items: [
+        { label: t.subjects,    to: PATHS.ADMIN.SUBJECTS,   icon: BookMarked  },
+        { label: t.lessons,     to: PATHS.ADMIN.LESSONS,    icon: BookOpen    },
+        { label: t.attendance,  to: PATHS.ADMIN.ATTENDANCE, icon: CheckSquare },
+        { label: t.tests,       to: PATHS.ADMIN.TESTS,      icon: FileText    },
+      ],
+    },
+    {
+      title: t.systemSection,
+      items: [
+        { label: t.reports,   to: PATHS.ADMIN.REPORTS,  icon: BarChart2 },
+        { label: t.settings,  to: PATHS.ADMIN.SETTINGS, icon: Settings  },
+      ],
+    },
+  ]
+
   const [stats, setStats] = useState({ users: 0, groups: 0, lessons: 0 })
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
       {sidebarOpen && (
         <div
@@ -92,37 +93,37 @@ export default function AdminLayout() {
         baseRoute={PATHS.ADMIN.ROOT}
         color="emerald"
         userName={userName}
-        userRole="Tizim administratori"
+        userRole={t.adminRole}
         userInitial={initial}
         onLogout={handleLogout}
         summaryCard={
           <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-white">
             <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest mb-3">
-              Tizim holati
+              {t.systemStatus}
             </p>
             <div className="grid grid-cols-2 gap-2 mb-3">
               <div className="bg-white/10 rounded-xl p-2.5 text-center">
                 <p className="text-xl font-bold leading-tight">
                   {stats.users > 0 ? stats.users.toLocaleString() : '—'}
                 </p>
-                <p className="text-[10px] text-emerald-200 mt-0.5">Foydalanuvchi</p>
+                <p className="text-[10px] text-emerald-200 mt-0.5">{t.usersLabel}</p>
               </div>
               <div className="bg-white/10 rounded-xl p-2.5 text-center">
                 <p className="text-xl font-bold leading-tight">
                   {stats.groups > 0 ? stats.groups : '—'}
                 </p>
-                <p className="text-[10px] text-emerald-200 mt-0.5">Faol guruh</p>
+                <p className="text-[10px] text-emerald-200 mt-0.5">{t.activeGroupsLabel}</p>
               </div>
             </div>
             <div className="flex items-center justify-between text-[10px] text-emerald-300 mb-1.5">
-              <span>Jami darslar</span>
+              <span>{t.totalLessonsLabel}</span>
               <span className="font-semibold text-white">{stats.lessons}</span>
             </div>
             <div className="h-1.5 bg-emerald-500/40 rounded-full overflow-hidden">
               <div className="h-full w-full bg-white/70 rounded-full" />
             </div>
             <p className="text-[10px] text-emerald-300 mt-1.5">
-              Barcha tizimlar ishlayapti ✓
+              {t.systemWorking}
             </p>
           </div>
         }
@@ -135,7 +136,7 @@ export default function AdminLayout() {
           userName={userName}
           userInitial={initial}
           avatarGradient="bg-gradient-to-br from-emerald-500 to-teal-600"
-          searchPlaceholder="Foydalanuvchi, kurs, guruh..."
+          searchPlaceholder={t.adminSearchPlaceholder}
         />
         <main className="flex-1 p-4 lg:p-6">
           <Outlet />

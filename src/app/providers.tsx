@@ -2,15 +2,18 @@ import type { ReactNode } from 'react'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          {children}
-        </NotificationProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            {children}
+          </NotificationProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   )
 }

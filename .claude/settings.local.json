@@ -13,7 +13,12 @@
       "PowerShell(cd \"C:\\\\Projects\\\\Yordamchi AI\"; $env:NODE_OPTIONS=\"--max-old-space-size=4096\"; npx tsc --noEmit --skipLibCheck 2>&1 | Select-Object -First 50)",
       "PowerShell(cd \"C:\\\\Projects\\\\Yordamchi AI\"; $env:NODE_OPTIONS=\"--max-old-space-size=4096\"; npx tsc --noEmit --skipLibCheck 2>&1)",
       "PowerShell(Test-Path *)",
-      "PowerShell(winget install *)"
+      "PowerShell(winget install *)",
+      "Bash(npm --version)",
+      "Bash(npx playwright *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5175)",
+      "Bash(node /tmp/verify_theme_lang.mjs)"
     ]
   }
 }

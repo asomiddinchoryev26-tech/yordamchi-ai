@@ -225,7 +225,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div className="flex gap-1 p-1 bg-gray-100 rounded-2xl overflow-x-auto">
+      <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-x-auto">
         {TABS.map(t => {
           const Icon = t.icon
           const active = tab === t.key
@@ -233,7 +233,7 @@ export default function AdminDashboardPage() {
             <button key={t.key} type="button" onClick={() => setTab(t.key)}
               className={cn(
                 'flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0',
-                active ? 'bg-white text-emerald-700 shadow-sm font-semibold' : 'text-gray-500 hover:text-gray-700 hover:bg-white/60',
+                active ? 'bg-white dark:bg-gray-700 text-emerald-700 dark:text-emerald-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/60',
               )}
             >
               <Icon className="w-4 h-4" />
@@ -249,42 +249,42 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
             {loading
               ? Array.from({length:6}).map((_,i) => (
-                  <div key={i} className="bg-gray-50 rounded-2xl border border-gray-100 p-5 animate-pulse h-28" />
+                  <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse h-28" />
                 ))
               : [
-                  { l:'Talabalar',       v: stats!.students, e:'📚', bg:'bg-violet-50'  },
-                  { l:"O'qituvchilar",   v: stats!.teachers, e:'🎓', bg:'bg-indigo-50'  },
-                  { l:'Guruhlar',        v: stats!.groups,   e:'🏫', bg:'bg-blue-50'    },
-                  { l:'Darslar',         v: stats!.lessons,  e:'📖', bg:'bg-emerald-50' },
-                  { l:'Testlar',         v: stats!.tests,    e:'📝', bg:'bg-amber-50'   },
-                  { l:'Davomat yozuvi', v: stats!.att,      e:'✅', bg:'bg-teal-50'    },
+                  { l:'Talabalar',       v: stats!.students, e:'📚', bg:'bg-violet-50  dark:bg-violet-950/40'  },
+                  { l:"O'qituvchilar",   v: stats!.teachers, e:'🎓', bg:'bg-indigo-50  dark:bg-indigo-950/40'  },
+                  { l:'Guruhlar',        v: stats!.groups,   e:'🏫', bg:'bg-blue-50    dark:bg-blue-950/40'    },
+                  { l:'Darslar',         v: stats!.lessons,  e:'📖', bg:'bg-emerald-50 dark:bg-emerald-950/40' },
+                  { l:'Testlar',         v: stats!.tests,    e:'📝', bg:'bg-amber-50   dark:bg-amber-950/40'   },
+                  { l:'Davomat yozuvi', v: stats!.att,      e:'✅', bg:'bg-teal-50    dark:bg-teal-950/40'    },
                 ].map(s => (
-                  <div key={s.l} className={cn('rounded-2xl border border-gray-100 p-5', s.bg)}>
+                  <div key={s.l} className={cn('rounded-2xl border border-gray-100 dark:border-gray-700 p-5', s.bg)}>
                     <span className="text-2xl">{s.e}</span>
-                    <p className="text-2xl font-bold text-gray-900 mt-2">{s.v.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{s.l}</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-2">{s.v.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.l}</p>
                   </div>
                 ))
             }
           </div>
 
           {/* Oylik grafik */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <div className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <BarChart2 className="w-3.5 h-3.5 text-emerald-600" />
+              <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <div className="w-7 h-7 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center">
+                  <BarChart2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 Oylik ro&apos;yxatdan o&apos;tish (so&apos;nggi 12 oy)
               </h2>
               {!loading && (
-                <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">
+                <span className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-lg">
                   Jami: {monthly.reduce((a,b)=>a+b.count,0)}
                 </span>
               )}
             </div>
             {loading ? (
-              <div className="h-28 bg-gray-50 rounded-xl animate-pulse" />
+              <div className="h-28 bg-gray-50 dark:bg-gray-700 rounded-xl animate-pulse" />
             ) : (
               <div className="flex items-end gap-1.5 h-28">
                 {monthly.map((m, i) => (
@@ -306,13 +306,13 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Tizim holati */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
               <Shield className="w-4 h-4 text-emerald-500" /> Tizim holati
             </h2>
-            <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-              <Check className="w-4 h-4 text-emerald-600" />
-              <p className="text-sm font-medium text-emerald-700">Barcha tizimlar ishlayapti — Supabase ulanishi faol</p>
+            <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Barcha tizimlar ishlayapti — Supabase ulanishi faol</p>
             </div>
           </div>
         </div>
@@ -326,14 +326,14 @@ export default function AdminDashboardPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input type="text" value={userSearch} onChange={e=>setUserSearch(e.target.value)}
                 placeholder="Ism yoki email..."
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </div>
             <div className="flex gap-1.5">
               {(['all','student','teacher','admin'] as const).map(r => (
                 <button key={r} type="button" onClick={()=>setUserRoleFilter(r)}
                   className={cn('px-3 py-2 rounded-xl text-xs font-semibold border whitespace-nowrap transition-all',
-                    userRoleFilter===r ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:border-emerald-300',
+                    userRoleFilter===r ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600',
                   )}
                 >
                   {r==='all' ? 'Hammasi' : ROLE_CFG[r].label}
@@ -342,51 +342,51 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             {loading ? (
               <div className="p-6 space-y-3">
-                {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse" />)}
+                {[1,2,3,4,5].map(i => <div key={i} className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse" />)}
               </div>
             ) : (
               <>
                 <table className="w-full text-sm hidden sm:table">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
                       {['Foydalanuvchi','Email','Rol','Holat',"Qo'shildi"].map(h => (
-                        <th key={h} className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide py-3 px-5 last:pr-5">{h}</th>
+                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-5 last:pr-5">{h}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {filteredUsers.map(u => {
                       const role = ROLE_CFG[u.role]
                       const letter = (u.full_name??u.email??'?').charAt(0).toUpperCase()
                       return (
-                        <tr key={u.id} className="hover:bg-gray-50/50">
+                        <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                           <td className="py-3 px-5">
                             <div className="flex items-center gap-2.5">
                               <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 bg-gradient-to-br',
                                 u.role==='student'?'from-blue-500 to-indigo-600':u.role==='teacher'?'from-indigo-500 to-violet-600':'from-emerald-500 to-teal-600'
                               )} style={{color:'white'}}>{letter}</div>
-                              <span className="font-medium text-gray-900">{u.full_name ?? '—'}</span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100">{u.full_name ?? '—'}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-5 text-gray-500 text-xs">{u.email}</td>
+                          <td className="py-3 px-5 text-gray-500 dark:text-gray-400 text-xs">{u.email}</td>
                           <td className="py-3 px-5"><span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', role?.cls)}>{role?.label}</span></td>
                           <td className="py-3 px-5">
                             <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full',
-                              u.status==='active'?'bg-emerald-100 text-emerald-700':'bg-gray-100 text-gray-500'
+                              u.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
                               {u.status==='active'?'Faol':'Nofaol'}
                             </span>
                           </td>
-                          <td className="py-3 px-5 text-xs text-gray-400">{fmtDate(u.created_at)}</td>
+                          <td className="py-3 px-5 text-xs text-gray-400 dark:text-gray-500">{fmtDate(u.created_at)}</td>
                         </tr>
                       )
                     })}
                   </tbody>
                 </table>
-                <div className="sm:hidden divide-y divide-gray-100">
+                <div className="sm:hidden divide-y divide-gray-100 dark:divide-gray-700">
                   {filteredUsers.map(u => {
                     const letter = (u.full_name??u.email??'?').charAt(0).toUpperCase()
                     return (
@@ -395,8 +395,8 @@ export default function AdminDashboardPage() {
                           u.role==='student'?'from-blue-500 to-indigo-600':u.role==='teacher'?'from-indigo-500 to-violet-600':'from-emerald-500 to-teal-600'
                         )}>{letter}</div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{u.full_name??'—'}</p>
-                          <p className="text-xs text-gray-400">{u.email}</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{u.full_name??'—'}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{u.email}</p>
                         </div>
                         <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', ROLE_CFG[u.role]?.cls)}>
                           {ROLE_CFG[u.role]?.label}
@@ -417,41 +417,41 @@ export default function AdminDashboardPage() {
       {/* ══ O'QITUVCHILAR ══ */}
       {tab === 'teachers' && (
         <div className="space-y-5">
-          <p className="text-sm text-gray-500">{loading ? '...' : `${teachers.length} ta o'qituvchi`}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${teachers.length} ta o'qituvchi`}</p>
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[1,2,3,4].map(i => <div key={i} className="h-32 bg-gray-100 rounded-2xl animate-pulse" />)}
+              {[1,2,3,4].map(i => <div key={i} className="h-32 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />)}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {teachers.map(t => {
                 const letter = (t.full_name??t.email??'O').charAt(0).toUpperCase()
                 return (
-                  <div key={t.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                  <div key={t.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md dark:hover:shadow-gray-900/40 transition-shadow">
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold flex-shrink-0 text-white text-lg bg-gradient-to-br from-indigo-500 to-violet-600">
                         {letter}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 truncate">{t.full_name ?? '—'}</h3>
-                        <p className="text-xs text-gray-400 mt-0.5 truncate">{t.email}</p>
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">{t.full_name ?? '—'}</h3>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{t.email}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-blue-50 rounded-xl p-3 text-center">
-                        <p className="text-xl font-bold text-blue-600">{t.group_count}</p>
-                        <p className="text-[10px] text-blue-400">Guruh</p>
+                      <div className="bg-blue-50 dark:bg-blue-950/40 rounded-xl p-3 text-center">
+                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{t.group_count}</p>
+                        <p className="text-[10px] text-blue-400 dark:text-blue-500">Guruh</p>
                       </div>
-                      <div className="bg-indigo-50 rounded-xl p-3 text-center">
-                        <p className="text-xl font-bold text-indigo-600">{t.student_count}</p>
-                        <p className="text-[10px] text-indigo-400">Talaba</p>
+                      <div className="bg-indigo-50 dark:bg-indigo-950/40 rounded-xl p-3 text-center">
+                        <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{t.student_count}</p>
+                        <p className="text-[10px] text-indigo-400 dark:text-indigo-500">Talaba</p>
                       </div>
                     </div>
                   </div>
                 )
               })}
               {teachers.length === 0 && (
-                <div className="sm:col-span-2 p-10 text-center text-sm text-gray-400 bg-white rounded-2xl border border-gray-100">
+                <div className="sm:col-span-2 p-10 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
                   O'qituvchilar yo'q
                 </div>
               )}
@@ -468,45 +468,45 @@ export default function AdminDashboardPage() {
       {/* ══ TALABALAR ══ */}
       {tab === 'students' && (
         <div className="space-y-5">
-          <p className="text-sm text-gray-500">{loading ? '...' : `${students.length} ta so'nggi talaba`}</p>
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${students.length} ta so'nggi talaba`}</p>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             {loading ? (
-              <div className="p-6 space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
+              <div className="p-6 space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"/>)}</div>
             ) : (
               <>
                 <table className="w-full text-sm hidden sm:table">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
                       {['Talaba','Email','Guruh','Holat',"Qo'shildi"].map(h=>(
-                        <th key={h} className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide py-3 px-5">{h}</th>
+                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-5">{h}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {students.map(s => {
                       const letter = (s.full_name??s.email??'T').charAt(0).toUpperCase()
                       return (
-                        <tr key={s.id} className="hover:bg-gray-50/50">
+                        <tr key={s.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                           <td className="py-3 px-5">
                             <div className="flex items-center gap-2.5">
                               <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white bg-gradient-to-br from-blue-500 to-indigo-600">
                                 {letter}
                               </div>
-                              <span className="font-medium text-gray-900">{s.full_name??'—'}</span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100">{s.full_name??'—'}</span>
                             </div>
                           </td>
-                          <td className="py-3 px-5 text-gray-500 text-xs">{s.email}</td>
+                          <td className="py-3 px-5 text-gray-500 dark:text-gray-400 text-xs">{s.email}</td>
                           <td className="py-3 px-5">
-                            <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg">{s.group_name}</span>
+                            <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-lg">{s.group_name}</span>
                           </td>
                           <td className="py-3 px-5">
                             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
-                              s.status==='active'?'bg-emerald-100 text-emerald-700':'bg-gray-100 text-gray-500'
+                              s.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
                               {s.status==='active'?'Faol':'Nofaol'}
                             </span>
                           </td>
-                          <td className="py-3 px-5 text-xs text-gray-400">{fmtDate(s.created_at)}</td>
+                          <td className="py-3 px-5 text-xs text-gray-400 dark:text-gray-500">{fmtDate(s.created_at)}</td>
                         </tr>
                       )
                     })}
@@ -527,37 +527,37 @@ export default function AdminDashboardPage() {
       {/* ══ KURSLAR ══ */}
       {tab === 'courses' && (
         <div className="space-y-5">
-          <p className="text-sm text-gray-500">{loading ? '...' : `${groups.length} ta kurs (guruh)`}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${groups.length} ta kurs (guruh)`}</p>
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[1,2,3,4].map(i=><div key={i} className="h-36 bg-gray-100 rounded-2xl animate-pulse"/>)}
+              {[1,2,3,4].map(i=><div key={i} className="h-36 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse"/>)}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {groups.map(g => {
                 return (
-                  <div key={g.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                  <div key={g.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md dark:hover:shadow-gray-900/40 transition-shadow">
                     <div className="flex items-start gap-3 mb-3">
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                        style={g.subject ? {backgroundColor:g.subject.color+'18',border:`2px solid ${g.subject.color}30`} : {backgroundColor:'#f3f4f6'}}
+                        style={g.subject ? {backgroundColor:g.subject.color+'18',border:`2px solid ${g.subject.color}30`} : {backgroundColor:'#374151'}}
                       >
                         {g.subject?.icon ?? '📚'}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-bold text-gray-900 truncate">{g.name}</h3>
+                          <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">{g.name}</h3>
                           <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0',
-                            g.status==='active'?'bg-emerald-100 text-emerald-700':g.status==='completed'?'bg-blue-100 text-blue-700':'bg-gray-100 text-gray-500'
+                            g.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':g.status==='completed'?'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                           )}>
                             {g.status==='active'?'Faol':g.status==='completed'?'Tugatilgan':'Nofaol'}
                           </span>
                         </div>
                         {g.subject && <p className="text-xs mt-0.5 font-medium" style={{color:g.subject.color}}>{g.subject.name}</p>}
-                        {g.teacher_name && <p className="text-xs text-gray-400 mt-0.5">{g.teacher_name}</p>}
+                        {g.teacher_name && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{g.teacher_name}</p>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                       <span>{g.student_count} talaba</span>
                       <span>{g.lesson_count} dars</span>
                     </div>
@@ -565,7 +565,7 @@ export default function AdminDashboardPage() {
                 )
               })}
               {groups.length === 0 && (
-                <div className="sm:col-span-2 p-10 text-center text-sm text-gray-400 bg-white rounded-2xl border border-gray-100">Kurslar yo'q</div>
+                <div className="sm:col-span-2 p-10 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">Kurslar yo'q</div>
               )}
             </div>
           )}
@@ -580,12 +580,12 @@ export default function AdminDashboardPage() {
       {/* ══ FAOLLIK ══ */}
       {tab === 'activity' && (
         <div className="space-y-5">
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-5">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
               <Activity className="w-4 h-4 text-emerald-500" /> So&apos;nggi faollik
             </h2>
             {loading ? (
-              <div className="space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-12 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
+              <div className="space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-12 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"/>)}</div>
             ) : activity.length === 0 ? (
               <p className="text-sm text-gray-400 text-center py-8">Hali faollik yo'q</p>
             ) : (
@@ -593,19 +593,19 @@ export default function AdminDashboardPage() {
                 {activity.map(a => (
                   <div key={a.id} className={cn(
                     'flex items-center gap-3 p-3 rounded-xl',
-                    a.type==='signup' ? 'bg-blue-50' : 'bg-emerald-50'
+                    a.type==='signup' ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-emerald-50 dark:bg-emerald-950/30'
                   )}>
                     <div className={cn(
                       'w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0',
-                      a.type==='signup' ? 'bg-blue-100' : 'bg-emerald-100'
+                      a.type==='signup' ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-emerald-100 dark:bg-emerald-900/40'
                     )}>
                       {a.type==='signup' ? '👤' : '📝'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{a.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{a.detail}</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{a.name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{a.detail}</p>
                     </div>
-                    <span className="text-[11px] text-gray-400 flex-shrink-0">{a.time}</span>
+                    <span className="text-[11px] text-gray-400 dark:text-gray-500 flex-shrink-0">{a.time}</span>
                   </div>
                 ))}
               </div>

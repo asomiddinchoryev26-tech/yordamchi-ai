@@ -209,8 +209,8 @@ export default function TeacherDashboardPage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">O&apos;qituvchi Dashboardi</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">O&apos;qituvchi Dashboardi</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {auth.user?.name ?? 'O\'qituvchi'} • Real ma&apos;lumotlar
           </p>
         </div>
@@ -220,16 +220,16 @@ export default function TeacherDashboardPage() {
             { l:'Guruhlar',  v: loading ? '...' : String(totalGroups)   },
             { l:'Darslar',   v: loading ? '...' : String(totalLessons)  },
           ].map(s => (
-            <div key={s.l} className="bg-white rounded-xl border border-gray-100 px-4 py-2.5 text-center min-w-[72px]">
-              <p className="text-lg font-bold text-gray-900 leading-none">{s.v}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">{s.l}</p>
+            <div key={s.l} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 px-4 py-2.5 text-center min-w-[72px]">
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-none">{s.v}</p>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{s.l}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ── Tabs ── */}
-      <div className="flex gap-1 p-1 bg-gray-100 rounded-2xl overflow-x-auto">
+      <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-x-auto">
         {TABS.map(t => {
           const Icon = t.icon
           const active = tab === t.key
@@ -237,7 +237,7 @@ export default function TeacherDashboardPage() {
             <button key={t.key} type="button" onClick={() => setTab(t.key)}
               className={cn(
                 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0',
-                active ? 'bg-white text-indigo-600 shadow-sm font-semibold' : 'text-gray-500 hover:text-gray-700 hover:bg-white/60',
+                active ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/60',
               )}
             >
               <Icon className="w-4 h-4" />
@@ -255,13 +255,13 @@ export default function TeacherDashboardPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input type="text" value={search} onChange={e=>setSearch(e.target.value)}
                 placeholder="Talaba ism yoki guruh..."
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
             <span className="text-sm text-gray-500">{filtered.length} ta</span>
           </div>
 
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             {loading ? (
               <div className="p-6 space-y-3">{[1,2,3,4].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
             ) : filtered.length === 0 ? (
@@ -272,24 +272,24 @@ export default function TeacherDashboardPage() {
               <>
                 <table className="w-full text-sm hidden sm:table">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                    <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
                       {['#','Talaba','Guruh','Davomat','Holat'].map(h=>(
-                        <th key={h} className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide py-3 px-5">{h}</th>
+                        <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-5">{h}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {filtered.map((s, i) => {
                       const attPct = s.att_total > 0 ? Math.round((s.att_present/s.att_total)*100) : null
                       return (
-                        <tr key={s.id} className="hover:bg-gray-50/50">
+                        <tr key={s.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                           <td className="py-3 px-5 text-gray-400 text-xs font-medium">{i+1}</td>
                           <td className="py-3 px-5">
                             <div className="flex items-center gap-2.5">
                               <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 text-white bg-gradient-to-br from-blue-500 to-indigo-600">
                                 {(s.full_name??s.email??'T').charAt(0).toUpperCase()}
                               </div>
-                              <span className="font-medium text-gray-900 truncate">{s.full_name ?? '—'}</span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100 truncate">{s.full_name ?? '—'}</span>
                             </div>
                           </td>
                           <td className="py-3 px-5">
@@ -324,7 +324,7 @@ export default function TeacherDashboardPage() {
                           {(s.full_name??s.email??'T').charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{s.full_name??'—'}</p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{s.full_name??'—'}</p>
                           <p className="text-xs text-gray-400">{s.group_name}</p>
                         </div>
                         {attPct !== null && <span className={cn('text-sm font-bold px-2 py-0.5 rounded-lg', avgColor(attPct))}>{attPct}%</span>}
@@ -352,17 +352,17 @@ export default function TeacherDashboardPage() {
               {[1,2,3,4].map(i=><div key={i} className="h-36 bg-gray-100 rounded-2xl animate-pulse"/>)}
             </div>
           ) : groups.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-sm text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center text-sm text-gray-400">
               Guruh biriktirilmagan
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {groups.map(g => (
-                <div key={g.id} className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                <div key={g.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
                     <div className="flex items-start gap-4 mb-4">
                       <div className="text-3xl">{g.subject?.icon ?? '📚'}</div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900">{g.name}</h3>
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100">{g.name}</h3>
                         {g.subject && <p className="text-xs mt-0.5 font-medium" style={{color:g.subject.color}}>{g.subject.name}</p>}
                         <p className="text-xs text-gray-400 mt-0.5">
                           {g.student_count} talaba • {g.lesson_count} dars
@@ -393,20 +393,20 @@ export default function TeacherDashboardPage() {
           {loading ? (
             <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse"/>)}</div>
           ) : attSummary.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-sm text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center text-sm text-gray-400">
               Davomat ma&apos;lumoti yo&apos;q
             </div>
           ) : (
             <>
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <h2 className="text-base font-bold text-gray-900 mb-5">Guruh bo&apos;yicha davomat xulosa</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-5">Guruh bo&apos;yicha davomat xulosa</h2>
                 <div className="space-y-4">
                   {attSummary.map(a => {
                     const pct = a.total > 0 ? Math.round((a.present/a.total)*100) : 0
                     return (
                       <div key={a.group_name} className="space-y-1.5">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium text-gray-800">{a.group_name}</span>
+                          <span className="font-medium text-gray-800 dark:text-gray-200">{a.group_name}</span>
                           <div className="flex items-center gap-3 text-xs text-gray-500">
                             <span>{a.total} qatnashish</span>
                             <span className={cn('font-bold', pct>=80?'text-emerald-600':pct>=60?'text-amber-600':'text-red-600')}>
@@ -448,7 +448,7 @@ export default function TeacherDashboardPage() {
               { l:'Darslar',   v: totalLessons,  e:'📖', bg:'bg-emerald-50'},
               { l:'Test natijalari', v: topStudents.length>0?'✓':'—', e:'📝', bg:'bg-amber-50'},
             ].map(s=>(
-              <div key={s.l} className={cn('rounded-2xl border border-gray-100 p-5',s.bg)}>
+              <div key={s.l} className={cn('rounded-2xl border border-gray-100 dark:border-gray-700 p-5',s.bg)}>
                 <span className="text-2xl">{s.e}</span>
                 <p className="text-xl font-bold text-gray-900 mt-2">{s.v}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{s.l}</p>
@@ -458,8 +458,8 @@ export default function TeacherDashboardPage() {
 
           {/* Top talabalar */}
           {topStudents.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-5">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+              <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
                 <TrendingUp className="w-4 h-4 text-emerald-500" />
                 Top talabalar (test natijalari)
               </h2>
@@ -467,7 +467,7 @@ export default function TeacherDashboardPage() {
                 {topStudents.map((s, i) => {
                   const pct = s.total > 0 ? Math.round((s.score/s.total)*100) : 0
                   return (
-                    <div key={s.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div key={s.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                       <span className={cn('w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold flex-shrink-0',
                         i===0?'bg-yellow-400 text-white':i===1?'bg-gray-400 text-white':i===2?'bg-amber-600 text-white':'bg-gray-200 text-gray-600'
                       )}>
@@ -477,7 +477,7 @@ export default function TeacherDashboardPage() {
                         {(s.full_name??'T').charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{s.full_name??'—'}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{s.full_name??'—'}</p>
                         <p className="text-xs text-gray-400">{s.group}</p>
                       </div>
                       <span className={cn('text-sm font-bold px-2 py-0.5 rounded-lg', avgColor(pct))}>{pct}%</span>
@@ -489,7 +489,7 @@ export default function TeacherDashboardPage() {
           )}
 
           {topStudents.length === 0 && !loading && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-sm text-gray-400">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center text-sm text-gray-400">
               Test natijalari yo&apos;q — testlarni nashr qilib, talabalar topshirgach hisobot paydo bo&apos;ladi
             </div>
           )}
