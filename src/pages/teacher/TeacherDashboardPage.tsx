@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import {
   Users, BookOpen, CheckSquare, BarChart2,
   Search, TrendingUp, GraduationCap, ChevronRight,
+  Award, Trophy, Star, Medal, Clock, CheckCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
@@ -12,7 +13,7 @@ import { PATHS } from '@/routes/paths'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
-type TeacherTab = 'students' | 'courses' | 'attendance' | 'reports'
+type TeacherTab = 'students' | 'courses' | 'attendance' | 'reports' | 'achievements'
 interface TabDef { key: TeacherTab; label: string; icon: ComponentType<{className?:string}> }
 
 type TDStudent = {
@@ -49,19 +50,92 @@ type TDAtt = {
   total:      number
 }
 
+type EarnedAchievement = {
+  id:           string
+  total_score:  number | null
+  period_year:  number
+  period_month: number | null
+  period_type:  'monthly' | 'yearly'
+  earned_at:    string
+  group_id:     string | null
+  group_name:   string | null
+  def: {
+    code:        string
+    name:        { uz: string; ru: string; en: string }
+    description: { uz: string; ru: string; en: string }
+    tier:        'gold' | 'silver' | 'bronze' | 'special'
+    icon_emoji:  string
+  } | null
+}
+
+type TDScoreSnapshot = {
+  id:                string
+  total_score:       number
+  attendance_score:  number
+  test_score:        number
+  consistency_score: number
+  activity_score:    number
+  period_year:       number
+  period_month:      number
+  group_name:        string | null
+}
+
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
 
 const TABS: TabDef[] = [
-  { key:'students',   label:'Talabalarim', icon: Users       },
-  { key:'courses',    label:'Guruhlarim',  icon: BookOpen    },
-  { key:'attendance', label:'Davomat',     icon: CheckSquare },
-  { key:'reports',    label:'Hisobotlar',  icon: BarChart2   },
+  { key:'students',     label:'Talabalarim', icon: Users       },
+  { key:'courses',      label:'Guruhlarim',  icon: BookOpen    },
+  { key:'attendance',   label:'Davomat',     icon: CheckSquare },
+  { key:'reports',      label:'Hisobotlar',  icon: BarChart2   },
+  { key:'achievements', label:'Yutuqlar',    icon: Award       },
 ]
+
+const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
 
 function avgColor(n: number) {
   if (n >= 80) return 'text-emerald-700 bg-emerald-50'
   if (n >= 60) return 'text-amber-700 bg-amber-50'
   return 'text-red-700 bg-red-50'
+}
+
+function scoreBarColor(n: number) {
+  if (n >= 90) return 'bg-emerald-500'
+  if (n >= 75) return 'bg-blue-500'
+  if (n >= 60) return 'bg-amber-500'
+  return 'bg-red-400'
+}
+
+function tierStyle(tier: string) {
+  switch (tier) {
+    case 'gold':
+      return { bg:'bg-amber-50 dark:bg-amber-900/20', border:'border-amber-200 dark:border-amber-700', iconBg:'bg-amber-100 dark:bg-amber-900/40', text:'text-amber-700 dark:text-amber-300', badge:'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', bar:'bg-amber-400', label:'Oltin' }
+    case 'silver':
+      return { bg:'bg-slate-50 dark:bg-slate-800/40', border:'border-slate-200 dark:border-slate-600', iconBg:'bg-slate-100 dark:bg-slate-700', text:'text-slate-600 dark:text-slate-300', badge:'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300', bar:'bg-slate-400', label:'Kumush' }
+    case 'bronze':
+      return { bg:'bg-orange-50 dark:bg-orange-900/20', border:'border-orange-200 dark:border-orange-700', iconBg:'bg-orange-100 dark:bg-orange-900/40', text:'text-orange-700 dark:text-orange-300', badge:'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300', bar:'bg-orange-400', label:'Bronza' }
+    default:
+      return { bg:'bg-violet-50 dark:bg-violet-900/20', border:'border-violet-200 dark:border-violet-700', iconBg:'bg-violet-100 dark:bg-violet-900/40', text:'text-violet-700 dark:text-violet-300', badge:'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300', bar:'bg-violet-400', label:'Maxsus' }
+  }
+}
+
+function fmtDate(d: string) {
+  const dt = new Date(d)
+  return `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`
+}
+
+function periodLabel(year: number, month: number | null) {
+  if (month === null) return `${year} yil`
+  return `${MONTHS[month - 1]} ${year}`
+}
+
+function achName(def: EarnedAchievement['def']): string {
+  if (!def) return 'Yutuq'
+  return def.name?.uz || def.name?.en || def.code
+}
+
+function achDesc(def: EarnedAchievement['def']): string {
+  if (!def) return ''
+  return def.description?.uz || def.description?.en || ''
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -74,10 +148,12 @@ export default function TeacherDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
 
-  const [students,    setStudents]    = useState<TDStudent[]>([])
-  const [groups,      setGroups]      = useState<TDGroup[]>([])
-  const [topStudents, setTopStudents] = useState<TDTopStudent[]>([])
-  const [attSummary,  setAttSummary]  = useState<TDAtt[]>([])
+  const [students,     setStudents]     = useState<TDStudent[]>([])
+  const [groups,       setGroups]       = useState<TDGroup[]>([])
+  const [topStudents,  setTopStudents]  = useState<TDTopStudent[]>([])
+  const [attSummary,   setAttSummary]   = useState<TDAtt[]>([])
+  const [achievements, setAchievements] = useState<EarnedAchievement[]>([])
+  const [snapshots,    setSnapshots]    = useState<TDScoreSnapshot[]>([])
 
   useEffect(() => {
     if (!auth.user?.id) return
@@ -89,6 +165,75 @@ export default function TeacherDashboardPage() {
     setLoading(true)
 
     try {
+      // Teacher's own achievements — independent of student groups
+      const [achieveRes, snapshotRes] = await Promise.all([
+        supabase
+          .from('user_achievements')
+          .select(`
+            id,
+            total_score,
+            period_year,
+            period_month,
+            period_type,
+            earned_at,
+            group_id,
+            achievement_definitions ( code, name, description, tier, icon_emoji ),
+            groups ( name )
+          `)
+          .eq('user_id', auth.user.id)
+          .order('earned_at', { ascending: false })
+          .limit(20),
+
+        supabase
+          .from('user_score_snapshots')
+          .select(`
+            id,
+            total_score,
+            attendance_score,
+            test_score,
+            consistency_score,
+            activity_score,
+            period_year,
+            period_month,
+            group_id,
+            groups ( name )
+          `)
+          .eq('user_id', auth.user.id)
+          .eq('role', 'teacher')
+          .eq('period_type', 'monthly')
+          .order('period_year', { ascending: false })
+          .order('period_month', { ascending: false })
+          .limit(6),
+      ])
+
+      setAchievements(
+        (achieveRes.data ?? []).map((r: any) => ({
+          id:           r.id,
+          total_score:  r.total_score,
+          period_year:  r.period_year,
+          period_month: r.period_month,
+          period_type:  r.period_type,
+          earned_at:    r.earned_at,
+          group_id:     r.group_id,
+          group_name:   r.groups?.name ?? null,
+          def:          r.achievement_definitions ?? null,
+        }))
+      )
+
+      setSnapshots(
+        (snapshotRes.data ?? []).map((r: any) => ({
+          id:                r.id,
+          total_score:       r.total_score,
+          attendance_score:  r.attendance_score,
+          test_score:        r.test_score,
+          consistency_score: r.consistency_score,
+          activity_score:    r.activity_score,
+          period_year:       r.period_year,
+          period_month:      r.period_month,
+          group_name:        r.groups?.name ?? null,
+        }))
+      )
+
       // 1. Guruhlar
       const { data: groupsData } = await supabase
         .from('groups')
@@ -109,7 +254,7 @@ export default function TeacherDashboardPage() {
       if (!groupIds.length) { setLoading(false); return }
 
       // 2. Talabalar + davomat parallel
-      const [enrollRes, attRes, testRes] = await Promise.all([
+      const [enrollRes, attRes, testIdsRes] = await Promise.all([
         supabase
           .from('student_groups')
           .select('group_id, student:profiles(id, full_name, email, status), group:groups(name)')
@@ -121,24 +266,32 @@ export default function TeacherDashboardPage() {
           .in('group_id', groupIds),
 
         supabase
-          .from('test_results')
-          .select('student_id, score, total_questions, test:tests(group_id)')
-          .not('submitted_at', 'is', null)
-          .in('test:tests(group_id)', groupIds)
-          .limit(200),
+          .from('tests')
+          .select('id')
+          .in('group_id', groupIds),
       ])
 
-      // Davomat map: student_id → {present, total}
-      const attMap = new Map<string, {present:number; total:number}>()
+      const testIds = (testIdsRes.data ?? []).map((t: any) => t.id)
+      const { data: testResultsData } = testIds.length
+        ? await supabase
+            .from('test_results')
+            .select('student_id, score, total_questions')
+            .not('submitted_at', 'is', null)
+            .in('test_id', testIds)
+            .limit(200)
+        : { data: [] }
+
+      const testRes = { data: testResultsData }
+
+      const attMap    = new Map<string, {present:number; total:number}>()
       const grpAttMap = new Map<string, {present:number; absent:number; total:number}>()
 
       for (const a of attRes.data ?? []) {
-        // per student
         if (!attMap.has(a.student_id)) attMap.set(a.student_id, {present:0, total:0})
         const e = attMap.get(a.student_id)!
         e.total++
         if (a.status==='present') e.present++
-        // per group
+
         if (!grpAttMap.has(a.group_id)) grpAttMap.set(a.group_id, {present:0, absent:0, total:0})
         const ge = grpAttMap.get(a.group_id)!
         ge.total++
@@ -161,7 +314,6 @@ export default function TeacherDashboardPage() {
       })
       setStudents(rows)
 
-      // Guruh davomat xulosasi
       setAttSummary(
         grpList.map(g => {
           const ga = grpAttMap.get(g.id) ?? {present:0, absent:0, total:0}
@@ -169,7 +321,6 @@ export default function TeacherDashboardPage() {
         })
       )
 
-      // Top talabalar (testlardan)
       const studentScoreMap = new Map<string, {score:number; total:number}>()
       for (const r of (testRes.data ?? []) as any[]) {
         if (!studentScoreMap.has(r.student_id)) studentScoreMap.set(r.student_id, {score:0, total:0})
@@ -202,6 +353,12 @@ export default function TeacherDashboardPage() {
   const totalStudents = students.length
   const totalGroups   = groups.length
   const totalLessons  = groups.reduce((a, g) => a + g.lesson_count, 0)
+
+  const goldCount    = achievements.filter(a => a.def?.tier === 'gold').length
+  const silverCount  = achievements.filter(a => a.def?.tier === 'silver').length
+  const bronzeCount  = achievements.filter(a => a.def?.tier === 'bronze').length
+  const specialCount = achievements.filter(a => a.def?.tier === 'special').length
+  const latestSnap   = snapshots[0] ?? null
 
   return (
     <div className="space-y-6 pb-6">
@@ -242,6 +399,11 @@ export default function TeacherDashboardPage() {
             >
               <Icon className="w-4 h-4" />
               {t.label}
+              {t.key === 'achievements' && achievements.length > 0 && (
+                <span className="ml-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
+                  {achievements.length}
+                </span>
+              )}
             </button>
           )
         })}
@@ -269,8 +431,7 @@ export default function TeacherDashboardPage() {
                 {students.length === 0 ? 'Guruhlarda talabalar yo\'q' : 'Talaba topilmadi'}
               </div>
             ) : (
-              <>
-                <div className="overflow-x-auto">
+              <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[440px]">
                   <thead>
                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
@@ -316,8 +477,7 @@ export default function TeacherDashboardPage() {
                     })}
                   </tbody>
                 </table>
-                </div>
-              </>
+              </div>
             )}
           </div>
           <div className="text-center">
@@ -344,28 +504,28 @@ export default function TeacherDashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {groups.map(g => (
                 <div key={g.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="text-3xl">{g.subject?.icon ?? '📚'}</div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 dark:text-gray-100">{g.name}</h3>
-                        {g.subject && <p className="text-xs mt-0.5 font-medium" style={{color:g.subject.color}}>{g.subject.name}</p>}
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {g.student_count} talaba • {g.lesson_count} dars
-                        </p>
-                      </div>
-                      <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0',
-                        g.status==='active'?'bg-emerald-100 text-emerald-700':g.status==='completed'?'bg-blue-100 text-blue-700':'bg-gray-100 text-gray-500'
-                      )}>
-                        {g.status==='active'?'Faol':g.status==='completed'?'Tugatilgan':'Nofaol'}
-                      </span>
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="text-3xl">{g.subject?.icon ?? '📚'}</div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{g.name}</h3>
+                      {g.subject && <p className="text-xs mt-0.5 font-medium" style={{color:g.subject.color}}>{g.subject.name}</p>}
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {g.student_count} talaba • {g.lesson_count} dars
+                      </p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">{g.student_count} / {g.student_count} talaba</span>
-                      <button onClick={()=>navigate(PATHS.TEACHER.GROUPS)} className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1">
-                        Ko&apos;rish <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0',
+                      g.status==='active'?'bg-emerald-100 text-emerald-700':g.status==='completed'?'bg-blue-100 text-blue-700':'bg-gray-100 text-gray-500'
+                    )}>
+                      {g.status==='active'?'Faol':g.status==='completed'?'Tugatilgan':'Nofaol'}
+                    </span>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">{g.student_count} / {g.student_count} talaba</span>
+                    <button onClick={()=>navigate(PATHS.TEACHER.GROUPS)} className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1">
+                      Ko&apos;rish <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -428,10 +588,10 @@ export default function TeacherDashboardPage() {
             {loading ? (
               [1,2,3,4].map(i=><div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse"/>)
             ) : [
-              { l:'Talabalar', v: totalStudents, e:'👥', bg:'bg-indigo-50'  },
-              { l:'Guruhlar',  v: totalGroups,   e:'🏫', bg:'bg-blue-50'   },
-              { l:'Darslar',   v: totalLessons,  e:'📖', bg:'bg-emerald-50'},
-              { l:'Test natijalari', v: topStudents.length>0?'✓':'—', e:'📝', bg:'bg-amber-50'},
+              { l:'Talabalar',      v: totalStudents,              e:'👥', bg:'bg-indigo-50'  },
+              { l:'Guruhlar',       v: totalGroups,                e:'🏫', bg:'bg-blue-50'    },
+              { l:'Darslar',        v: totalLessons,               e:'📖', bg:'bg-emerald-50' },
+              { l:'Test natijalari',v: topStudents.length>0?'✓':'—',e:'📝', bg:'bg-amber-50'  },
             ].map(s=>(
               <div key={s.l} className={cn('rounded-2xl border border-gray-100 dark:border-gray-700 p-5',s.bg)}>
                 <span className="text-2xl">{s.e}</span>
@@ -441,7 +601,6 @@ export default function TeacherDashboardPage() {
             ))}
           </div>
 
-          {/* Top talabalar */}
           {topStudents.length > 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
               <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
@@ -477,6 +636,269 @@ export default function TeacherDashboardPage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center text-sm text-gray-400">
               Test natijalari yo&apos;q — testlarni nashr qilib, talabalar topshirgach hisobot paydo bo&apos;ladi
             </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ YUTUQLAR ══ */}
+      {tab === 'achievements' && (
+        <div className="space-y-6">
+
+          {loading && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                {[1,2,3,4].map(i=><div key={i} className="h-24 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse"/>)}
+              </div>
+              <div className="h-40 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse"/>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[1,2].map(i=><div key={i} className="h-36 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse"/>)}
+              </div>
+            </div>
+          )}
+
+          {!loading && (
+            <>
+              {/* ── 1. Tier statistikasi ── */}
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                {[
+                  { tier:'gold',    label:'Oltin',  emoji:'🥇', count: goldCount,    bg:'bg-amber-50 dark:bg-amber-900/20',   border:'border-amber-200 dark:border-amber-700',  text:'text-amber-600 dark:text-amber-400'  },
+                  { tier:'silver',  label:'Kumush', emoji:'🥈', count: silverCount,  bg:'bg-slate-50 dark:bg-slate-800/40',   border:'border-slate-200 dark:border-slate-600',  text:'text-slate-500 dark:text-slate-400'  },
+                  { tier:'bronze',  label:'Bronza', emoji:'🥉', count: bronzeCount,  bg:'bg-orange-50 dark:bg-orange-900/20', border:'border-orange-200 dark:border-orange-700', text:'text-orange-600 dark:text-orange-400' },
+                  { tier:'special', label:'Maxsus', emoji:'⭐', count: specialCount, bg:'bg-violet-50 dark:bg-violet-900/20', border:'border-violet-200 dark:border-violet-700', text:'text-violet-600 dark:text-violet-400' },
+                ].map(s => (
+                  <div key={s.tier} className={cn('rounded-2xl border p-4 flex flex-col items-center text-center', s.bg, s.border)}>
+                    <span className="text-2xl mb-1">{s.emoji}</span>
+                    <p className={cn('text-2xl font-bold', s.text)}>{s.count}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label} yutuq</p>
+                    {s.count > 0 && (
+                      <span className="mt-1.5 inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle className="w-3 h-3" /> Erishildi
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* ── 2. Ballar taqsimoti ── */}
+              {latestSnap && (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                  <div className="flex items-center justify-between mb-5">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                      <Star className="w-4 h-4 text-amber-500" />
+                      Ballar taqsimoti
+                    </h2>
+                    <div className="flex items-center gap-2">
+                      {latestSnap.group_name && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500">{latestSnap.group_name} ·</span>
+                      )}
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        {periodLabel(latestSnap.period_year, latestSnap.period_month)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 mb-5 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                    <div className={cn(
+                      'w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black flex-shrink-0',
+                      latestSnap.total_score >= 90 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' :
+                      latestSnap.total_score >= 75 ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' :
+                      latestSnap.total_score >= 60 ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300' :
+                      'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
+                    )}>
+                      {latestSnap.total_score}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Umumiy ball</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {latestSnap.total_score >= 90 ? '🥇 Oltin darajaga erishgansiz!' :
+                         latestSnap.total_score >= 75 ? '🥈 Kumush darajada!' :
+                         latestSnap.total_score >= 60 ? '🥉 Bronza darajada!' :
+                         'Hali sertifikat darajasiga yetmadingiz'}
+                      </p>
+                    </div>
+                    <div className="ml-auto text-right flex-shrink-0">
+                      <div className={cn('text-xs font-bold px-2.5 py-1 rounded-lg',
+                        latestSnap.total_score >= 90 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' :
+                        latestSnap.total_score >= 75 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+                        latestSnap.total_score >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
+                        'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                      )}>
+                        {latestSnap.total_score >= 90 ? 'Oltin' :
+                         latestSnap.total_score >= 75 ? 'Kumush' :
+                         latestSnap.total_score >= 60 ? 'Bronza' : '< Bronza'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { label:'Davomat',   value: latestSnap.attendance_score,  weight:'×40%', icon:'📅' },
+                      { label:'Test bali', value: latestSnap.test_score,        weight:'×40%', icon:'📝' },
+                      { label:'Izchillik', value: latestSnap.consistency_score, weight:'×20%', icon:'🔁' },
+                      { label:'Faollik',   value: latestSnap.activity_score,    weight:'—',    icon:'⚡' },
+                    ].map(({ label, value, weight, icon }) => (
+                      <div key={label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                            <span>{icon}</span> {label}
+                            <span className="text-gray-300 dark:text-gray-600">{weight}</span>
+                          </span>
+                          <span className={cn('text-xs font-bold',
+                            value >= 90 ? 'text-emerald-600 dark:text-emerald-400' :
+                            value >= 75 ? 'text-blue-600 dark:text-blue-400' :
+                            value >= 60 ? 'text-amber-600 dark:text-amber-400' :
+                            'text-red-500 dark:text-red-400'
+                          )}>
+                            {value}
+                          </span>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className={cn('h-full rounded-full transition-all', scoreBarColor(value))} style={{ width: `${value}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {latestSnap.total_score < 90 && (
+                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {latestSnap.total_score < 60
+                          ? `Bronza uchun: ${60 - latestSnap.total_score} ball kerak`
+                          : latestSnap.total_score < 75
+                          ? `Kumush uchun: ${75 - latestSnap.total_score} ball kerak`
+                          : `Oltin uchun: ${90 - latestSnap.total_score} ball kerak`}
+                      </p>
+                      <div className="mt-1.5 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className={cn('h-full rounded-full', scoreBarColor(latestSnap.total_score))} style={{ width: `${latestSnap.total_score}%` }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── 3. Erishilgan yutuqlar ── */}
+              {achievements.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-amber-500" />
+                    Erishilgan yutuqlar
+                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500">({achievements.length} ta)</span>
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {achievements.map(a => {
+                      const st = tierStyle(a.def?.tier ?? 'special')
+                      return (
+                        <div key={a.id} className={cn('rounded-2xl border p-5 flex gap-4', st.bg, st.border)}>
+                          <div className={cn('w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0', st.iconBg)}>
+                            {a.def?.icon_emoji ?? '🏆'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', st.badge)}>{st.label}</span>
+                              {a.total_score !== null && (
+                                <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">{a.total_score} ball</span>
+                              )}
+                            </div>
+                            <h3 className={cn('text-sm font-bold truncate', st.text)}>{achName(a.def)}</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{achDesc(a.def)}</p>
+                            <div className="flex items-center gap-3 mt-2 flex-wrap">
+                              <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />{periodLabel(a.period_year, a.period_month)}
+                              </span>
+                              {a.group_name && (
+                                <span className="text-[10px] text-gray-400 dark:text-gray-500">📚 {a.group_name}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ── 4. Bo'sh holat ── */}
+              {achievements.length === 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-8 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-3xl mx-auto mb-4">
+                    🏆
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-2">Hali yutuqlar yo&apos;q</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-sm mx-auto">
+                    Oylik hisob-kitob tugagandan so&apos;ng yutuqlaringiz bu yerda ko&apos;rinadi.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto text-left">
+                    {[
+                      { emoji:'🥉', title:'Bronza', desc:"60+ ball to'pla", bg:'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' },
+                      { emoji:'🥈', title:'Kumush', desc:"75+ ball to'pla", bg:'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-600'    },
+                      { emoji:'🥇', title:'Oltin',  desc:"90+ ball to'pla", bg:'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'     },
+                    ].map(g => (
+                      <div key={g.title} className={cn('rounded-xl border p-3', g.bg)}>
+                        <span className="text-xl">{g.emoji}</span>
+                        <p className="text-xs font-bold text-gray-800 dark:text-gray-200 mt-1">{g.title}</p>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400">{g.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── 5. So'nggi faollik timeline ── */}
+              {achievements.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
+                  <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
+                    <Medal className="w-4 h-4 text-blue-500" /> So&apos;nggi faollik
+                  </h2>
+                  <div className="relative">
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-gray-700" />
+                    <div className="space-y-4">
+                      {achievements.slice(0, 5).map((a, idx) => {
+                        const st = tierStyle(a.def?.tier ?? 'special')
+                        return (
+                          <div key={a.id} className="flex gap-4 relative">
+                            <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0 relative z-10 border-2 border-white dark:border-gray-800', st.iconBg)}>
+                              {a.def?.icon_emoji ?? '🏆'}
+                            </div>
+                            <div className={cn(
+                              'flex-1 rounded-xl border p-3',
+                              idx === 0 ? cn(st.bg, st.border) : 'bg-gray-50 dark:bg-gray-700/40 border-gray-100 dark:border-gray-700'
+                            )}>
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <p className={cn('text-sm font-semibold', idx === 0 ? st.text : 'text-gray-800 dark:text-gray-200')}>
+                                    {achName(a.def)}
+                                  </p>
+                                  {a.group_name && (
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{a.group_name}</p>
+                                  )}
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                  <p className="text-[10px] text-gray-400 dark:text-gray-500">{fmtDate(a.earned_at)}</p>
+                                  <p className={cn('text-[10px] font-bold mt-0.5', st.text)}>{periodLabel(a.period_year, a.period_month)}</p>
+                                </div>
+                              </div>
+                              {a.total_score !== null && (
+                                <div className="mt-2 flex items-center gap-2">
+                                  <div className="flex-1 h-1 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div className={cn('h-full rounded-full', st.bar)} style={{ width: `${a.total_score}%` }} />
+                                  </div>
+                                  <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">{a.total_score}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  {achievements.length > 5 && (
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-4">
+                      + yana {achievements.length - 5} ta yutuq
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

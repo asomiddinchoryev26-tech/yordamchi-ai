@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import {
   Home, Users, GraduationCap, Layers,
   BookOpen, BookMarked, CheckSquare, FileText,
-  BarChart2, Settings,
+  BarChart2, Settings, Award,
 } from 'lucide-react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Navbar } from '@/components/layout/Navbar'
@@ -48,8 +48,9 @@ export default function AdminLayout() {
     {
       title: t.systemSection,
       items: [
-        { label: t.reports,   to: PATHS.ADMIN.REPORTS,  icon: BarChart2 },
-        { label: t.settings,  to: PATHS.ADMIN.SETTINGS, icon: Settings  },
+        { label: t.reports,      to: PATHS.ADMIN.REPORTS,       icon: BarChart2 },
+        { label: 'Yutuqlar',     to: PATHS.ADMIN.ACHIEVEMENTS,  icon: Award     },
+        { label: t.settings,     to: PATHS.ADMIN.SETTINGS,      icon: Settings  },
       ],
     },
   ]

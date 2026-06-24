@@ -15,6 +15,7 @@ import NotFound from '@/components/common/NotFound'
 
 export const router = createBrowserRouter([
   {
+
     path: PATHS.HOME,
     element: <App />,
     children: [
@@ -47,3 +48,6 @@ export const router = createBrowserRouter([
     ],
   },
 ])
+  
+
+

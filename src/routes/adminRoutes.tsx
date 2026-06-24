@@ -13,6 +13,7 @@ import TestsPage from '@/pages/admin/TestsPage'
 import ReportsPage from '@/pages/admin/ReportsPage'
 import SubjectsPage from '@/pages/admin/SubjectsPage'
 import SettingsPage from '@/pages/admin/SettingsPage'
+import AchievementsPage from '@/pages/admin/AchievementsPage'
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -35,7 +36,8 @@ export const adminRoutes: RouteObject[] = [
               { path: 'tests',      element: <TestsPage />          },
               { path: 'subjects',   element: <SubjectsPage />       },
               { path: 'reports',    element: <ReportsPage />        },
-              { path: 'settings',   element: <SettingsPage />       },
+              { path: 'settings',      element: <SettingsPage />      },
+              { path: 'achievements', element: <AchievementsPage /> },
             ],
           },
         ],

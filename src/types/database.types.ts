@@ -314,6 +314,127 @@ export type Database = {
           { foreignKeyName: 'student_groups_group_id_fkey';   columns: ['group_id'];   referencedRelation: 'groups';   referencedColumns: ['id'] },
         ]
       }
+      achievement_definitions: {
+        Row: {
+          id:               string
+          code:             string
+          name:             Record<string, string>
+          description:      Record<string, string>
+          target_role:      'student' | 'teacher'
+          tier:             'gold' | 'silver' | 'bronze' | 'special'
+          icon_emoji:       string
+          condition_type:   'threshold' | 'rank' | 'component'
+          condition_config: Record<string, unknown>
+          is_active:        boolean
+          created_at:       string
+        }
+        Insert: {
+          id?:               string
+          code:              string
+          name?:             Record<string, string>
+          description?:      Record<string, string>
+          target_role:       'student' | 'teacher'
+          tier:              'gold' | 'silver' | 'bronze' | 'special'
+          icon_emoji?:       string
+          condition_type:    'threshold' | 'rank' | 'component'
+          condition_config?: Record<string, unknown>
+          is_active?:        boolean
+          created_at?:       string
+        }
+        Update: {
+          code?:             string
+          name?:             Record<string, string>
+          description?:      Record<string, string>
+          target_role?:      'student' | 'teacher'
+          tier?:             'gold' | 'silver' | 'bronze' | 'special'
+          icon_emoji?:       string
+          condition_type?:   'threshold' | 'rank' | 'component'
+          condition_config?: Record<string, unknown>
+          is_active?:        boolean
+        }
+        Relationships: []
+      }
+      user_score_snapshots: {
+        Row: {
+          id:                string
+          user_id:           string
+          role:              'student' | 'teacher'
+          period_type:       'monthly' | 'yearly'
+          period_year:       number
+          period_month:      number | null
+          group_id:          string | null
+          attendance_score:  number
+          test_score:        number
+          consistency_score: number
+          activity_score:    number
+          total_score:       number
+          calculated_at:     string
+        }
+        Insert: {
+          id?:                string
+          user_id:            string
+          role:               'student' | 'teacher'
+          period_type:        'monthly' | 'yearly'
+          period_year:        number
+          period_month?:      number | null
+          group_id?:          string | null
+          attendance_score?:  number
+          test_score?:        number
+          consistency_score?: number
+          activity_score?:    number
+          total_score?:       number
+          calculated_at?:     string
+        }
+        Update: {
+          attendance_score?:  number
+          test_score?:        number
+          consistency_score?: number
+          activity_score?:    number
+          total_score?:       number
+          calculated_at?:     string
+        }
+        Relationships: [
+          { foreignKeyName: 'user_score_snapshots_user_id_fkey';  columns: ['user_id'];  referencedRelation: 'profiles'; referencedColumns: ['id'] },
+          { foreignKeyName: 'user_score_snapshots_group_id_fkey'; columns: ['group_id']; referencedRelation: 'groups';   referencedColumns: ['id'] },
+        ]
+      }
+      user_achievements: {
+        Row: {
+          id:             string
+          user_id:        string
+          achievement_id: string
+          snapshot_id:    string | null
+          period_type:    'monthly' | 'yearly'
+          period_year:    number
+          period_month:   number | null
+          group_id:       string | null
+          total_score:    number | null
+          earned_at:      string
+        }
+        Insert: {
+          id?:             string
+          user_id:         string
+          achievement_id:  string
+          snapshot_id?:    string | null
+          period_type:     'monthly' | 'yearly'
+          period_year:     number
+          period_month?:   number | null
+          group_id?:       string | null
+          total_score?:    number | null
+          earned_at?:      string
+        }
+        Update: {
+          snapshot_id?: string | null
+          total_score?: number | null
+          earned_at?:   string
+        }
+        Relationships: [
+          { foreignKeyName: 'user_achievements_user_id_fkey';         columns: ['user_id'];         referencedRelation: 'profiles';                referencedColumns: ['id'] },
+          { foreignKeyName: 'user_achievements_achievement_id_fkey';  columns: ['achievement_id'];  referencedRelation: 'achievement_definitions'; referencedColumns: ['id'] },
+          { foreignKeyName: 'user_achievements_snapshot_id_fkey';     columns: ['snapshot_id'];     referencedRelation: 'user_score_snapshots';    referencedColumns: ['id'] },
+          { foreignKeyName: 'user_achievements_group_id_fkey';        columns: ['group_id'];        referencedRelation: 'groups';                  referencedColumns: ['id'] },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -322,6 +443,30 @@ export type Database = {
       get_my_profile_role: {
         Args:    Record<string, never>
         Returns: string
+      }
+      get_my_current_score: {
+        Args:    { p_group_id: string }
+        Returns: Array<{
+          attendance_score:  number
+          test_score:        number
+          consistency_score: number
+          activity_score:    number
+          total_score:       number
+        }>
+      }
+      get_my_teacher_score_current: {
+        Args:    Record<string, never>
+        Returns: Array<{
+          attendance_score:  number
+          test_score:        number
+          consistency_score: number
+          activity_score:    number
+          total_score:       number
+        }>
+      }
+      run_monthly_achievement_cycle: {
+        Args:    { p_year: number; p_month: number }
+        Returns: Record<string, unknown>
       }
     }
     Enums: {

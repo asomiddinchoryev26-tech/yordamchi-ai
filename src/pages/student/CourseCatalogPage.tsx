@@ -48,54 +48,78 @@ export default function CourseCatalogPage() {
     setError(null)
 
     try {
-      // Talabaning guruhlari + har bir guruhning dars soni
+      // 1. Faqat enrollment IDlarini olish
       const { data: enrollments, error: eErr } = await supabase
         .from('student_groups')
-        .select(`
-          enrolled_at,
-          group:groups(
-            id, name, status,
-            teacher:profiles!groups_teacher_id_fkey(full_name, email),
-            subject:subjects(id, name, color, icon),
-            lessons(id)
-          )
-        `)
+        .select('group_id, enrolled_at')
         .eq('student_id', auth.user.id)
         .order('enrolled_at', { ascending: false })
 
       if (eErr) throw eErr
+      if (!enrollments?.length) { setCourses([]); return }
 
-      // Davomat statistikasi
-      const groupIds = (enrollments ?? []).map((e: any) => e.group?.id).filter(Boolean)
-      const { data: attData } = groupIds.length
-        ? await supabase
-            .from('attendance')
-            .select('group_id, status')
-            .eq('student_id', auth.user.id)
-            .in('group_id', groupIds)
+      const groupIds = enrollments.map(e => e.group_id)
+
+      // 2. Guruh detallari, davomat, darslar — parallel
+      const [groupsRes, attRes, lessonsRes] = await Promise.all([
+        supabase
+          .from('groups')
+          .select('id, name, status, teacher_id, subject:subjects(id, name, color, icon)')
+          .in('id', groupIds),
+
+        supabase
+          .from('attendance')
+          .select('group_id, status')
+          .eq('student_id', auth.user.id)
+          .in('group_id', groupIds),
+
+        supabase
+          .from('lessons')
+          .select('group_id')
+          .in('group_id', groupIds)
+          .eq('is_published', true),
+      ])
+
+      // 3. O'qituvchi ismlarini alohida olish
+      const teacherIds = [...new Set(
+        (groupsRes.data ?? []).map((g: any) => g.teacher_id).filter(Boolean)
+      )]
+      const { data: teachersData } = teacherIds.length
+        ? await supabase.from('profiles').select('id, full_name, email').in('id', teacherIds)
         : { data: [] }
 
-      // Guruh bo'yicha davomat
-      const attMap = new Map<string, { present: number; total: number }>()
-      for (const a of attData ?? []) {
-        if (!attMap.has(a.group_id)) attMap.set(a.group_id, { present: 0, total: 0 })
-        const e = attMap.get(a.group_id)!
-        e.total++
-        if (a.status === 'present') e.present++
+      // Lookup map lar
+      const groupMap   = new Map((groupsRes.data ?? []).map((g: any) => [g.id, g]))
+      const teacherMap = new Map((teachersData ?? []).map((t: any) => [t.id, t]))
+
+      const lessonCountMap = new Map<string, number>()
+      for (const l of lessonsRes.data ?? []) {
+        const gid = (l as any).group_id
+        lessonCountMap.set(gid, (lessonCountMap.get(gid) ?? 0) + 1)
       }
 
-      const rows: EnrolledCourse[] = (enrollments ?? [])
-        .map((e: any) => {
-          const g = e.group
+      const attMap = new Map<string, { present: number; total: number }>()
+      for (const a of attRes.data ?? []) {
+        const gid = (a as any).group_id
+        if (!attMap.has(gid)) attMap.set(gid, { present: 0, total: 0 })
+        const e = attMap.get(gid)!
+        e.total++
+        if ((a as any).status === 'present') e.present++
+      }
+
+      const rows: EnrolledCourse[] = enrollments
+        .map(e => {
+          const g = groupMap.get(e.group_id)
           if (!g) return null
-          const att = attMap.get(g.id) ?? { present: 0, total: 0 }
+          const teacher = g.teacher_id ? teacherMap.get(g.teacher_id) : null
+          const att     = attMap.get(g.id) ?? { present: 0, total: 0 }
           return {
             group_id:     g.id,
             group_name:   g.name,
             group_status: g.status,
-            subject:      g.subject ?? null,
-            teacher:      g.teacher ?? null,
-            lesson_count: (g.lessons ?? []).length,
+            subject:      (g as any).subject ?? null,
+            teacher:      teacher ? { full_name: teacher.full_name, email: teacher.email } : null,
+            lesson_count: lessonCountMap.get(g.id) ?? 0,
             enrolled_at:  e.enrolled_at,
             att_present:  att.present,
             att_total:    att.total,

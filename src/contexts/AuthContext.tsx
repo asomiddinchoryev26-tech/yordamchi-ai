@@ -20,28 +20,43 @@ function mapAuthError(msg: string): string {
 
 // ─── Supabase user → App user ─────────────────────────────────────────────────
 
-function isValidRole(v: unknown): v is UserRole {
-  return v === 'student' || v === 'teacher' || v === 'admin'
+// profiles jadvalidan faqat role olib, User ob'ektini sbUser bilan to'ldiradi.
+// O'zbek tilidagi eski qiymatlarni inglizchaga normalize qiladi.
+function normalizeRole(v: unknown): UserRole | null {
+  if (v === 'student'    || v === 'Talaba')       return 'student'
+  if (v === 'teacher'    || v === "O'qituvchi")   return 'teacher'
+  if (v === 'admin'      || v === 'Admin')        return 'admin'
+  return null
 }
 
-// profiles jadvalidan faqat role olib, User ob'ektini sbUser bilan to'ldiradi.
-// Profil topilmasa yoki xatolik bo'lsa — null qaytaradi (login ga yo'naltirish uchun).
 async function resolveUser(sbUser: SupabaseUser): Promise<User | null> {
-  const { data: profile, error } = await supabase
+  // SECURITY DEFINER funksiyasi — RLS ni chetlab o'tadi, har doim ishlaydi
+  const { data: roleValue, error: roleErr } = await supabase.rpc('get_my_profile_role')
+
+  if (roleErr || !roleValue) {
+    console.error('[resolveUser] rpc get_my_profile_role failed:', roleErr?.message ?? 'null returned')
+    return null
+  }
+
+  const role = normalizeRole(roleValue)
+  if (!role) {
+    console.warn('[resolveUser] unrecognized role value:', roleValue)
+    return null
+  }
+
+  // full_name ni best-effort olamiz (SELECT policy yo'q bo'lsa ham login ishlaydi)
+  const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('full_name')
     .eq('id', sbUser.id)
     .single()
-
-  if (error || !profile) return null
-  if (!isValidRole(profile.role)) return null
 
   const meta = (sbUser.user_metadata ?? {}) as Record<string, unknown>
   return {
     id:        sbUser.id,
     email:     sbUser.email ?? '',
-    name:      typeof meta['name'] === 'string' ? meta['name'] : (sbUser.email ?? ''),
-    role:      profile.role,
+    name:      profile?.full_name ?? (typeof meta['name'] === 'string' ? meta['name'] : (sbUser.email ?? '')),
+    role,
     avatarUrl: typeof meta['avatar_url'] === 'string' ? meta['avatar_url'] : undefined,
     createdAt: sbUser.created_at,
   }

@@ -14,6 +14,7 @@ AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid() LIMIT 1
 $$;
 
+
 -- 2. Profiles jadvaliga qo'shimcha ustunlar
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS phone  text,
