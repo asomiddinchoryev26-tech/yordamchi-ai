@@ -56,3 +56,12 @@ export { selectTutorMode } from './tutor/mode-selector'
 
 // ── Intelligence Service (Sprint 3.1 integration layer) ───────────────────────
 export { intelligenceService } from './services/intelligence-service'
+
+// ── Vision (Sprint 3.2 Phase 1) ───────────────────────────────────────────────
+export type {
+  VisionInput, VisionSolution, VisionResult, VisionHistoryEntry,
+  VisionProcessingState, VisionErrorCode, SubjectArea, DifficultyLevel,
+} from './vision/types'
+export { visionService }    from './vision/visionService'
+export { processImage }     from './vision/imageProcessor'
+export { buildVisionPrompt } from './vision/promptBuilder'

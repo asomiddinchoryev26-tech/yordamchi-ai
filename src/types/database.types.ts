@@ -512,6 +512,49 @@ export type Database = {
           { foreignKeyName: 'ai_messages_conversation_id_fkey'; columns: ['conversation_id']; referencedRelation: 'ai_conversations'; referencedColumns: ['id'] },
         ]
       }
+      // Sprint 3.2 Phase 1 — AI Vision
+      ai_vision_results: {
+        Row: {
+          id:            string
+          student_id:    string
+          topic:         string
+          subject:       string
+          difficulty:    string
+          detected_text: string
+          solution_json: Record<string, unknown>
+          xp_earned:     number
+          duration_ms:   number
+          confidence:    number
+          created_at:    string
+          updated_at:    string
+        }
+        Insert: {
+          id?:            string
+          student_id:     string
+          topic?:         string
+          subject?:       string
+          difficulty?:    string
+          detected_text?: string
+          solution_json?: Record<string, unknown>
+          xp_earned?:     number
+          duration_ms?:   number
+          confidence?:    number
+          created_at?:    string
+          updated_at?:    string
+        }
+        Update: {
+          topic?:         string
+          subject?:       string
+          difficulty?:    string
+          detected_text?: string
+          solution_json?: Record<string, unknown>
+          xp_earned?:     number
+          duration_ms?:   number
+          confidence?:    number
+          updated_at?:    string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

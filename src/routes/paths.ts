@@ -13,6 +13,7 @@ export const PATHS = {
     PROFILE:      '/dashboard/profile',
     ACHIEVEMENTS: '/dashboard/achievements',
     AI_ASSISTANT: '/dashboard/ai-assistant',
+    AI_VISION:    '/dashboard/ai-vision',    // Sprint 3.2 Phase 1
   },
 
   TEACHER: {
