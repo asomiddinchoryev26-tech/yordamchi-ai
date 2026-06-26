@@ -110,10 +110,7 @@ export interface VisionPrompt {
 
 /**
  * Build the complete vision prompt for Gemini.
- *
- * @param input   - Processed image input
- * @param profile - Student intelligence profile (optional, enriches teaching)
- * @param lang    - Response language
+ * Phase 1 mode: returns strict JSON schema (for structured solve).
  */
 export function buildVisionPrompt(
   input:   VisionInput,
@@ -124,5 +121,52 @@ export function buildVisionPrompt(
     systemInstruction: buildSystemInstruction(profile, lang),
     userMessage:       buildUserMessage(input, lang),
     language:          lang,
+  }
+}
+
+// ─── Phase 2: Chat mode prompt (returns markdown, not JSON) ──────────────────
+
+/**
+ * Build a CHAT-MODE vision prompt for Gemini.
+ * Returns markdown text instead of JSON — used in Universal AI chat.
+ * The caller provides the user's actual question as userMessage.
+ */
+export function buildVisionChatPrompt(
+  _input:  VisionInput,   // kept for future image metadata injection
+  profile: StudentIntelligenceProfile | null,
+  lang:    Language,
+): VisionPrompt {
+  const langName = lang === 'uz' ? "O'zbek" : lang === 'ru' ? 'Русский' : 'English'
+  const level    = profile?.level?.definition?.label[lang] ?? ''
+  const weakList = profile?.weakTopics?.map(t => t.title).join(', ') ?? ''
+
+  const systemInstruction = [
+    `You are YordamchiAI — a personalized AI Teacher powered by Gemini 2.5 Flash.`,
+    profile
+      ? `Student: ${profile.name} | Level: ${level} | Mastery: ${profile.masteryScore}/100`
+      : '',
+    weakList ? `Needs extra attention on: ${weakList}` : '',
+    ``,
+    `The student has shared an image/PDF with a question. Be their personal tutor.`,
+    ``,
+    `## RESPONSE RULES`,
+    `- RESPOND IN ${langName.toUpperCase()} ONLY`,
+    `- Use markdown formatting throughout:`,
+    `  • **bold** for key terms and answers`,
+    `  • Numbered lists (1. 2. 3.) for step-by-step solutions`,
+    `  • Code blocks: \`\`\`python\\n...\\n\`\`\``,
+    `  • LaTeX math inline: $formula$ or block: $$formula$$`,
+    `  • Tables when comparing multiple items`,
+    `- For math problems: solve step-by-step, show all work`,
+    `- For text/essays: analyze clearly, give structured feedback`,
+    `- Be encouraging: celebrate correct reasoning before correcting errors`,
+    `- End with ONE follow-up question to deepen understanding`,
+    `- Keep total response under 600 words unless the problem requires more`,
+  ].filter(Boolean).join('\n')
+
+  return {
+    systemInstruction,
+    userMessage: '', // overridden by caller's actual question
+    language:    lang,
   }
 }
