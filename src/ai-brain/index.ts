@@ -50,3 +50,9 @@ export { tutorEngine, TUTOR_MODE_CONFIGS } from './tutor/engine'
 export type { PromptBuilderInput, PromptBuildResult } from './prompts/types'
 export { promptBuilder, buildSystemPrompt } from './prompts/builder'
 export { AI_IDENTITY, BEHAVIORAL_RULES, MODE_OPENINGS } from './prompts/templates'
+
+// ── Tutor Mode Selector ───────────────────────────────────────────────────────
+export { selectTutorMode } from './tutor/mode-selector'
+
+// ── Intelligence Service (Sprint 3.1 integration layer) ───────────────────────
+export { intelligenceService } from './services/intelligence-service'

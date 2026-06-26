@@ -14,11 +14,26 @@ export interface StudentContext {
   attTotal:       number
 }
 
+// ─── Sprint 3.1: Enriched options (optional — backward compatible) ────────────
+
+export interface AIProviderOptions {
+  /** Auth user ID — used to build StudentIntelligenceProfile */
+  userId?:          string
+  /** Active conversation ID — used to load/save session memory */
+  conversationId?:  string
+  /** The user's last message (used for mode selection + mistake detection) */
+  lastUserMessage?: string
+}
+
 // ─── Provider interfeysi ───────────────────────────────────────────────────────
 // OpenAI yoki boshqa provayderga o'tish uchun faqat shu klassni almashtiring.
 
 export interface AIProvider {
-  complete(messages: ChatMessage[], context: StudentContext): Promise<string>
+  complete(
+    messages: ChatMessage[],
+    context:  StudentContext,
+    options?: AIProviderOptions,
+  ): Promise<string>
 }
 
 // ─── Til aniqlash ─────────────────────────────────────────────────────────────
@@ -35,7 +50,7 @@ function detectLang(text: string): 'uz' | 'ru' | 'en' {
 // Real OpenAI integratsiyasi uchun bu klassni OpenAIProvider bilan almashtiring.
 
 export class MockAIProvider implements AIProvider {
-  async complete(messages: ChatMessage[], ctx: StudentContext): Promise<string> {
+  async complete(messages: ChatMessage[], ctx: StudentContext, _options?: AIProviderOptions): Promise<string> {
     // Oxirgi foydalanuvchi xabari
     const last   = messages.filter(m => m.role === 'user').at(-1)?.content ?? ''
     const lang   = detectLang(last)
@@ -269,11 +284,49 @@ export class MockAIProvider implements AIProvider {
 
 import { supabase } from '@/lib/supabase'
 
+// Sprint 3.1 — dynamic import to avoid circular deps and enable tree-shaking
+let _intelligenceService: typeof import('@/ai-brain/services/intelligence-service').intelligenceService | null = null
+async function getIntelligenceService() {
+  if (!_intelligenceService) {
+    const mod = await import('@/ai-brain/services/intelligence-service')
+    _intelligenceService = mod.intelligenceService
+  }
+  return _intelligenceService
+}
+
 class EdgeFunctionProvider implements AIProvider {
-  async complete(messages: ChatMessage[], context: StudentContext): Promise<string> {
-    const { data, error } = await supabase.functions.invoke('ai-chat', {
-      body: { messages, context },
-    })
+  async complete(
+    messages: ChatMessage[],
+    context:  StudentContext,
+    options?: AIProviderOptions,
+  ): Promise<string> {
+    // ── Sprint 3.1: Build rich system prompt when userId + convId are available ──
+    let systemPrompt: string | undefined
+
+    if (options?.userId && options.conversationId) {
+      try {
+        const svc = await getIntelligenceService()
+        const lastMsg = options.lastUserMessage
+          ?? messages.filter(m => m.role === 'user').at(-1)?.content
+          ?? ''
+
+        const built = svc.buildSystemPrompt(
+          context,
+          options.userId,
+          options.conversationId,
+          lastMsg,
+        )
+        if (built) systemPrompt = built
+      } catch {
+        // Non-critical: fall back to Edge Function's internal generic prompt
+      }
+    }
+
+    const body: Record<string, unknown> = { messages, context }
+    if (systemPrompt) body['systemPrompt'] = systemPrompt
+
+    const { data, error } = await supabase.functions.invoke('ai-chat', { body })
+
     if (error) {
       // FunctionsHttpError.context — Edge Function'ning haqiqiy response body'si
       const ctx = (error as unknown as { context?: { error?: string } }).context

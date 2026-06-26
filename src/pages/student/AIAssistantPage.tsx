@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { aiChatService }                  from '@/services/ai-chat.service'
 import { aiProvider, loadStudentContext } from '@/services/ai-provider.service'
+import { intelligenceService }            from '@/ai-brain/services/intelligence-service'
 import {
   AsomiddinAvatar,
   UserAvatar,
@@ -322,12 +323,18 @@ export default function AIAssistantPage() {
     if (!context) return
     setIsTyping(true)
     try {
-      const greeting = await aiProvider.complete([], context)
+      const greeting = await aiProvider.complete([], context, {
+        userId:         studentId,
+        conversationId: convId,
+        lastUserMessage: '',
+      })
       const saved    = await aiChatService.addMessage(convId, 'assistant', greeting)
       setMessages([saved]); setStreamingId(saved.id)
       const title = 'Suhbat — ' + new Date().toLocaleDateString('uz-UZ')
       void aiChatService.updateTitle(convId, title)
       setConversations(prev => prev.map(c => c.id === convId ? { ...c, title } : c))
+      // Record greeting in memory
+      intelligenceService.recordAIResponse(convId, greeting, '', context)
     } catch { /* greeting xatosi suhbatni bloklamas */ }
     finally   { setIsTyping(false) }
   }
@@ -359,9 +366,18 @@ export default function AIAssistantPage() {
         ...newMsgs.filter(m => !m.id.startsWith('temp')), savedUser,
       ].map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
 
-      const aiResponse = await aiProvider.complete(history, context ?? {
+      const currentCtx = context ?? {
         studentName, groups: [], recentLessons: [],
         testStats: { passed: 0, total: 0, avgPct: 0 }, attPct: null, attTotal: 0,
+      }
+
+      // Sprint 3.1: Record user message in memory before sending
+      intelligenceService.recordUserMessage(activeConvId, text, currentCtx)
+
+      const aiResponse = await aiProvider.complete(history, currentCtx, {
+        userId:          studentId,
+        conversationId:  activeConvId,
+        lastUserMessage: text,
       })
 
       const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', aiResponse)
@@ -370,6 +386,10 @@ export default function AIAssistantPage() {
       setConversations(prev =>
         prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c),
       )
+
+      // Sprint 3.1: Record AI response + auto-detect mistakes
+      intelligenceService.recordAIResponse(activeConvId, aiResponse, text, currentCtx)
+
     } catch {
       setError("Xabar yuborishda xatolik. Qayta urinib ko'ring.")
       setMessages(prev => prev.filter(m => m.id !== tempMsg.id))
@@ -387,12 +407,23 @@ export default function AIAssistantPage() {
 
     setIsTyping(true); setError(null)
     try {
-      const aiResponse = await aiProvider.complete(history, context ?? {
+      const lastUserMsg = history.filter(m => m.role === 'user').at(-1)?.content ?? ''
+      const currentCtx  = context ?? {
         studentName, groups: [], recentLessons: [],
         testStats: { passed: 0, total: 0, avgPct: 0 }, attPct: null, attTotal: 0,
+      }
+
+      const aiResponse = await aiProvider.complete(history, currentCtx, {
+        userId:          studentId,
+        conversationId:  activeConvId,
+        lastUserMessage: lastUserMsg,
       })
       const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', aiResponse)
       setMessages(prev => [...prev.slice(0, aiIdx), savedAI])
+
+      // Sprint 3.1: Record regenerated response
+      intelligenceService.recordAIResponse(activeConvId, aiResponse, lastUserMsg, currentCtx)
+
     } catch { setError("Qaytadan yaratishda xatolik") }
     finally   { setIsTyping(false) }
   }
