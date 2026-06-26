@@ -100,8 +100,15 @@ export type Translations = {
 
   // ── Landing page ──────────────────────────────────────────────────────────
   heroTagline: string
-  heroTitle: string
+  heroTitle: string        // Use | as delimiter: text before | is plain, after | is gradient
   heroSubtitle: string
+  heroBadge: string        // Eyebrow badge above headline
+  heroCtaPrimary: string   // Primary CTA button label (no arrow — rendered as icon)
+  heroCtaDemo: string      // Secondary CTA label
+  heroNoCreditCard: string // Friction reducer text below CTAs
+  heroRoleStudent: string  // Role tab: student
+  heroRoleTeacher: string  // Role tab: teacher
+  heroRoleSchool: string   // Role tab: school/institution
   startFree: string
   viewPricing: string
   whyTitle: string
@@ -115,6 +122,12 @@ export type Translations = {
   ctaTitle: string
   ctaSubtitle: string
   registerNow: string
+  // ── Social Proof ─────────────────────────────────────────────────────────
+  statStudentsLabel: string
+  statTeachersLabel: string
+  statConversationsLabel: string
+  statCentersLabel: string
+  statRatingLabel: string
 
   // ── Auth pages ────────────────────────────────────────────────────────────
   loginTitle: string
@@ -241,8 +254,15 @@ const uz: Translations = {
 
   // Landing
   heroTagline: "AI bilan ta'lim yangi darajada",
-  heroTitle: "Bilim olamiga xush kelibsiz",
-  heroSubtitle: "YordamchiAI — sun'iy intellekt yordamida o'qituvchilar, talabalar va administratorlarni birlashtiruvchi zamonaviy ta'lim platformasi.",
+  heroTitle: "O'quvchilar va o'qituvchilar uchun|AI yordamchi",
+  heroSubtitle: "Savollaringizga bir soniyada javob oling. Darslarni avtomatlang. Har bir talabaning o'quv yo'lini shaxsiylang.",
+  heroBadge: "Gemini 2.5 Flash bilan quvvatlangan",
+  heroCtaPrimary: "Bepul boshlash",
+  heroCtaDemo: "Demoni ko'rish",
+  heroNoCreditCard: "Kredit karta talab qilinmaydi · 30 kun bepul",
+  heroRoleStudent: "Talabaman",
+  heroRoleTeacher: "O'qituvchiman",
+  heroRoleSchool: "Maktab vakili",
   startFree: 'Bepul boshlash →',
   viewPricing: "Narxlarni ko'rish",
   whyTitle: 'Nima uchun YordamchiAI?',
@@ -256,6 +276,12 @@ const uz: Translations = {
   ctaTitle: 'Bugun boshlang — bepul!',
   ctaSubtitle: "Minglab o'qituvchilar va talabalar allaqachon YordamchiAI bilan ta'limni yangi darajaga olib chiqdi.",
   registerNow: "Hoziroq ro'yxatdan o'ting →",
+  // Social Proof
+  statStudentsLabel: "Faol talabalar",
+  statTeachersLabel: "O'qituvchilar",
+  statConversationsLabel: "AI suhbatlar",
+  statCentersLabel: "Ta'lim markazlari",
+  statRatingLabel: "Foydalanuvchi bahosi",
 
   // Auth - Login
   loginTitle: 'Hisobga kirish',
@@ -383,8 +409,15 @@ const ru: Translations = {
 
   // Landing
   heroTagline: 'Образование нового уровня с ИИ',
-  heroTitle: 'Добро пожаловать в мир знаний',
-  heroSubtitle: 'YordamchiAI — современная образовательная платформа, объединяющая преподавателей, студентов и администраторов с помощью искусственного интеллекта.',
+  heroTitle: 'ИИ-ассистент для студентов|и преподавателей',
+  heroSubtitle: 'Мгновенные ответы на любые вопросы. Автоматизируйте уроки. Персонализируйте путь каждого ученика с помощью ИИ.',
+  heroBadge: 'Работает на Gemini 2.5 Flash',
+  heroCtaPrimary: 'Начать бесплатно',
+  heroCtaDemo: 'Смотреть демо',
+  heroNoCreditCard: 'Без кредитной карты · 30 дней бесплатно',
+  heroRoleStudent: 'Я студент',
+  heroRoleTeacher: 'Я преподаватель',
+  heroRoleSchool: 'Представляю школу',
   startFree: 'Начать бесплатно →',
   viewPricing: 'Посмотреть цены',
   whyTitle: 'Почему YordamchiAI?',
@@ -398,6 +431,12 @@ const ru: Translations = {
   ctaTitle: 'Начните сегодня — бесплатно!',
   ctaSubtitle: 'Тысячи преподавателей и студентов уже вывели образование на новый уровень с YordamchiAI.',
   registerNow: 'Зарегистрироваться сейчас →',
+  // Social Proof
+  statStudentsLabel: 'Активных студентов',
+  statTeachersLabel: 'Преподавателей',
+  statConversationsLabel: 'ИИ диалогов',
+  statCentersLabel: 'Учебных центров',
+  statRatingLabel: 'Оценка пользователей',
 
   // Auth - Login
   loginTitle: 'Войти в аккаунт',
@@ -525,8 +564,15 @@ const en: Translations = {
 
   // Landing
   heroTagline: 'Education at a new level with AI',
-  heroTitle: 'Welcome to the World of Knowledge',
-  heroSubtitle: 'YordamchiAI — a modern learning platform powered by artificial intelligence, uniting teachers, students, and administrators in one place.',
+  heroTitle: 'The AI Assistant|Built for Education',
+  heroSubtitle: 'Get instant answers to any question. Automate lesson tracking. Personalize every student\'s learning path with AI.',
+  heroBadge: 'Powered by Gemini 2.5 Flash',
+  heroCtaPrimary: 'Start for free',
+  heroCtaDemo: 'Watch demo',
+  heroNoCreditCard: 'No credit card required · Free for 30 days',
+  heroRoleStudent: 'I\'m a student',
+  heroRoleTeacher: 'I\'m a teacher',
+  heroRoleSchool: 'I represent a school',
   startFree: 'Start free →',
   viewPricing: 'View pricing',
   whyTitle: 'Why YordamchiAI?',
@@ -540,6 +586,12 @@ const en: Translations = {
   ctaTitle: 'Start today — it\'s free!',
   ctaSubtitle: 'Thousands of teachers and students have already elevated their education with YordamchiAI.',
   registerNow: 'Register now →',
+  // Social Proof
+  statStudentsLabel: 'Active students',
+  statTeachersLabel: 'Teachers',
+  statConversationsLabel: 'AI conversations',
+  statCentersLabel: 'Education centers',
+  statRatingLabel: 'User rating',
 
   // Auth - Login
   loginTitle: 'Sign in to your account',
