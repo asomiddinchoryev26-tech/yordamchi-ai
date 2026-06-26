@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* highlight.js theme — GitHub Dark (matches code block bg #0d1117) */
+@import "highlight.js/styles/github-dark.css";
 
 /* Tailwind v4: dark: variantini .dark CLASS bilan ishlash uchun */
 @variant dark (&:where(.dark, .dark *));

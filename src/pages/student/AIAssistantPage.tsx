@@ -6,9 +6,10 @@ import {
   Mic, SidebarClose, SidebarOpen,
   Camera, ImageIcon, FileText as FileIcon, X as XIcon,
 } from 'lucide-react'
-import { AITeacherPanel } from '@/components/ai-teacher'
-// Sprint 3.3 — Vision integration (file attachment in AI Assistant)
-import { supabase }              from '@/lib/supabase'
+import { AITeacherPanel }   from '@/components/ai-teacher'
+import { useVoiceInput }    from '@/hooks/useVoiceInput'
+// Sprint 3.3 — Vision integration
+import { supabase }                   from '@/lib/supabase'
 import { processImage, validateFile } from '@/ai-brain/vision/imageProcessor'
 import { buildVisionChatPrompt }      from '@/ai-brain/vision/promptBuilder'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
@@ -287,6 +288,18 @@ export default function AIAssistantPage() {
   // Sprint 3.3: file attachment state
   const [attachedFile,   setAttachedFile]   = useState<File | null>(null)
   const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null)
+  const [voiceError,     setVoiceError]     = useState<string | null>(null)
+
+  // Sprint 3.3: Voice input
+  const { isListening, isSupported: voiceSupported, toggle: toggleVoice } = useVoiceInput({
+    language,
+    onResult: (transcript) => {
+      setInput(prev => (prev ? prev + ' ' : '') + transcript)
+      setVoiceError(null)
+      setTimeout(() => inputRef.current?.focus(), 60)
+    },
+    onInterim: (_partial) => { /* optional: could show partial in a tooltip */ },
+  })
 
   const bottomRef    = useRef<HTMLDivElement>(null)
   const inputRef     = useRef<HTMLTextAreaElement>(null)
@@ -327,28 +340,9 @@ export default function AIAssistantPage() {
       const conv = await aiChatService.createConversation(studentId)
       setConversations(prev => [conv, ...prev])
       setActiveConvId(conv.id); setMessages([])
-      await sendAIGreeting(conv.id)
+      // No greeting — user types their first question directly
+      setTimeout(() => inputRef.current?.focus(), 80)
     } catch { setError("Yangi suhbat yaratishda xatolik") }
-  }
-
-  async function sendAIGreeting(convId: string) {
-    if (!context) return
-    setIsTyping(true)
-    try {
-      const greeting = await aiProvider.complete([], context, {
-        userId:         studentId,
-        conversationId: convId,
-        lastUserMessage: '',
-      })
-      const saved    = await aiChatService.addMessage(convId, 'assistant', greeting)
-      setMessages([saved]); setStreamingId(saved.id)
-      const title = 'Suhbat — ' + new Date().toLocaleDateString('uz-UZ')
-      void aiChatService.updateTitle(convId, title)
-      setConversations(prev => prev.map(c => c.id === convId ? { ...c, title } : c))
-      // Record greeting in memory
-      intelligenceService.recordAIResponse(convId, greeting, '', context)
-    } catch { /* greeting xatosi suhbatni bloklamas */ }
-    finally   { setIsTyping(false) }
   }
 
   // ── Sprint 3.3: File attachment helpers ─────────────────────────────────────
@@ -960,13 +954,27 @@ export default function AIAssistantPage() {
                   aria-label="AI ga savol yozing"
                 />
 
-                {/* Voice placeholder */}
+                {/* Voice input (functional) */}
                 <button
                   type="button"
-                  disabled
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 dark:text-gray-600 flex-shrink-0 mb-0.5 cursor-not-allowed"
-                  title="Ovoz bilan yuborish (tez orada)"
-                  aria-label="Ovozli xabar (hali tayyor emas)"
+                  onClick={toggleVoice}
+                  disabled={isTyping || !voiceSupported}
+                  title={
+                    !voiceSupported
+                      ? 'Brauzer ovozni qo\'llab-quvvatlamaydi'
+                      : isListening
+                        ? 'To\'xtatish (yozish tayyor)'
+                        : 'Ovoz bilan yozish'
+                  }
+                  aria-label={isListening ? 'Ovozni to\'xtatish' : 'Ovoz bilan yozish'}
+                  className={cn(
+                    'w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 mb-0.5 transition-all duration-150',
+                    isListening
+                      ? 'text-red-500 bg-red-50 dark:bg-red-900/20 animate-pulse'
+                      : voiceSupported && !isTyping
+                        ? 'text-gray-400 hover:text-brand dark:hover:text-brand-light hover:bg-brand/8 dark:hover:bg-brand/12 cursor-pointer'
+                        : 'text-gray-200 dark:text-gray-700 cursor-not-allowed',
+                  )}
                 >
                   <Mic className="w-4 h-4" aria-hidden="true" />
                 </button>
@@ -1020,9 +1028,20 @@ export default function AIAssistantPage() {
                 </div>
               </div>{/* end input container */}
 
-              <p className="text-center text-[10px] text-gray-300 dark:text-gray-700 mt-2.5 select-none tracking-wide">
-                Asomiddin AI · Gemini 2.5 Flash · Enter — yuborish
-              </p>
+              {/* Voice feedback */}
+              {isListening && (
+                <p className="text-center text-[11px] text-red-500 dark:text-red-400 mt-1.5 animate-pulse">
+                  🎙 {language === 'ru' ? 'Слушаю…' : language === 'en' ? 'Listening…' : 'Tinglamoqda…'}
+                </p>
+              )}
+              {voiceError && (
+                <p className="text-center text-[11px] text-amber-600 dark:text-amber-400 mt-1.5">{voiceError}</p>
+              )}
+              {!isListening && !voiceError && (
+                <p className="text-center text-[10px] text-gray-300 dark:text-gray-700 mt-2.5 select-none tracking-wide">
+                  Asomiddin AI · Gemini 2.5 Flash · Enter — yuborish
+                </p>
+              )}
             </div>
           </div>
         )}

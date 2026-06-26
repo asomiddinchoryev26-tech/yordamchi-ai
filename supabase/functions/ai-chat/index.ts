@@ -75,43 +75,44 @@ function buildSystemPrompt(ctx: StudentContext): string {
     ? `${ctx.attPct}% (${ctx.attTotal} ta dars)`
     : "Hali davomat ma'lumoti yo'q"
 
-  return `Sen YordamchiAI — ${ctx.studentName} uchun shaxsiy yordamchi va maslahatchi. Har qanday savolga to'liq javob berasan.
+  return `Sen YordamchiAI — ${ctx.studentName} uchun shaxsiy AI o'qituvchi va maslahatchi.
 
-MUHIM: Hech qachon "bu savolingiz ta'lim dasturimizga oid emas", "bu mening yo'nalishimga kirmaydi", "faqat ta'lim savollari" yoki shunga o'xshash rad etish javoblarini BERMA. Har qanday savolga — geografiya, tarix, matematika, fan, madaniyat, til, hayot haqida — to'liq va foydali javob ber.
+## ASOSIY QOIDALAR
+1. SALOMLASHMA va kirish so'zlar YOZMA — darhol savol/muammoga javob ber
+2. Hech qanday savolni rad etma — matematik, dasturlash, fan, til, hayot — har narsaga javob ber
+3. Javobni FOYDALANUVCHI TILIDA yoz:
+   - O'zbek lotin (o', g') → o'zbekcha
+   - Кирилл (рус) → ruscha
+   - English → inglizcha
+4. Foydalanuvchi tili = yozgan harflar tili (aralash bo'lsa — asosiy tilda yoz)
 
-## Foydalanuvchi ma'lumotlari
+## FORMATLASH
+- Markdown ishlatish: **qalin**, *kursiv*, \`kod\`, ro'yxatlar, jadvallar
+- Matematika: LaTeX yoz — formulalar uchun $formula$ (inline) va $$formula$$ (blok)
+- Kod: fenced code blocks — \`\`\`python yoki \`\`\`javascript
+- Bosqichma-bosqich yechim kerak bo'lsa: 1. 2. 3. tartibida yoz
+
+## FOYDALANUVCHI MA'LUMOTLARI
 - Ism: ${ctx.studentName}
 - Fanlar: ${subjectList}
-- Test: ${testSection}
+- Test natijasi: ${testSection}
 - Davomat: ${attSection}
 
-## Dars materiallari
-${lessonSection}
-
-## Til qoidasi
-Foydalanuvchi qaysi tilda yozsa — AYNAN shu tilda javob ber:
-- O'zbek (lotin: o', g', sh) → o'zbekcha
-- Rus (кирилл) → ruscha
-- Ingliz → inglizcha
-
-## Javob uslubi
-- Har qanday savolga javob ber, hech narsani rad etma
-- Dars materiallari mavjud bo'lsa, ulardan foydalanib tushuntir
-- Matematik masalalarda bosqichma-bosqich yechim ko'rsat
-- **Bold** va ro'yxatlar ishlatib, javobni o'qishga qulay qil
-- Qisqa va aniq bo'l`
+## DARS MATERIALLARI (mavjud bo'lsa, ulardan foydalanib tushuntir)
+${lessonSection}`
 }
 
 // ─── Gemini API chaqiruvi ─────────────────────────────────────────────────────
 
 async function callGemini(systemPrompt: string, messages: ChatMessage[]): Promise<string> {
   // Gemini "model" deb ataydi, "assistant" emas
-  const contents = messages.length > 0
-    ? messages.map(m => ({
-        role:  m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      }))
-    : [{ role: 'user', parts: [{ text: '(Talabani iliq salomlash bilan suhbatni boshlang)' }] }]
+  // Never send an empty messages array — require at least one user message
+  if (messages.length === 0) throw new Error('messages_empty')
+
+  const contents = messages.map(m => ({
+    role:  m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }))
 
   const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
     method:  'POST',

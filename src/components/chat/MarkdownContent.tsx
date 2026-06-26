@@ -1,14 +1,102 @@
-import { useState } from 'react'
+/**
+ * components/chat/MarkdownContent.tsx
+ * Full markdown renderer with:
+ *  • Inline & block KaTeX math ($…$ and $$…$$)
+ *  • Syntax-highlighted code blocks (highlight.js)
+ *  • Tables, blockquotes, headings, lists, HR
+ *  • Bold, italic, inline-code, strikethrough
+ */
+
+import { useState, useEffect, useRef } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import katex from 'katex'
+import 'katex/dist/katex.min.css'
+import hljs from 'highlight.js/lib/core'
 
-// ─── Inline parser ────────────────────────────────────────────────────────────
-// **bold**, *italic*, `code`, ~~strike~~, __bold__
+// ── Register common languages (tree-shakeable) ────────────────────────────────
+import langJS   from 'highlight.js/lib/languages/javascript'
+import langTS   from 'highlight.js/lib/languages/typescript'
+import langPy   from 'highlight.js/lib/languages/python'
+import langSQL  from 'highlight.js/lib/languages/sql'
+import langBash from 'highlight.js/lib/languages/bash'
+import langJSON from 'highlight.js/lib/languages/json'
+import langCSS  from 'highlight.js/lib/languages/css'
+import langHTML from 'highlight.js/lib/languages/xml'
+import langJava from 'highlight.js/lib/languages/java'
+import langCPP  from 'highlight.js/lib/languages/cpp'
 
-const INLINE_RE = /(\*\*[^*\n]+\*\*|__[^_\n]+__|~~[^~\n]+~~|\*[^*\n]+\*|`[^`\n]+`)/
+hljs.registerLanguage('javascript', langJS)
+hljs.registerLanguage('js',         langJS)
+hljs.registerLanguage('typescript', langTS)
+hljs.registerLanguage('ts',         langTS)
+hljs.registerLanguage('python',     langPy)
+hljs.registerLanguage('py',         langPy)
+hljs.registerLanguage('sql',        langSQL)
+hljs.registerLanguage('bash',       langBash)
+hljs.registerLanguage('sh',         langBash)
+hljs.registerLanguage('json',       langJSON)
+hljs.registerLanguage('css',        langCSS)
+hljs.registerLanguage('html',       langHTML)
+hljs.registerLanguage('xml',        langHTML)
+hljs.registerLanguage('java',       langJava)
+hljs.registerLanguage('cpp',        langCPP)
+hljs.registerLanguage('c',          langCPP)
+
+// ── Katex math rendering ──────────────────────────────────────────────────────
+
+function renderMath(source: string, display: boolean): string {
+  try {
+    return katex.renderToString(source, {
+      displayMode:  display,
+      throwOnError: false,
+      strict:       false,
+      output:       'html',
+    })
+  } catch {
+    return source
+  }
+}
+
+// Inline math: $...$  (not $$...$$, not $$ on its own)
+function MathInline({ src }: { src: string }) {
+  return (
+    <span
+      className="align-middle"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: renderMath(src, false) }}
+    />
+  )
+}
+
+// Block math: $$...$$
+function MathBlock({ src }: { src: string }) {
+  return (
+    <div
+      className="overflow-x-auto py-2 text-center"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: renderMath(src, true) }}
+    />
+  )
+}
+
+// ── Inline parser ─────────────────────────────────────────────────────────────
+// Handles: **bold**, *italic*, `code`, ~~strike~~, $math$
 
 export function parseInline(text: string): React.ReactNode[] {
+  // Tokenize step-by-step
+  const INLINE_RE =
+    /(\$\$[\s\S]+?\$\$|\$[^$\n]+?\$|\*\*[^*\n]+\*\*|__[^_\n]+__|~~[^~\n]+~~|\*[^*\n]+\*|`[^`\n]+`)/
+
   return text.split(INLINE_RE).map((part, i) => {
+    // Block math inline (rare but handle it)
+    if (part.startsWith('$$') && part.endsWith('$$') && part.length > 4)
+      return <MathInline key={i} src={part.slice(2, -2)} />
+
+    // Inline math $...$
+    if (part.startsWith('$') && part.endsWith('$') && part.length > 2 && !part.includes('\n'))
+      return <MathInline key={i} src={part.slice(1, -1)} />
+
     if ((part.startsWith('**') && part.endsWith('**')) || (part.startsWith('__') && part.endsWith('__')))
       return <strong key={i} className="font-semibold text-gray-900 dark:text-gray-100">{part.slice(2, -2)}</strong>
     if (part.startsWith('*') && part.endsWith('*') && part.length > 2)
@@ -25,10 +113,23 @@ export function parseInline(text: string): React.ReactNode[] {
   })
 }
 
-// ─── Code block ───────────────────────────────────────────────────────────────
+// ── Code block with syntax highlighting ───────────────────────────────────────
 
 function CodeBlock({ lang, code }: { lang: string; code: string }) {
   const [copied, setCopied] = useState(false)
+  const preRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (!preRef.current) return
+    const el = preRef.current
+    const normalLang = lang.toLowerCase().trim()
+    if (normalLang && hljs.getLanguage(normalLang)) {
+      const result = hljs.highlight(code.trimEnd(), { language: normalLang, ignoreIllegals: true })
+      el.innerHTML = result.value
+    } else {
+      el.textContent = code.trimEnd()
+    }
+  }, [code, lang])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code).catch(() => {})
@@ -47,21 +148,25 @@ function CodeBlock({ lang, code }: { lang: string; code: string }) {
           type="button"
           onClick={handleCopy}
           className="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-gray-200 transition-colors"
+          aria-label="Nusxalash"
         >
           {copied
             ? <><Check className="w-3.5 h-3.5 text-emerald-400" /><span className="text-emerald-400">Nusxalandi</span></>
             : <><Copy className="w-3.5 h-3.5" /><span>Nusxalash</span></>}
         </button>
       </div>
-      {/* Code */}
-      <pre className="bg-[#0d1117] dark:bg-gray-950 px-5 py-4 overflow-x-auto text-[13px] leading-relaxed">
-        <code className="font-mono text-gray-200 whitespace-pre">{code.trimEnd()}</code>
+      {/* Code — highlight.js populates via useEffect */}
+      <pre className="bg-[#0d1117] dark:bg-gray-950 px-5 py-4 overflow-x-auto text-[13px] leading-relaxed m-0">
+        <code
+          ref={preRef}
+          className={cn('font-mono whitespace-pre', lang && `language-${lang.toLowerCase()}`)}
+        />
       </pre>
     </div>
   )
 }
 
-// ─── Table ────────────────────────────────────────────────────────────────────
+// ── Table ─────────────────────────────────────────────────────────────────────
 
 function TableBlock({ lines }: { lines: string[] }) {
   const parse = (line: string) =>
@@ -99,36 +204,58 @@ function TableBlock({ lines }: { lines: string[] }) {
   )
 }
 
-// ─── Segment extractor ────────────────────────────────────────────────────────
+// ── Segment extractor (code blocks + block math + text) ───────────────────────
 
-type Seg = { k: 'code'; lang: string; code: string } | { k: 'text'; text: string }
+type Seg =
+  | { k: 'code';       lang: string; code: string }
+  | { k: 'math_block'; src:  string }
+  | { k: 'text';       text: string }
 
 function extractSegments(raw: string): Seg[] {
   const segs: Seg[] = []
   let rest = raw
 
   while (rest.length > 0) {
-    const idx = rest.indexOf('```')
-    if (idx === -1) { segs.push({ k: 'text', text: rest }); break }
+    // ── Fenced code block ````…``` ──────────────────────────────────────────
+    const codeIdx = rest.indexOf('```')
+    // ── Block math $$…$$ ────────────────────────────────────────────────────
+    const mathIdx = rest.indexOf('$$')
 
-    if (idx > 0) segs.push({ k: 'text', text: rest.slice(0, idx) })
+    // Determine which comes first (or neither)
+    let nextType: 'code' | 'math' | 'none' = 'none'
+    let nextIdx = Infinity
+    if (codeIdx !== -1 && codeIdx < nextIdx) { nextType = 'code'; nextIdx = codeIdx }
+    if (mathIdx !== -1 && mathIdx < nextIdx) { nextType = 'math'; nextIdx = mathIdx }
 
-    const after    = rest.slice(idx + 3)
-    const nlIdx    = after.indexOf('\n')
-    const lang     = nlIdx === -1 ? '' : after.slice(0, nlIdx).trim()
-    const body     = nlIdx === -1 ? after : after.slice(nlIdx + 1)
-    const closeIdx = body.indexOf('```')
+    if (nextType === 'none') { segs.push({ k: 'text', text: rest }); break }
 
-    if (closeIdx === -1) { segs.push({ k: 'text', text: rest.slice(idx) }); break }
+    // Text before marker
+    if (nextIdx > 0) segs.push({ k: 'text', text: rest.slice(0, nextIdx) })
 
-    segs.push({ k: 'code', lang, code: body.slice(0, closeIdx) })
-    rest = body.slice(closeIdx + 3)
+    if (nextType === 'code') {
+      const after    = rest.slice(nextIdx + 3)
+      const nlIdx    = after.indexOf('\n')
+      const lang     = nlIdx === -1 ? '' : after.slice(0, nlIdx).trim()
+      const body     = nlIdx === -1 ? after : after.slice(nlIdx + 1)
+      const closeIdx = body.indexOf('```')
+
+      if (closeIdx === -1) { segs.push({ k: 'text', text: rest.slice(nextIdx) }); break }
+      segs.push({ k: 'code', lang, code: body.slice(0, closeIdx) })
+      rest = body.slice(closeIdx + 3)
+    } else {
+      // block math $$...$$
+      const after    = rest.slice(nextIdx + 2)
+      const closeIdx = after.indexOf('$$')
+      if (closeIdx === -1) { segs.push({ k: 'text', text: rest.slice(nextIdx) }); break }
+      segs.push({ k: 'math_block', src: after.slice(0, closeIdx).trim() })
+      rest = after.slice(closeIdx + 2)
+    }
   }
 
   return segs
 }
 
-// ─── Text block renderer ──────────────────────────────────────────────────────
+// ── Text block renderer ───────────────────────────────────────────────────────
 
 function isSepLine(s: string)   { return /^\|[\s\-:|]+\|/.test(s.trim()) }
 function isTableLine(s: string) { return s.trim().startsWith('|') && s.trim().endsWith('|') }
@@ -148,13 +275,11 @@ function TextBlock({ text }: { text: string }) {
       nodes.push(<TableBlock key={`t-${i}`} lines={tbl} />)
       continue
     }
-
     // ── HR ───────
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
       nodes.push(<hr key={i} className="border-gray-200 dark:border-gray-700 my-1" />)
       i++; continue
     }
-
     // ── Headings ─
     if (/^### /.test(line)) {
       nodes.push(<p key={i} className="text-sm font-bold text-gray-900 dark:text-gray-100 mt-2">{parseInline(line.slice(4))}</p>)
@@ -168,7 +293,6 @@ function TextBlock({ text }: { text: string }) {
       nodes.push(<p key={i} className="text-base font-bold text-gray-900 dark:text-gray-100 mt-2">{parseInline(line.slice(2))}</p>)
       i++; continue
     }
-
     // ── Blockquote ─
     if (/^> /.test(line)) {
       const items: string[] = []
@@ -180,7 +304,6 @@ function TextBlock({ text }: { text: string }) {
       )
       continue
     }
-
     // ── Bullet list ─
     if (/^[\-\*\+] /.test(line)) {
       const items: string[] = []
@@ -197,11 +320,10 @@ function TextBlock({ text }: { text: string }) {
       )
       continue
     }
-
     // ── Numbered list ─
     if (/^\d+\. /.test(line)) {
       const items: string[] = []
-      let   num = 1
+      let num = 1
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
         const m = lines[i].match(/^(\d+)\. (.+)/)
         if (m) { if (items.length === 0) num = parseInt(m[1]); items.push(m[2]) }
@@ -219,10 +341,8 @@ function TextBlock({ text }: { text: string }) {
       )
       continue
     }
-
     // ── Empty line ─
     if (line.trim() === '') { nodes.push(<div key={i} className="h-2.5" />); i++; continue }
-
     // ── Paragraph ─
     nodes.push(<p key={i} className="leading-[1.75]">{parseInline(line)}</p>)
     i++
@@ -231,7 +351,7 @@ function TextBlock({ text }: { text: string }) {
   return <div className="space-y-1">{nodes}</div>
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+// ── Main export ───────────────────────────────────────────────────────────────
 
 export default function MarkdownContent({ text }: { text: string }) {
   if (!text) return null
@@ -240,11 +360,11 @@ export default function MarkdownContent({ text }: { text: string }) {
 
   return (
     <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2.5">
-      {segs.map((seg, i) =>
-        seg.k === 'code'
-          ? <CodeBlock key={i} lang={seg.lang} code={seg.code} />
-          : <TextBlock  key={i} text={seg.text} />
-      )}
+      {segs.map((seg, i) => {
+        if (seg.k === 'code')       return <CodeBlock  key={i} lang={seg.lang} code={seg.code} />
+        if (seg.k === 'math_block') return <MathBlock  key={i} src={seg.src}  />
+        return <TextBlock key={i} text={seg.text} />
+      })}
     </div>
   )
 }
