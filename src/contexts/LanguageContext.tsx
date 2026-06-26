@@ -100,15 +100,28 @@ export type Translations = {
 
   // ── Landing page ──────────────────────────────────────────────────────────
   heroTagline: string
-  heroTitle: string        // Use | as delimiter: text before | is plain, after | is gradient
-  heroSubtitle: string
+  heroTitle: string        // Fallback title with | split
+  heroSubtitle: string     // Fallback subtitle
   heroBadge: string        // Eyebrow badge above headline
-  heroCtaPrimary: string   // Primary CTA button label (no arrow — rendered as icon)
+  heroCtaPrimary: string   // Primary CTA button label
   heroCtaDemo: string      // Secondary CTA label
-  heroNoCreditCard: string // Friction reducer text below CTAs
+  heroNoCreditCard: string // Friction reducer
   heroRoleStudent: string  // Role tab: student
   heroRoleTeacher: string  // Role tab: teacher
   heroRoleSchool: string   // Role tab: school/institution
+  // Dynamic per-role headlines (| splits plain|gradient)
+  heroTitleStudent: string
+  heroTitleTeacher: string
+  heroTitleSchool: string
+  // Dynamic per-role subtitles (sentences separated by '. ')
+  heroSubtitleStudent: string
+  heroSubtitleTeacher: string
+  heroSubtitleSchool: string
+  // Conversion copy
+  heroDiff: string         // ChatGPT differentiation line
+  heroUrgency: string      // Urgency/beta copy
+  heroSocialInline: string // Inline social proof above CTA
+  heroTrustNoInstall: string // Trust badge: no installation
   startFree: string
   viewPricing: string
   whyTitle: string
@@ -257,12 +270,22 @@ const uz: Translations = {
   heroTitle: "O'quvchilar va o'qituvchilar uchun|AI yordamchi",
   heroSubtitle: "Savollaringizga bir soniyada javob oling. Darslarni avtomatlang. Har bir talabaning o'quv yo'lini shaxsiylang.",
   heroBadge: "Gemini 2.5 Flash bilan quvvatlangan",
-  heroCtaPrimary: "Bepul boshlash",
-  heroCtaDemo: "Demoni ko'rish",
+  heroCtaPrimary: "Bepul sinab ko'ring",
+  heroCtaDemo: "Ko'proq ma'lumot",
   heroNoCreditCard: "Kredit karta talab qilinmaydi · 30 kun bepul",
   heroRoleStudent: "Talabaman",
   heroRoleTeacher: "O'qituvchiman",
   heroRoleSchool: "Maktab vakili",
+  heroTitleStudent: "Imtihondan qo'rqmang.|AI o'qituvchingiz 24/7 tayyor.",
+  heroTitleTeacher: "Dars tayyorgarligiga 2 soat emas.|AI bilan 20 daqiqa yetarli.",
+  heroTitleSchool: "Barcha sinflar. Barcha natijalar.|Bitta boshqaruv tizimida.",
+  heroSubtitleStudent: "AI imtihon oldidan zaif mavzularingizni aniqlab beradi. ChatGPT bilmaydi — YordamchiAI kurs materiallaringizni biladi. Savol bering va bir soniyada aniq javob oling.",
+  heroSubtitleTeacher: "Davomatni bir tugmada belgilang — AI o'zi hisobot tayyorlaydi. Har bir talabaning rivojini real vaqtda kuzating. Dars tayyorgarligiga 2 soat emas, 20 daqiqa sarflang.",
+  heroSubtitleSchool: "Barcha o'qituvchilar, talabalar va hisobotlar bitta tizimda. AI muammoli o'quvchilarni erta aniqlaydi — siz choralar ko'rishingiz mumkin. Maktab samaradorligini kuzating va yaxshilang.",
+  heroDiff: "ChatGPT bilmaydi — YordamchiAI kurs materiallaringizni biladi",
+  heroUrgency: "Beta davri: Bepul kirish hozir faol",
+  heroSocialInline: "1,200+ talaba foydalanmoqda · ★ 4.9/5",
+  heroTrustNoInstall: "O'rnatish kerak emas",
   startFree: 'Bepul boshlash →',
   viewPricing: "Narxlarni ko'rish",
   whyTitle: 'Nima uchun YordamchiAI?',
@@ -412,12 +435,22 @@ const ru: Translations = {
   heroTitle: 'ИИ-ассистент для студентов|и преподавателей',
   heroSubtitle: 'Мгновенные ответы на любые вопросы. Автоматизируйте уроки. Персонализируйте путь каждого ученика с помощью ИИ.',
   heroBadge: 'Работает на Gemini 2.5 Flash',
-  heroCtaPrimary: 'Начать бесплатно',
-  heroCtaDemo: 'Смотреть демо',
+  heroCtaPrimary: 'Попробовать бесплатно',
+  heroCtaDemo: 'Узнать больше',
   heroNoCreditCard: 'Без кредитной карты · 30 дней бесплатно',
   heroRoleStudent: 'Я студент',
   heroRoleTeacher: 'Я преподаватель',
   heroRoleSchool: 'Представляю школу',
+  heroTitleStudent: 'Не паникуйте перед экзаменом.|ИИ-репетитор готов 24/7.',
+  heroTitleTeacher: 'Не тратьте 2 часа на подготовку.|С ИИ хватит 20 минут.',
+  heroTitleSchool: 'Все классы. Все результаты.|Одна система управления.',
+  heroSubtitleStudent: 'ИИ выявляет ваши слабые темы перед каждым экзаменом. В отличие от ChatGPT — знает вашу учебную программу. Задайте вопрос и получите точный ответ за секунду.',
+  heroSubtitleTeacher: 'Отмечайте посещаемость одной кнопкой — ИИ готовит отчёты сам. Отслеживайте прогресс каждого ученика в реальном времени. Тратьте 20 минут на подготовку, а не 2 часа.',
+  heroSubtitleSchool: 'Все учителя, ученики и отчёты в одной системе. ИИ заранее выявляет учеников в зоне риска — вы принимаете меры. Следите за эффективностью школы и улучшайте результаты.',
+  heroDiff: 'ChatGPT не знает — YordamchiAI знает вашу учебную программу',
+  heroUrgency: 'Бета-период: бесплатный доступ активен прямо сейчас',
+  heroSocialInline: '1 200+ студентов пользуются · ★ 4.9/5',
+  heroTrustNoInstall: 'Установка не нужна',
   startFree: 'Начать бесплатно →',
   viewPricing: 'Посмотреть цены',
   whyTitle: 'Почему YordamchiAI?',
@@ -567,12 +600,22 @@ const en: Translations = {
   heroTitle: 'The AI Assistant|Built for Education',
   heroSubtitle: 'Get instant answers to any question. Automate lesson tracking. Personalize every student\'s learning path with AI.',
   heroBadge: 'Powered by Gemini 2.5 Flash',
-  heroCtaPrimary: 'Start for free',
-  heroCtaDemo: 'Watch demo',
+  heroCtaPrimary: 'Try for free',
+  heroCtaDemo: 'Learn more',
   heroNoCreditCard: 'No credit card required · Free for 30 days',
   heroRoleStudent: 'I\'m a student',
   heroRoleTeacher: 'I\'m a teacher',
   heroRoleSchool: 'I represent a school',
+  heroTitleStudent: 'No more exam panic.|Your AI tutor is ready 24/7.',
+  heroTitleTeacher: 'Stop spending 2 hours on prep.|20 minutes with AI is enough.',
+  heroTitleSchool: 'Every class. Every result.|One management system.',
+  heroSubtitleStudent: 'AI identifies your weakest topics before every exam. Unlike ChatGPT — YordamchiAI knows your exact curriculum. Ask anything and get a precise answer in seconds.',
+  heroSubtitleTeacher: 'Mark attendance in one click — AI prepares reports automatically. Track every student\'s progress in real time. Spend 20 minutes on lesson prep, not 2 hours.',
+  heroSubtitleSchool: 'All teachers, students and reports in one system. AI identifies at-risk students early so you can act in time. Track school performance and drive continuous improvement.',
+  heroDiff: 'Unlike ChatGPT — YordamchiAI knows your exact curriculum',
+  heroUrgency: 'Beta access: free registration is active now',
+  heroSocialInline: '1,200+ students using it · ★ 4.9/5',
+  heroTrustNoInstall: 'No installation required',
   startFree: 'Start free →',
   viewPricing: 'View pricing',
   whyTitle: 'Why YordamchiAI?',
