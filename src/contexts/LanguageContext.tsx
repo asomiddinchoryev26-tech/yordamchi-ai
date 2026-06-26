@@ -118,10 +118,14 @@ export type Translations = {
   heroSubtitleTeacher: string
   heroSubtitleSchool: string
   // Conversion copy
-  heroDiff: string         // ChatGPT differentiation line
-  heroUrgency: string      // Urgency/beta copy
-  heroSocialInline: string // Inline social proof above CTA
-  heroTrustNoInstall: string // Trust badge: no installation
+  heroDiff: string              // ChatGPT differentiation line
+  heroUrgency: string           // Urgency/beta copy
+  heroSocialInline: string      // Inline social proof above CTA
+  heroTrustNoInstall: string    // Trust badge: no installation
+  heroCtaStudentAction: string  // Role-specific primary CTA — student
+  heroCtaTeacherAction: string  // Role-specific primary CTA — teacher
+  heroCtaSchoolAction: string   // Role-specific primary CTA — school
+  heroAlreadyUser: string       // "Already have an account?" text
   startFree: string
   viewPricing: string
   whyTitle: string
@@ -277,15 +281,19 @@ const uz: Translations = {
   heroRoleTeacher: "O'qituvchiman",
   heroRoleSchool: "Maktab vakili",
   heroTitleStudent: "Imtihondan qo'rqmang.|AI o'qituvchingiz 24/7 tayyor.",
-  heroTitleTeacher: "Dars tayyorgarligiga 2 soat emas.|AI bilan 20 daqiqa yetarli.",
-  heroTitleSchool: "Barcha sinflar. Barcha natijalar.|Bitta boshqaruv tizimida.",
-  heroSubtitleStudent: "AI imtihon oldidan zaif mavzularingizni aniqlab beradi. ChatGPT bilmaydi — YordamchiAI kurs materiallaringizni biladi. Savol bering va bir soniyada aniq javob oling.",
-  heroSubtitleTeacher: "Davomatni bir tugmada belgilang — AI o'zi hisobot tayyorlaydi. Har bir talabaning rivojini real vaqtda kuzating. Dars tayyorgarligiga 2 soat emas, 20 daqiqa sarflang.",
-  heroSubtitleSchool: "Barcha o'qituvchilar, talabalar va hisobotlar bitta tizimda. AI muammoli o'quvchilarni erta aniqlaydi — siz choralar ko'rishingiz mumkin. Maktab samaradorligini kuzating va yaxshilang.",
+  heroTitleTeacher: "Dars tayyorgarligiga 2 soat emas.|AI bilan — 20 daqiqa. Har safar.",
+  heroTitleSchool: "Barcha sinflar. Barcha natijalar.|Bitta ekranda.",
+  heroSubtitleStudent: "Testdan oldin zaif mavzularingiz aniq ko'rsatiladi. Har savolingizga kurs materiallaringiz asosida javob olasiz. Imtihon kuni xotirjam turing — AI bilan tayyor bo'lasiz.",
+  heroSubtitleTeacher: "Testlar va dars materiallarini AI bilan daqiqalarda yarating. Har bir talabaning rivojini real vaqtda ko'ring. Davomat, hisobotlar, xabarnomalar — barchasi avtomatik.",
+  heroSubtitleSchool: "Barcha o'qituvchilar va talabalar bitta platformada boshqariladi. AI muammoli o'quvchilarni erta aniqlaydi — siz o'z vaqtida choralar ko'rasiz. Ma'muriy ishlar avtomatlashtiriladi.",
   heroDiff: "ChatGPT bilmaydi — YordamchiAI kurs materiallaringizni biladi",
-  heroUrgency: "Beta davri: Bepul kirish hozir faol",
+  heroUrgency: "Ilk foydalanuvchilar uchun: Barcha imkoniyatlar bepul",
   heroSocialInline: "1,200+ talaba foydalanmoqda · ★ 4.9/5",
   heroTrustNoInstall: "O'rnatish kerak emas",
+  heroCtaStudentAction: "AI o'qituvchimni olaman",
+  heroCtaTeacherAction: "AI sinfimni yarataman",
+  heroCtaSchoolAction: "Maktabimni modernizatsiya qilaman",
+  heroAlreadyUser: "Hisobingiz bormi?",
   startFree: 'Bepul boshlash →',
   viewPricing: "Narxlarni ko'rish",
   whyTitle: 'Nima uchun YordamchiAI?',
@@ -442,15 +450,19 @@ const ru: Translations = {
   heroRoleTeacher: 'Я преподаватель',
   heroRoleSchool: 'Представляю школу',
   heroTitleStudent: 'Не паникуйте перед экзаменом.|ИИ-репетитор готов 24/7.',
-  heroTitleTeacher: 'Не тратьте 2 часа на подготовку.|С ИИ хватит 20 минут.',
-  heroTitleSchool: 'Все классы. Все результаты.|Одна система управления.',
-  heroSubtitleStudent: 'ИИ выявляет ваши слабые темы перед каждым экзаменом. В отличие от ChatGPT — знает вашу учебную программу. Задайте вопрос и получите точный ответ за секунду.',
-  heroSubtitleTeacher: 'Отмечайте посещаемость одной кнопкой — ИИ готовит отчёты сам. Отслеживайте прогресс каждого ученика в реальном времени. Тратьте 20 минут на подготовку, а не 2 часа.',
-  heroSubtitleSchool: 'Все учителя, ученики и отчёты в одной системе. ИИ заранее выявляет учеников в зоне риска — вы принимаете меры. Следите за эффективностью школы и улучшайте результаты.',
+  heroTitleTeacher: 'Не тратьте 2 часа на подготовку.|С ИИ — 20 минут. Каждый раз.',
+  heroTitleSchool: 'Все классы. Все результаты.|На одном экране.',
+  heroSubtitleStudent: 'Слабые темы выявляются до экзамена — AI показывает точно. Ответы на вопросы основаны на вашей учебной программе. В день экзамена будьте спокойны — ИИ вас подготовит.',
+  heroSubtitleTeacher: 'Создавайте тесты и материалы с ИИ за минуты. Отслеживайте прогресс каждого ученика в реальном времени. Посещаемость, отчёты, уведомления — всё автоматически.',
+  heroSubtitleSchool: 'Все учителя и ученики — в одной системе. ИИ выявляет отстающих заранее — вы успеваете принять меры. Административная работа автоматизируется.',
   heroDiff: 'ChatGPT не знает — YordamchiAI знает вашу учебную программу',
-  heroUrgency: 'Бета-период: бесплатный доступ активен прямо сейчас',
+  heroUrgency: 'Для первых пользователей: все функции бесплатно',
   heroSocialInline: '1 200+ студентов пользуются · ★ 4.9/5',
   heroTrustNoInstall: 'Установка не нужна',
+  heroCtaStudentAction: 'Получить ИИ-репетитора',
+  heroCtaTeacherAction: 'Создать ИИ-класс',
+  heroCtaSchoolAction: 'Модернизировать школу',
+  heroAlreadyUser: 'Уже есть аккаунт?',
   startFree: 'Начать бесплатно →',
   viewPricing: 'Посмотреть цены',
   whyTitle: 'Почему YordamchiAI?',
@@ -607,15 +619,19 @@ const en: Translations = {
   heroRoleTeacher: 'I\'m a teacher',
   heroRoleSchool: 'I represent a school',
   heroTitleStudent: 'No more exam panic.|Your AI tutor is ready 24/7.',
-  heroTitleTeacher: 'Stop spending 2 hours on prep.|20 minutes with AI is enough.',
-  heroTitleSchool: 'Every class. Every result.|One management system.',
-  heroSubtitleStudent: 'AI identifies your weakest topics before every exam. Unlike ChatGPT — YordamchiAI knows your exact curriculum. Ask anything and get a precise answer in seconds.',
-  heroSubtitleTeacher: 'Mark attendance in one click — AI prepares reports automatically. Track every student\'s progress in real time. Spend 20 minutes on lesson prep, not 2 hours.',
-  heroSubtitleSchool: 'All teachers, students and reports in one system. AI identifies at-risk students early so you can act in time. Track school performance and drive continuous improvement.',
+  heroTitleTeacher: 'Stop spending 2 hours on prep.|With AI — 20 minutes. Every time.',
+  heroTitleSchool: 'Every class. Every result.|On one screen.',
+  heroSubtitleStudent: 'Weak topics are shown precisely before every exam. Answers to your questions are based on your exact curriculum. Feel calm on exam day — AI prepares you for exactly what matters.',
+  heroSubtitleTeacher: 'Create tests and lesson materials with AI in minutes. Track every student\'s progress in real time. Attendance, reports and notifications — all automated.',
+  heroSubtitleSchool: 'All teachers and students managed in one platform. AI identifies struggling students early — you act before they fall behind. Administrative work is automated.',
   heroDiff: 'Unlike ChatGPT — YordamchiAI knows your exact curriculum',
-  heroUrgency: 'Beta access: free registration is active now',
+  heroUrgency: 'For early users: all features are free',
   heroSocialInline: '1,200+ students using it · ★ 4.9/5',
   heroTrustNoInstall: 'No installation required',
+  heroCtaStudentAction: 'Get My AI Tutor',
+  heroCtaTeacherAction: 'Build My AI Classroom',
+  heroCtaSchoolAction: 'Modernize My School',
+  heroAlreadyUser: 'Already have an account?',
   startFree: 'Start free →',
   viewPricing: 'View pricing',
   whyTitle: 'Why YordamchiAI?',
