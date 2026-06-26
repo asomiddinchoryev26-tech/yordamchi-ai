@@ -4,6 +4,7 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* ── Existing semantic tokens ──────────────────────────────────────────── */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -26,6 +27,31 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
+
+  /* ── Phase 1 Design System ─────────────────────────────────────────────── */
+
+  /* Brand colors */
+  --color-brand:       #5B5CF6;
+  --color-brand-dark:  #7C3AED;
+  --color-brand-light: #8B5CF6;
+
+  /* Surface & text */
+  --color-surface-tinted: #FAFBFF;
+  --color-ink:        #111827;
+  --color-ink-muted:  #6B7280;
+  --color-ink-subtle: #9CA3AF;
+
+  /* Status */
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+
+  /* Border radius tokens */
+  --radius-card:  24px;
+  --radius-btn:   18px;
+  --radius-input: 16px;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @layer base {
@@ -36,7 +62,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 239 84% 67%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -48,18 +74,18 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --ring: 239 84% 67%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222.2 47% 11%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 47% 11%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 239 84% 72%;
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -71,7 +97,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 239 84% 72%;
   }
 
   * {
@@ -81,16 +107,39 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-family: var(--font-sans);
     margin: 0;
     transition: background-color 0.2s ease, color 0.2s ease;
-    /* Prevent horizontal scroll on mobile */
     overflow-x: hidden;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Minimum touch target size */
   button, a, [role="button"] {
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ── Custom shadow utilities ─────────────────────────────────────────────── */
+@layer utilities {
+  .shadow-soft {
+    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  }
+  .shadow-large {
+    box-shadow: 0 20px 60px -10px rgb(91 92 246 / 0.18), 0 4px 20px -4px rgb(0 0 0 / 0.08);
+  }
+  .dark .shadow-large {
+    box-shadow: 0 20px 60px -10px rgb(0 0 0 / 0.55), 0 4px 20px -4px rgb(0 0 0 / 0.3);
+  }
+  .shadow-brand {
+    box-shadow: 0 8px 32px 0 rgb(91 92 246 / 0.35), 0 2px 8px 0 rgb(91 92 246 / 0.2);
+  }
+  .shadow-glass {
+    box-shadow: 0 8px 32px 0 rgb(91 92 246 / 0.12), inset 0 1px 0 0 rgb(255 255 255 / 0.6);
+  }
+  .dark .shadow-glass {
+    box-shadow: 0 8px 32px 0 rgb(0 0 0 / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
   }
 }
