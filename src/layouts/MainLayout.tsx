@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, Outlet } from 'react-router-dom'
-import { Sun, Moon, Globe, ChevronDown, Menu, X, ArrowRight, Zap } from 'lucide-react'
+import { Sun, Moon, Globe, ChevronDown, Menu, X, ArrowRight } from 'lucide-react'
 import { PATHS } from '@/routes/paths'
 import { APP_NAME } from '@/utils/constants'
 import logoSrc from '@/assets/images/logo.svg'
@@ -131,14 +131,13 @@ export default function MainLayout() {
               <button
                 type="button"
                 onClick={() => setLangOpen(v => !v)}
-                className="h-9 px-2.5 flex items-center gap-1.5 rounded-xl text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150 text-xs font-semibold"
+                className="h-9 px-2.5 flex items-center gap-1 rounded-xl text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150 text-xs font-semibold"
                 aria-label={t.language}
                 aria-expanded={langOpen}
                 aria-haspopup="listbox"
               >
-                <Globe className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-                <span className="text-sm">{currentLang?.flag}</span>
-                <span className="tracking-wide">{currentLang?.short ?? 'UZ'}</span>
+                <span className="text-[15px] leading-none">{currentLang?.flag}</span>
+                <span className="tracking-wide mx-0.5">{currentLang?.short ?? 'UZ'}</span>
                 <ChevronDown className={cn('w-3 h-3 text-gray-400 transition-transform duration-200', langOpen && 'rotate-180')} />
               </button>
 
@@ -236,19 +235,6 @@ export default function MainLayout() {
         >
           <div className="max-w-6xl mx-auto px-5 py-5 space-y-5 overflow-y-auto max-h-[calc(100vh-80px)]">
 
-            {/* Brand identity in drawer */}
-            <div className="flex items-center gap-2.5 px-1">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 leading-none mb-0.5">{APP_NAME}</p>
-                <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-none">Powered by Gemini 2.5 Flash</p>
-              </div>
-            </div>
-
-            <div className="h-px bg-gray-100 dark:bg-gray-800" />
-
             {/* Language switcher */}
             <div>
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2.5 flex items-center gap-1.5 px-1">
@@ -323,7 +309,7 @@ export default function MainLayout() {
       >
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="flex items-center gap-2">
-            <img src={logoSrc} alt="" className="w-6 h-6 rounded-md" aria-hidden="true" />
+            <img src={logoSrc} alt="" className="w-6 h-6 rounded-lg" aria-hidden="true" />
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{APP_NAME}</span>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-500 order-last sm:order-none">

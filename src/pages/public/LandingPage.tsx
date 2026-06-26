@@ -195,7 +195,7 @@ const ChatMockup = memo(function ChatMockup({ demo, language }: { demo: DemoCont
       </div>
 
       {/* Chat area */}
-      <div className="px-4 pt-4 pb-3 space-y-3.5 min-h-[290px]">
+      <div className="px-4 pt-4 pb-3 space-y-3.5 min-h-[320px]">
 
         {/* AI Header inside chat */}
         <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-800">
@@ -289,7 +289,7 @@ const ChatMockup = memo(function ChatMockup({ demo, language }: { demo: DemoCont
 // ─── Social Proof Stat Item ────────────────────────────────────────────────────
 
 function StatItem({
-  target, suffix, label, Icon, colorClass, active,
+  target, suffix, label, Icon, colorClass, active, className: cls,
 }: {
   target: number
   suffix: string
@@ -297,10 +297,11 @@ function StatItem({
   Icon: React.ElementType
   colorClass: string
   active: boolean
+  className?: string
 }) {
   const count = useCountUp(target, active)
   return (
-    <div className="flex flex-col items-center gap-1 px-5 py-4 sm:py-5">
+    <div className={cn('flex flex-col items-center gap-1 px-5 py-4 sm:py-5', cls)}>
       <div className={cn('flex items-center gap-1.5', colorClass)}>
         <Icon className="w-4 h-4 opacity-75 flex-shrink-0" />
         <span className="text-2xl sm:text-[1.75rem] font-black tracking-tight tabular-nums leading-none">
@@ -346,8 +347,8 @@ function HeroSection() {
   function fadeUp(delay = 0) {
     return {
       className: cn(
-        'transition-all',
-        prefersReduced ? '' : 'duration-700',
+        'transition-[opacity,transform]',
+        prefersReduced ? 'duration-0' : 'duration-700 ease-out',
         mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5',
       ),
       style: prefersReduced ? {} : { transitionDelay: `${delay}ms` },
@@ -385,7 +386,7 @@ function HeroSection() {
               <div className={p.className} style={p.style}>
                 <h1
                   id="hero-heading"
-                  className="text-[2.6rem] sm:text-5xl lg:text-[3.35rem] xl:text-[3.6rem] font-black text-gray-900 dark:text-gray-50 leading-[1.08] tracking-tight mb-5"
+                  className="text-[2.1rem] sm:text-5xl lg:text-[3.35rem] xl:text-[3.6rem] font-black text-gray-900 dark:text-gray-50 leading-[1.1] tracking-tight mb-6"
                 >
                   {headlineBefore && (
                     <span className="block">{headlineBefore}</span>
@@ -402,7 +403,7 @@ function HeroSection() {
             {/* Subtitle */}
             {(() => { const p = fadeUp(170); return (
               <div className={p.className} style={p.style}>
-                <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 leading-relaxed max-w-[500px] mb-8">
+                <p className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 leading-relaxed max-w-[460px] mb-8">
                   {t.heroSubtitle}
                 </p>
               </div>
@@ -442,41 +443,41 @@ function HeroSection() {
             {/* Role tabs */}
             {(() => { const p = fadeUp(330); return (
               <div className={cn(p.className, 'mt-8')} style={p.style}>
-              <div
-                className="flex flex-wrap gap-2"
-                role="group"
-                aria-label="Select your role to see the relevant demo"
-              >
-                {ROLES.map(({ id, label, Icon }) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setActiveRole(id)}
-                    aria-pressed={activeRole === id}
-                    className={cn(
-                      'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold border-2 transition-all duration-150',
-                      activeRole === id
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 shadow-sm shadow-indigo-500/15'
-                        : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400',
-                    )}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {label}
-                  </button>
-                ))}
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="group"
+                  aria-label="Select your role to see the relevant demo"
+                >
+                  {ROLES.map(({ id, label, Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setActiveRole(id)}
+                      aria-pressed={activeRole === id}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold border-2 transition-all duration-150',
+                        activeRole === id
+                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 shadow-sm shadow-indigo-500/15'
+                          : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400',
+                      )}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
             )})()}
           </div>
 
           {/* ── RIGHT: Chat Mockup ──────────────────────────────────────────── */}
           <div
             className={cn(
-              'relative transition-all',
-              prefersReduced ? '' : 'duration-700',
+              'relative transition-[opacity,transform]',
+              prefersReduced ? 'duration-0' : 'duration-700 ease-out',
               mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6',
             )}
-            style={prefersReduced ? {} : { transitionDelay: '220ms' }}
+            style={prefersReduced ? {} : { transitionDelay: '220ms', willChange: 'transform, opacity' }}
           >
             {/* Glow behind card */}
             <div
@@ -509,10 +510,14 @@ function SocialProofSection() {
       id="social-proof"
       aria-label="Platform statistics"
       ref={ref as React.RefObject<HTMLElement>}
-      className="border-y border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/40"
+      className="scroll-mt-16 border-y border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/40"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-wrap sm:flex-nowrap items-center justify-center sm:divide-x divide-gray-200 dark:divide-gray-700/60">
+        {/*
+          Mobile: 2-column grid — 4 stats in 2×2, rating spans full width on row 3
+          sm+: horizontal flex row with dividers
+        */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-nowrap sm:items-center sm:justify-center sm:divide-x divide-gray-200 dark:divide-gray-700/60">
 
           {STATS.map(({ target, suffix, label, Icon, color }) => (
             <StatItem
@@ -526,8 +531,8 @@ function SocialProofSection() {
             />
           ))}
 
-          {/* Rating — always static */}
-          <div className="flex flex-col items-center gap-1 px-5 py-4 sm:py-5">
+          {/* Rating — always static, spans 2 cols on mobile to center it */}
+          <div className="col-span-2 sm:col-span-1 flex flex-col items-center gap-1 px-5 py-4 sm:py-5">
             <div className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400">
               <Star className="w-4 h-4 fill-current opacity-90 flex-shrink-0" />
               <span className="text-2xl sm:text-[1.75rem] font-black tracking-tight leading-none">4.9</span>
