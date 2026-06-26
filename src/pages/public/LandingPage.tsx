@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import {
   motion,
+  AnimatePresence,
   useInView as useInViewFM,
   useReducedMotion,
   MotionConfig,
@@ -276,11 +277,19 @@ const ChatMockup = memo(function ChatMockup({
           {/* AI identity header */}
           <div className="flex items-center gap-2.5 pb-2.5 border-b border-gray-100/60 dark:border-white/[0.06]">
             <div className="relative flex-shrink-0">
+              {/* Pulsing glow ring behind avatar */}
+              <motion.div
+                className="absolute -inset-1.5 rounded-full -z-10"
+                style={{ background: 'linear-gradient(135deg, #5B5CF6, #7C3AED)' }}
+                animate={{ scale: [1, 1.35, 1], opacity: [0.45, 0, 0.45] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                aria-hidden="true"
+              />
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden"
+                className="relative w-8 h-8 rounded-full flex items-center justify-center overflow-hidden z-10"
                 style={{
                   background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)',
-                  boxShadow: '0 0 0 2px rgba(91,92,246,0.25)',
+                  boxShadow: '0 0 0 2px rgba(91,92,246,0.3), 0 0 16px rgba(91,92,246,0.25)',
                 }}
               >
                 <img
@@ -290,7 +299,7 @@ const ChatMockup = memo(function ChatMockup({
                   onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
                 />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 z-20" />
             </div>
             <div>
               <p className="text-[11px] font-bold text-gray-900 dark:text-gray-100 leading-none tracking-wider">ASOMIDDIN AI</p>
@@ -320,36 +329,68 @@ const ChatMockup = memo(function ChatMockup({
             </div>
           </div>
 
-          {/* Typing indicator */}
-          {typing && (
-            <div className="flex items-end gap-2" aria-label="AI is thinking" aria-live="polite">
-              <div className="w-6 h-6 rounded-full flex-shrink-0" style={{ background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)' }} aria-hidden="true" />
-              <div className="bg-gray-100 dark:bg-white/[0.07] px-4 py-3 rounded-2xl rounded-tl-sm inline-flex items-center gap-1.5">
-                {[0, 1, 2].map(i => (
-                  <span
-                    key={i}
-                    className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full"
-                    style={{ animation: 'bounce 1.0s infinite', animationDelay: `${i * 160}ms` }}
-                    aria-hidden="true"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Typing indicator — wave pulse via Framer Motion */}
+          <AnimatePresence>
+            {typing && (
+              <motion.div
+                key="typing"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.25 }}
+                className="flex items-end gap-2"
+                aria-label="AI is thinking"
+                aria-live="polite"
+              >
+                <div className="w-6 h-6 rounded-full flex-shrink-0" style={{ background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)' }} aria-hidden="true" />
+                <div className="bg-gray-100 dark:bg-white/[0.07] px-4 py-[11px] rounded-2xl rounded-tl-sm inline-flex items-center gap-[5px]">
+                  {[0, 1, 2].map(i => (
+                    <motion.span
+                      key={i}
+                      className="block w-[5px] h-[5px] bg-gray-400 dark:bg-gray-400 rounded-full"
+                      animate={{ scale: [0.6, 1, 0.6], opacity: [0.3, 1, 0.3] }}
+                      transition={{
+                        duration: 1.2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: i * 0.2,
+                      }}
+                      aria-hidden="true"
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* AI response */}
-          {showAI && (
-            <div className="flex items-start gap-2 transition-opacity duration-500 opacity-100">
-              <div className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5" style={{ background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)' }} aria-hidden="true" />
-              <div className="flex-1 bg-gray-50/80 dark:bg-white/[0.05] border border-gray-100/60 dark:border-white/[0.06] px-3.5 py-3 rounded-2xl rounded-tl-sm">
-                {demo.aiMsg.map((line, i) => (
-                  <p key={i} className={cn('text-[12px] text-gray-600 dark:text-gray-300 leading-relaxed', i > 0 && 'mt-1.5')}>
-                    {renderText(line)}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* AI response — animated fade-in via AnimatePresence */}
+          <AnimatePresence>
+            {showAI && (
+              <motion.div
+                key="ai-response"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45, ease: 'easeOut' }}
+                className="flex items-start gap-2"
+              >
+                <div className="w-6 h-6 rounded-full flex-shrink-0 mt-0.5" style={{ background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)' }} aria-hidden="true" />
+                <div className="flex-1 bg-gray-50/80 dark:bg-white/[0.05] border border-gray-100/60 dark:border-white/[0.06] px-3.5 py-3 rounded-2xl rounded-tl-sm">
+                  {demo.aiMsg.map((line, i) => (
+                    <motion.p
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3, delay: i * 0.08 }}
+                      className={cn('text-[12px] text-gray-600 dark:text-gray-300 leading-relaxed', i > 0 && 'mt-1.5')}
+                    >
+                      {renderText(line)}
+                    </motion.p>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Decorative input bar */}
@@ -374,7 +415,7 @@ const ChatMockup = memo(function ChatMockup({
 function CompactDemo({ demo }: { demo: DemoContent }) {
   return (
     <div
-      className="lg:hidden overflow-hidden border border-white/60 dark:border-white/[0.08] mb-5"
+      className="relative lg:hidden overflow-hidden border border-white/60 dark:border-white/[0.08] mb-5"
       style={{
         borderRadius: '20px',
         background: 'rgba(255,255,255,0.88)',
@@ -526,11 +567,53 @@ function HeroSection() {
       aria-labelledby="hero-heading"
       className="relative overflow-hidden pt-8 pb-14 sm:pt-10 sm:pb-16 lg:pt-14 lg:pb-20"
     >
-      {/* Ambient glow */}
-      <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
+      {/* Multi-layer ambient glow — creates depth */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden="true">
+        {/* Primary center glow — top */}
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[700px] rounded-full blur-3xl opacity-60"
-          style={{ background: 'radial-gradient(ellipse at center, rgba(91,92,246,0.12) 0%, rgba(124,58,237,0.06) 50%, transparent 75%)' }}
+          className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1000px] h-[700px] rounded-full"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(91,92,246,0.16) 0%, rgba(124,58,237,0.08) 35%, transparent 65%)',
+            filter: 'blur(72px)',
+          }}
+        />
+        {/* Right accent glow */}
+        <div
+          className="absolute -top-8 right-[2%] w-[480px] h-[420px] rounded-full opacity-60"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(139,92,246,0.18) 0%, transparent 65%)',
+            filter: 'blur(64px)',
+          }}
+        />
+        {/* Bottom-left warmth */}
+        <div
+          className="absolute -bottom-8 -left-16 w-[380px] h-[320px] rounded-full opacity-35"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(91,92,246,0.14) 0%, transparent 70%)',
+            filter: 'blur(56px)',
+          }}
+        />
+      </div>
+
+      {/* Decorative floating dots — desktop only, very subtle */}
+      <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
+        <motion.div
+          className="absolute hidden lg:block top-20 right-[46%] w-[11px] h-[11px] rounded-full"
+          style={{ background: 'rgba(91,92,246,0.45)', boxShadow: '0 0 10px rgba(91,92,246,0.5)' }}
+          animate={{ y: [0, -14, 0], opacity: [0.7, 0.25, 0.7] }}
+          transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute hidden lg:block top-52 right-[41%] w-[7px] h-[7px] rounded-full"
+          style={{ background: 'rgba(124,58,237,0.5)', boxShadow: '0 0 7px rgba(124,58,237,0.45)' }}
+          animate={{ y: [0, -10, 0], opacity: [0.6, 0.15, 0.6] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+        />
+        <motion.div
+          className="absolute hidden lg:block bottom-20 right-[48%] w-[9px] h-[9px] rounded-full"
+          style={{ background: 'rgba(139,92,246,0.4)', boxShadow: '0 0 8px rgba(139,92,246,0.4)' }}
+          animate={{ y: [0, -12, 0], opacity: [0.5, 0.1, 0.5] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
         />
       </div>
 
@@ -713,13 +796,23 @@ function HeroSection() {
               animate={shouldReduce ? {} : { y: [0, -9, 0] }}
               transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1.0 }}
             >
-              {/* Glow behind card */}
+              {/* Enhanced double-layer glow behind card */}
               <div className="relative">
+                {/* Primary glow */}
                 <div
-                  className="absolute -inset-6 rounded-3xl -z-10 pointer-events-none"
+                  className="absolute -inset-8 rounded-[40px] -z-10 pointer-events-none"
                   style={{
-                    background: 'radial-gradient(ellipse at 50% 50%, rgba(91,92,246,0.14) 0%, rgba(124,58,237,0.07) 50%, transparent 80%)',
-                    filter: 'blur(20px)',
+                    background: 'radial-gradient(ellipse at 40% 40%, rgba(91,92,246,0.22) 0%, rgba(124,58,237,0.12) 35%, transparent 65%)',
+                    filter: 'blur(28px)',
+                  }}
+                  aria-hidden="true"
+                />
+                {/* Secondary glow — opposite corner */}
+                <div
+                  className="absolute -inset-8 rounded-[40px] -z-10 pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(ellipse at 70% 70%, rgba(139,92,246,0.16) 0%, transparent 60%)',
+                    filter: 'blur(36px)',
                   }}
                   aria-hidden="true"
                 />
@@ -773,9 +866,15 @@ function StatsSection() {
     <section
       id="social-proof"
       aria-label="Platform statistics"
-      className="scroll-mt-16 py-12 sm:py-16 bg-surface-tinted dark:bg-[#0F172A] border-y border-gray-100 dark:border-white/[0.05]"
+      className="scroll-mt-16 py-12 sm:py-16 border-y border-gray-100 dark:border-white/[0.05] relative overflow-hidden bg-[#F8F9FF] dark:bg-[#0F172A]"
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      {/* Light-mode gradient depth overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none dark:hidden"
+        style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(91,92,246,0.06) 0%, transparent 60%)' }}
+        aria-hidden="true"
+      />
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
         <motion.div
           className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4"
           variants={STAGGER_STATS}
@@ -793,7 +892,7 @@ function StatsSection() {
   )
 }
 
-// ─── Features Section (unchanged visually) ────────────────────────────────────
+// ─── Features Section (unchanged visually) (unchanged visually) ────────────────────────────────────
 
 function FeaturesSection() {
   const { t } = useLanguage()
@@ -814,11 +913,20 @@ function FeaturesSection() {
           {FEATURES.map(f => (
             <motion.div
               key={f.title}
-              whileHover={{ y: -4, scale: 1.01 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="bg-white dark:bg-gray-900/80 rounded-card border border-gray-100 dark:border-white/[0.06] p-5 sm:p-6 shadow-soft hover:shadow-large cursor-default"
+              whileHover={{
+                y: -6,
+                scale: 1.015,
+                boxShadow: '0 0 0 1.5px rgba(91,92,246,0.28), 0 16px 44px -6px rgba(91,92,246,0.14), 0 4px 12px -2px rgba(0,0,0,0.05)',
+              }}
+              initial={{
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+              }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className="relative bg-white dark:bg-gray-900/80 rounded-card border border-gray-100 dark:border-white/[0.06] p-5 sm:p-6 cursor-default overflow-hidden group"
             >
-              <div className={cn('w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center mb-4', f.iconBg)}>
+              {/* Gradient top accent — appears on hover */}
+              <div className="absolute top-0 inset-x-0 h-[2.5px] bg-gradient-to-r from-brand to-brand-dark opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className={cn('w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110', f.iconBg)}>
                 <f.Icon className={cn('w-5 h-5 sm:w-6 sm:h-6', f.iconColor)} aria-hidden="true" />
               </div>
               <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-base sm:text-lg">{f.title}</h3>
@@ -844,7 +952,14 @@ export default function LandingPage() {
         <FeaturesSection />
 
         {/* Final CTA */}
-        <section className="py-14 sm:py-20 px-4 sm:px-6 text-center bg-white dark:bg-[#0F172A]">
+        <section className="py-14 sm:py-20 px-4 sm:px-6 text-center bg-white dark:bg-[#0F172A] relative overflow-hidden">
+          {/* Radial glow centered on CTA */}
+          <div
+            className="absolute inset-0 pointer-events-none dark:hidden"
+            style={{ background: 'radial-gradient(ellipse at 50% 60%, rgba(91,92,246,0.07) 0%, transparent 55%)' }}
+            aria-hidden="true"
+          />
+          <div className="relative">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
             {t.ctaTitle}
           </h2>
@@ -870,6 +985,7 @@ export default function LandingPage() {
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </motion.div>
+          </div>
         </section>
       </div>
     </MotionConfig>
