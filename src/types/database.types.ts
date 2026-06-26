@@ -206,6 +206,7 @@ export type Database = {
           id:           string
           title:        string
           content:      string | null
+          video_url:    string | null
           group_id:     string | null
           subject_id:   string | null
           teacher_id:   string | null
@@ -218,6 +219,7 @@ export type Database = {
           id?:           string
           title:         string
           content?:      string | null
+          video_url?:    string | null
           group_id?:     string | null
           subject_id?:   string | null
           teacher_id?:   string | null
@@ -229,6 +231,7 @@ export type Database = {
         Update: {
           title?:        string
           content?:      string | null
+          video_url?:    string | null
           group_id?:     string | null
           subject_id?:   string | null
           teacher_id?:   string | null
@@ -240,6 +243,35 @@ export type Database = {
           { foreignKeyName: 'lessons_group_id_fkey';   columns: ['group_id'];   referencedRelation: 'groups';   referencedColumns: ['id'] },
           { foreignKeyName: 'lessons_subject_id_fkey'; columns: ['subject_id']; referencedRelation: 'subjects'; referencedColumns: ['id'] },
           { foreignKeyName: 'lessons_teacher_id_fkey'; columns: ['teacher_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] },
+        ]
+      }
+      lesson_attachments: {
+        Row: {
+          id:          string
+          lesson_id:   string
+          file_name:   string
+          file_path:   string
+          file_size:   number | null
+          mime_type:   string | null
+          uploaded_by: string | null
+          created_at:  string
+        }
+        Insert: {
+          id?:          string
+          lesson_id:    string
+          file_name:    string
+          file_path:    string
+          file_size?:   number | null
+          mime_type?:   string | null
+          uploaded_by?: string | null
+          created_at?:  string
+        }
+        Update: {
+          file_name?: string
+        }
+        Relationships: [
+          { foreignKeyName: 'lesson_attachments_lesson_id_fkey';   columns: ['lesson_id'];   referencedRelation: 'lessons';  referencedColumns: ['id'] },
+          { foreignKeyName: 'lesson_attachments_uploaded_by_fkey'; columns: ['uploaded_by']; referencedRelation: 'profiles'; referencedColumns: ['id'] },
         ]
       }
       settings: {
@@ -435,6 +467,51 @@ export type Database = {
           { foreignKeyName: 'user_achievements_group_id_fkey';        columns: ['group_id'];        referencedRelation: 'groups';                  referencedColumns: ['id'] },
         ]
       }
+      ai_conversations: {
+        Row: {
+          id:         string
+          student_id: string
+          title:      string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?:         string
+          student_id:  string
+          title?:      string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          title?:      string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: 'ai_conversations_student_id_fkey'; columns: ['student_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] },
+        ]
+      }
+      ai_messages: {
+        Row: {
+          id:              string
+          conversation_id: string
+          role:            'user' | 'assistant'
+          content:         string
+          created_at:      string
+        }
+        Insert: {
+          id?:              string
+          conversation_id:  string
+          role:             'user' | 'assistant'
+          content:          string
+          created_at?:      string
+        }
+        Update: {
+          content?: string
+        }
+        Relationships: [
+          { foreignKeyName: 'ai_messages_conversation_id_fkey'; columns: ['conversation_id']; referencedRelation: 'ai_conversations'; referencedColumns: ['id'] },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -510,4 +587,9 @@ export type TestUpdate = Database['public']['Tables']['tests']['Update']
 
 export type TestResultRow    = Database['public']['Tables']['test_results']['Row']
 export type TestResultInsert = Database['public']['Tables']['test_results']['Insert']
+
+export type AiConversationRow    = Database['public']['Tables']['ai_conversations']['Row']
+export type AiConversationInsert = Database['public']['Tables']['ai_conversations']['Insert']
+export type AiMessageRow         = Database['public']['Tables']['ai_messages']['Row']
+export type AiMessageInsert      = Database['public']['Tables']['ai_messages']['Insert']
 

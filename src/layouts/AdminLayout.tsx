@@ -12,14 +12,26 @@ import type { SidebarNavSection } from '@/components/layout/Sidebar'
 import { PATHS } from '@/routes/paths'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { UserAvatar } from '@/components/identity'
+import { useProfile } from '@/hooks/useProfile'
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const auth     = useAuth()
-  const navigate = useNavigate()
-  const { t }    = useLanguage()
-  const userName = auth.user?.name ?? 'Administrator'
-  const initial  = userName.charAt(0).toUpperCase()
+  const auth        = useAuth()
+  const { profile } = useProfile()
+  const navigate    = useNavigate()
+  const { t }       = useLanguage()
+  const userName    = profile?.fullName ?? auth.user?.name ?? 'Administrator'
+  const initial     = userName.charAt(0).toUpperCase()
+
+  const avatarEl = (
+    <UserAvatar
+      name={userName}
+      avatarUrl={profile?.avatarUrl}
+      size="sm"
+      showStatus
+    />
+  )
 
   const NAV_SECTIONS: SidebarNavSection[] = [
     {
@@ -89,6 +101,7 @@ export default function AdminLayout() {
         userName={userName}
         userRole={t.adminRole}
         userInitial={initial}
+        avatarNode={avatarEl}
         onLogout={handleLogout}
         summaryCard={
           <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-white">
@@ -131,6 +144,7 @@ export default function AdminLayout() {
           userInitial={initial}
           avatarGradient="bg-gradient-to-br from-emerald-500 to-teal-600"
           searchPlaceholder={t.adminSearchPlaceholder}
+          avatarNode={avatarEl}
         />
         <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
           <Outlet />

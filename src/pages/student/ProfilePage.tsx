@@ -1,507 +1,439 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
-  Pencil, Lock, Eye, EyeOff,
-  AlertCircle, CheckCircle, Phone, Calendar,
-  Users, GraduationCap,
+  User, FileText, Shield, Globe, Sun,
+  CheckCircle, AlertCircle, Loader2, Eye, EyeOff,
+  Camera, Trash2, Upload, GraduationCap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAuth } from '@/hooks/useAuth'
-import { profileService } from '@/services/profile.service'
 import { supabase } from '@/lib/supabase'
-import type { ProfileRow } from '@/types/database.types'
+import { useProfile } from '@/hooks/useProfile'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { UserAvatar } from '@/components/identity/UserAvatar'
+import { AvatarUploader } from '@/components/identity/AvatarUploader'
 
-// ─── Yordamchi funksiyalar ────────────────────────────────────────────────────
+// ─── Reusable Section Card ────────────────────────────────────────────────────
 
-const MONTHS = [
-  'Yanvar','Fevral','Mart','Aprel','May','Iyun',
-  'Iyul','Avgust','Sentabr','Oktyabr','Noyabr','Dekabr',
-]
-function fmtDate(dateStr: string): string {
-  const d = new Date(dateStr)
-  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
+function Section({
+  icon: Icon, title, children,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+        <Icon className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+        <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+      </div>
+      <div className="px-5 py-5">{children}</div>
+    </div>
+  )
 }
 
-// ─── Tiplari ──────────────────────────────────────────────────────────────────
-
-type EnrolledGroup = {
-  enrolled_at: string
-  group: {
-    id:      string
-    name:    string
-    status:  'active' | 'inactive' | 'completed'
-    subject: { name: string; color: string; icon: string } | null
-  } | null
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+        {label}
+      </label>
+      {children}
+    </div>
+  )
 }
 
-// ─── Komponent ────────────────────────────────────────────────────────────────
+const inputCls = cn(
+  'w-full px-3.5 py-2.5 text-sm rounded-xl border outline-none transition-all duration-150',
+  'border-gray-200 dark:border-gray-700',
+  'bg-white dark:bg-gray-800',
+  'text-gray-900 dark:text-gray-100',
+  'placeholder:text-gray-400 dark:placeholder:text-gray-600',
+  'focus:border-violet-400 dark:focus:border-violet-600 focus:ring-2 focus:ring-violet-500/10',
+  'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-800/50',
+)
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function StudentProfilePage() {
-  const auth = useAuth()
+  const { profile, isLoading, isSaving, error, updateProfile, uploadAvatar, deleteAvatar, clearError } = useProfile()
+  const { language, setLanguage } = useLanguage()
 
-  const [profile,  setProfile]  = useState<ProfileRow | null>(null)
-  const [groups,   setGroups]   = useState<EnrolledGroup[]>([])
-  const [loading,  setLoading]  = useState(true)
-  const [error,    setError]    = useState<string | null>(null)
-
-  // ── Tahrirlash ────────────────────────────────────────────────────────────
-  const [isEditing, setIsEditing] = useState(false)
-  const [editForm,  setEditForm]  = useState({ full_name: '', phone: '', bio: '' })
-  const [saving,    setSaving]    = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
+  // Form state synced from profile
+  const [form, setForm] = useState({
+    fullName: profile?.fullName ?? '',
+    phone:    profile?.phone    ?? '',
+    bio:      profile?.bio      ?? '',
+  })
+  const [formDirty, setFormDirty] = useState(false)
   const [saved,     setSaved]     = useState(false)
 
-  // ── Parol ─────────────────────────────────────────────────────────────────
-  const [showPwSection, setShowPwSection] = useState(false)
-  const [pwForm,   setPwForm]   = useState({ newPw: '', confirmPw: '' })
+  // Avatar section
+  const [showUploader, setShowUploader] = useState(false)
+  const [avatarConfirm, setAvatarConfirm] = useState<'delete' | null>(null)
+
+  // Password section
   const [showPw,   setShowPw]   = useState(false)
+  const [pwForm,   setPwForm]   = useState({ newPw: '', confirmPw: '' })
+  const [showMask, setShowMask] = useState(false)
   const [pwSaving, setPwSaving] = useState(false)
   const [pwError,  setPwError]  = useState<string | null>(null)
   const [pwSaved,  setPwSaved]  = useState(false)
 
-  // ── Ma'lumot yuklash ──────────────────────────────────────────────────────
-  useEffect(() => { void loadData() }, [])
-
-  async function loadData() {
-    if (!auth.user?.id) return
-    setLoading(true)
-    setError(null)
-
-    try {
-      const [profileData, groupsRes] = await Promise.all([
-        profileService.getById(auth.user.id),
-
-        supabase
-          .from('student_groups')
-          .select('enrolled_at, group:groups(id, name, status, subject:subjects(name, color, icon))')
-          .eq('student_id', auth.user.id)
-          .order('enrolled_at', { ascending: false }),
-      ])
-
-      setProfile(profileData)
-      setGroups((groupsRes.data ?? []) as EnrolledGroup[])
-    } catch {
-      setError("Ma'lumotlarni yuklashda xatolik. Sahifani yangilang.")
-    } finally {
-      setLoading(false)
-    }
+  function setField(k: keyof typeof form, v: string) {
+    setForm(f => ({ ...f, [k]: v }))
+    setFormDirty(true)
   }
 
-  // ── Tahrirlash ────────────────────────────────────────────────────────────
-  function startEdit() {
-    if (!profile) return
-    setEditForm({
-      full_name: profile.full_name ?? '',
-      phone:     profile.phone     ?? '',
-      bio:       profile.bio       ?? '',
-    })
-    setSaveError(null)
-    setIsEditing(true)
-  }
-
-  function cancelEdit() {
-    setIsEditing(false)
-    setSaveError(null)
+  // Sync form if profile loads for first time
+  if (profile && form.fullName === '' && !formDirty) {
+    setForm({ fullName: profile.fullName, phone: profile.phone ?? '', bio: profile.bio ?? '' })
   }
 
   async function handleSave() {
-    if (!profile) return
-    if (!editForm.full_name.trim()) {
-      setSaveError('Ism va familiya majburiy')
-      return
-    }
-    setSaving(true)
-    setSaveError(null)
-    try {
-      const updated = await profileService.update(profile.id, {
-        full_name: editForm.full_name.trim(),
-        phone:     editForm.phone.trim() || null,
-        bio:       editForm.bio.trim()   || null,
-      })
-      setProfile(updated)
-      setIsEditing(false)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : 'Saqlashda xatolik')
-    } finally {
-      setSaving(false)
-    }
+    if (!form.fullName.trim()) return
+    clearError()
+    await updateProfile({
+      fullName: form.fullName.trim(),
+      phone:    form.phone.trim()  || undefined,
+      bio:      form.bio.trim()    || undefined,
+    })
+    setFormDirty(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
   }
 
-  // ── Parol ─────────────────────────────────────────────────────────────────
+  async function handleAvatarUpload(blob: Blob) {
+    await uploadAvatar(blob)
+    setShowUploader(false)
+  }
+
+  async function handleDeleteAvatar() {
+    await deleteAvatar()
+    setAvatarConfirm(null)
+  }
+
   async function handlePwChange() {
-    if (pwForm.newPw.length < 8) {
-      setPwError("Parol kamida 8 ta belgidan iborat bo'lishi kerak")
-      return
-    }
-    if (pwForm.newPw !== pwForm.confirmPw) {
-      setPwError('Parollar mos kelmadi')
-      return
-    }
-    setPwSaving(true)
-    setPwError(null)
+    if (pwForm.newPw.length < 8) { setPwError("Parol kamida 8 ta belgidan iborat bo'lishi kerak"); return }
+    if (pwForm.newPw !== pwForm.confirmPw) { setPwError('Parollar mos kelmadi'); return }
+    setPwSaving(true); setPwError(null)
     try {
-      const { error: authErr } = await supabase.auth.updateUser({ password: pwForm.newPw })
-      if (authErr) throw new Error(authErr.message)
+      const { error: e } = await supabase.auth.updateUser({ password: pwForm.newPw })
+      if (e) throw e
       setPwForm({ newPw: '', confirmPw: '' })
-      setShowPwSection(false)
-      setPwSaved(true)
+      setShowPw(false); setPwSaved(true)
       setTimeout(() => setPwSaved(false), 4000)
-    } catch (err) {
-      setPwError(err instanceof Error ? err.message : 'Xatolik yuz berdi')
-    } finally {
-      setPwSaving(false)
-    }
+    } catch (e) {
+      setPwError(e instanceof Error ? e.message : 'Xatolik yuz berdi')
+    } finally { setPwSaving(false) }
   }
 
-  // ── Loading skeleton ──────────────────────────────────────────────────────
-  if (loading) {
+  // ── Loading ───────────────────────────────────────────────────────────────
+  if (isLoading) {
     return (
-      <div className="space-y-4 pb-8">
-        <div className="h-8 bg-gray-200 rounded w-24 animate-pulse" />
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
-          <div className="flex gap-4">
-            <div className="w-20 h-20 bg-gray-200 rounded-2xl flex-shrink-0" />
-            <div className="flex-1 space-y-3">
-              <div className="h-5 bg-gray-200 rounded w-1/2" />
-              <div className="h-4 bg-gray-100 rounded w-1/3" />
-            </div>
-          </div>
-        </div>
+      <div className="space-y-4 pb-8 max-w-2xl">
+        {[1,2,3].map(i => (
+          <div key={i} className="h-32 rounded-2xl bg-gray-100 dark:bg-gray-800/60 animate-pulse" style={{ opacity: 1 - i * 0.2 }} />
+        ))}
       </div>
     )
   }
 
-  if (error) {
-    return (
-      <div className="p-5 rounded-2xl bg-red-50 border border-red-200 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-        <p className="text-sm text-red-700">{error}</p>
-      </div>
-    )
+  const ROLE_LABELS: Record<string, string> = {
+    student: 'Talaba', teacher: "O'qituvchi", admin: 'Administrator',
   }
-
-  const initial      = (profile?.full_name ?? auth.user?.name ?? 'T').charAt(0).toUpperCase()
-  const activeGroups = groups.filter(g => g.group?.status === 'active')
 
   return (
-    <div className="space-y-5 pb-8 max-w-3xl">
+    <div className="space-y-5 pb-10 max-w-2xl">
 
-      {/* ── Sarlavha ── */}
+      {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Profil</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Shaxsiy ma'lumotlar va sozlamalar</p>
+        <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Profil</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Shaxsiy ma'lumotlar va hisob sozlamalari</p>
       </div>
 
-      {/* ── Muvaffaqiyat xabarlari ── */}
+      {/* Global feedback */}
       {saved && (
-        <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
-          <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <p className="text-sm text-emerald-700 font-medium">Profil muvaffaqiyatli yangilandi</p>
+        <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+          <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">Profil muvaffaqiyatli yangilandi</p>
         </div>
       )}
       {pwSaved && (
-        <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
-          <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <p className="text-sm text-emerald-700 font-medium">Parol muvaffaqiyatli o'zgartirildi</p>
+        <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+          <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">Parol muvaffaqiyatli o'zgartirildi</p>
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
         </div>
       )}
 
-      {/* ══ Profil kartochkasi ══ */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-start gap-5">
-          {/* Avatar */}
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold flex-shrink-0 shadow-md">
-            {initial}
+      {/* ── Avatar ─────────────────────────────────────────────────────────── */}
+      <Section icon={Camera} title="Avatar">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+          {/* Preview */}
+          <div className="flex-shrink-0">
+            <UserAvatar
+              name={profile?.fullName ?? 'Foydalanuvchi'}
+              avatarUrl={profile?.avatarUrl}
+              size="xl"
+            />
           </div>
 
-          {/* Ma'lumotlar */}
-          <div className="flex-1 min-w-0">
-            {isEditing ? (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Ism va familiya <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.full_name}
-                    onChange={e => setEditForm(f => ({ ...f, full_name: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                  />
-                </div>
+          <div className="flex-1 text-center sm:text-left">
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-0.5">
+              {profile?.fullName ?? '—'}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              {profile?.avatarUrl ? 'Yuklangan rasm ishlatilmoqda' : 'Ismi harflari ko\'rsatilmoqda'}
+            </p>
 
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={profile?.email ?? ''}
-                    disabled
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-400 bg-gray-50 cursor-not-allowed"
-                  />
-                </div>
+            <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+              <button
+                type="button"
+                onClick={() => setShowUploader(v => !v)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors shadow-sm"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                {profile?.avatarUrl ? 'Almashtirish' : 'Rasm yuklash'}
+              </button>
+              {profile?.avatarUrl && (
+                <button
+                  type="button"
+                  onClick={() => setAvatarConfirm('delete')}
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  O'chirish
+                </button>
+              )}
+            </div>
 
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Telefon</label>
-                  <input
-                    type="tel"
-                    value={editForm.phone}
-                    onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
-                    placeholder="+998 90 123 45 67"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Bio</label>
-                  <textarea
-                    value={editForm.bio}
-                    onChange={e => setEditForm(f => ({ ...f, bio: e.target.value }))}
-                    placeholder="O'zingiz haqida qisqacha..."
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors resize-none"
-                  />
-                </div>
-
-                {saveError && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200">
-                    <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                    <p className="text-sm text-red-700">{saveError}</p>
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-1">
+            {/* Delete confirm */}
+            {avatarConfirm === 'delete' && (
+              <div className="mt-3 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-300 font-medium mb-2.5">Avatar o'chirilsinmi?</p>
+                <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
+                    onClick={handleDeleteAvatar}
+                    disabled={isSaving}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
                   >
-                    {saving
-                      ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      : null
-                    }
-                    Saqlash
+                    {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    Ha, o'chirish
                   </button>
                   <button
                     type="button"
-                    onClick={cancelEdit}
-                    disabled={saving}
-                    className="px-4 py-2 border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                    onClick={() => setAvatarConfirm(null)}
+                    className="px-3 py-1.5 border border-gray-200 dark:border-gray-700 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     Bekor
                   </button>
                 </div>
               </div>
-            ) : (
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 leading-tight">
-                      {profile?.full_name ?? auth.user?.name ?? 'Ism kiritilmagan'}
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">{profile?.email ?? auth.user?.email}</p>
-                    <span className="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                      <GraduationCap className="w-3 h-3" />
-                      Talaba
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={startEdit}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors flex-shrink-0"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                    Tahrirlash
-                  </button>
-                </div>
+            )}
 
-                <div className="mt-4 space-y-2">
-                  {profile?.phone && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      {profile.phone}
-                    </div>
-                  )}
-                  {profile?.created_at && (
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      Qo'shilgan: {fmtDate(profile.created_at)}
-                    </div>
-                  )}
-                  {profile?.bio && (
-                    <p className="text-sm text-gray-600 mt-3 leading-relaxed border-t border-gray-100 pt-3">
-                      {profile.bio}
-                    </p>
-                  )}
-                  {!profile?.phone && !profile?.bio && (
-                    <p className="text-xs text-gray-400 italic mt-2">
-                      Telefon va bio hali qo'shilmagan.{' '}
-                      <button type="button" onClick={startEdit} className="text-blue-500 hover:underline">
-                        Tahrirlash
-                      </button>
-                    </p>
-                  )}
-                </div>
+            {/* Uploader */}
+            {showUploader && profile && (
+              <div className="mt-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                <AvatarUploader
+                  profile={profile}
+                  onUpload={handleAvatarUpload}
+                  onDelete={profile.avatarUrl ? handleDeleteAvatar : undefined}
+                  isUploading={isSaving}
+                />
               </div>
             )}
           </div>
         </div>
-      </div>
+      </Section>
 
-      {/* ══ Mening guruhlarim ══ */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-4">
-          <Users className="w-4 h-4 text-blue-600" />
-          <h3 className="text-base font-bold text-gray-900">Mening guruhlarim</h3>
-          {groups.length > 0 && (
-            <span className="ml-auto text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-              {activeGroups.length} faol
-            </span>
-          )}
-        </div>
-
-        {groups.length === 0 ? (
-          <div className="text-center py-8">
-            <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-sm text-gray-400">Hali hech qanday guruhga qo'shilmagan</p>
-            <p className="text-xs text-gray-400 mt-1">Administrator guruhga qo'shsa, bu yerda ko'rinadi</p>
+      {/* ── Personal Information ────────────────────────────────────────────── */}
+      <Section icon={User} title="Shaxsiy ma'lumotlar">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="To'liq ism *">
+              <input
+                type="text"
+                value={form.fullName}
+                onChange={e => setField('fullName', e.target.value)}
+                className={inputCls}
+                placeholder="Ism Familiya"
+              />
+            </Field>
+            <Field label="Email (o'zgartirib bo'lmaydi)">
+              <input
+                type="email"
+                value={profile?.email ?? ''}
+                disabled
+                className={inputCls}
+              />
+            </Field>
           </div>
+
+          <Field label="Telefon raqami">
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={e => setField('phone', e.target.value)}
+              placeholder="+998 90 123 45 67"
+              className={inputCls}
+            />
+          </Field>
+
+          <Field label="Bio">
+            <textarea
+              value={form.bio}
+              onChange={e => setField('bio', e.target.value)}
+              placeholder="O'zingiz haqida qisqacha..."
+              rows={3}
+              maxLength={300}
+              className={cn(inputCls, 'resize-none leading-relaxed')}
+            />
+            <p className="text-[11px] text-gray-400 dark:text-gray-600 mt-1 text-right">
+              {form.bio.length}/300
+            </p>
+          </Field>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving || !formDirty || !form.fullName.trim()}
+            className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            O'zgarishlarni saqlash
+          </button>
+        </div>
+      </Section>
+
+      {/* ── Account info (read-only) ────────────────────────────────────────── */}
+      <Section icon={GraduationCap} title="Hisob ma'lumotlari">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            { label: 'Rol',      value: ROLE_LABELS[profile?.role ?? 'student'] ?? profile?.role ?? '—' },
+            { label: 'Holat',    value: profile?.status === 'active' ? 'Faol' : 'Bloklangan' },
+            { label: 'Email',    value: profile?.email ?? '—' },
+            { label: 'Ro\'yxat', value: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('uz-UZ') : '—' },
+          ].map(({ label, value }) => (
+            <div key={label} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3">
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wide mb-0.5">{label}</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{value}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* ── Language ────────────────────────────────────────────────────────── */}
+      <Section icon={Globe} title="Til">
+        <div className="flex flex-wrap gap-2">
+          {([['uz', "O'zbek 🇺🇿"], ['ru', 'Русский 🇷🇺'], ['en', 'English 🇬🇧']] as const).map(([code, label]) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => setLanguage(code)}
+              className={cn(
+                'px-4 py-2 rounded-xl text-sm font-semibold border transition-all duration-150',
+                language === code
+                  ? 'bg-violet-600 border-violet-600 text-white shadow-md shadow-violet-500/20'
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-violet-300 dark:hover:border-violet-700',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      {/* ── About / Bio display ──────────────────────────────────────────────── */}
+      {profile?.bio && (
+        <Section icon={FileText} title="Haqida">
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
+        </Section>
+      )}
+
+      {/* ── Security ────────────────────────────────────────────────────────── */}
+      <Section icon={Shield} title="Xavfsizlik">
+        {!showPw ? (
+          <button
+            type="button"
+            onClick={() => setShowPw(true)}
+            className="flex items-center gap-2 text-sm text-violet-600 dark:text-violet-400 font-semibold hover:underline"
+          >
+            <Shield className="w-4 h-4" />
+            Parolni o'zgartirish
+          </button>
         ) : (
           <div className="space-y-3">
-            {groups.map((enrollment, idx) => {
-              const g = enrollment.group
-              if (!g) return null
-              return (
-                <div
-                  key={`${g.id}-${idx}`}
-                  className={cn(
-                    'flex items-center gap-4 p-4 rounded-xl border',
-                    g.status === 'active'
-                      ? 'bg-blue-50/50 border-blue-100'
-                      : 'bg-gray-50 border-gray-200',
-                  )}
-                >
-                  {/* Guruh ikonkasi */}
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                    style={g.subject
-                      ? { backgroundColor: g.subject.color + '20', border: `2px solid ${g.subject.color}30` }
-                      : { backgroundColor: '#f3f4f6', border: '2px solid #e5e7eb' }
-                    }
-                  >
-                    {g.subject ? g.subject.icon : <Users className="w-5 h-5 text-gray-400" />}
-                  </div>
-
-                  {/* Guruh ma'lumoti */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-gray-900 text-sm">{g.name}</p>
-                      <span className={cn(
-                        'text-[11px] font-semibold px-2 py-0.5 rounded-full',
-                        g.status === 'active'    ? 'bg-emerald-100 text-emerald-700' :
-                        g.status === 'completed' ? 'bg-blue-100 text-blue-700'       :
-                        'bg-gray-100 text-gray-500',
-                      )}>
-                        {g.status === 'active' ? 'Faol' : g.status === 'completed' ? 'Tugatilgan' : 'Nofaol'}
-                      </span>
-                    </div>
-                    {g.subject && (
-                      <p className="text-xs text-gray-500 mt-0.5">{g.subject.name}</p>
-                    )}
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      Qo'shilgan: {fmtDate(enrollment.enrolled_at)}
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* ══ Xavfsizlik ══ */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 text-blue-600" />
-            <h3 className="text-base font-bold text-gray-900">Xavfsizlik</h3>
-          </div>
-          {!showPwSection && (
-            <button
-              type="button"
-              onClick={() => setShowPwSection(true)}
-              className="text-sm text-blue-600 font-medium hover:underline"
-            >
-              Parolni o'zgartirish
-            </button>
-          )}
-        </div>
-
-        {showPwSection && (
-          <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Yangi parol</label>
+            <Field label="Yangi parol">
               <div className="relative">
                 <input
-                  type={showPw ? 'text' : 'password'}
+                  type={showMask ? 'text' : 'password'}
                   value={pwForm.newPw}
                   onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))}
                   placeholder="Kamida 8 ta belgi"
-                  className="w-full px-3 py-2 pr-10 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                  className={cn(inputCls, 'pr-10')}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPw(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowMask(v => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showMask ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Parolni tasdiqlash</label>
+            </Field>
+            <Field label="Parolni tasdiqlash">
               <input
-                type={showPw ? 'text' : 'password'}
+                type={showMask ? 'text' : 'password'}
                 value={pwForm.confirmPw}
                 onChange={e => setPwForm(f => ({ ...f, confirmPw: e.target.value }))}
                 placeholder="Parolni qayta kiriting"
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                className={inputCls}
               />
-            </div>
+            </Field>
 
             {pwError && (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200">
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                 <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                <p className="text-sm text-red-700">{pwError}</p>
+                <p className="text-sm text-red-700 dark:text-red-300">{pwError}</p>
               </div>
             )}
 
-            <div className="flex gap-2 pt-1">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={handlePwChange}
                 disabled={pwSaving}
-                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
               >
-                {pwSaving
-                  ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : null
-                }
+                {pwSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Yangilash
               </button>
               <button
                 type="button"
-                onClick={() => { setShowPwSection(false); setPwError(null); setPwForm({ newPw: '', confirmPw: '' }) }}
-                className="px-4 py-2 border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                onClick={() => { setShowPw(false); setPwError(null); setPwForm({ newPw: '', confirmPw: '' }) }}
+                className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 Bekor
               </button>
             </div>
           </div>
         )}
-      </div>
+      </Section>
+
+      {/* ── Appearance placeholder ───────────────────────────────────────────── */}
+      <Section icon={Sun} title="Ko'rinish">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Mavzu sozlamasi Navbar'dagi 🌙/☀️ tugmasi orqali o'zgartiriladi.
+        </p>
+      </Section>
+
     </div>
   )
 }

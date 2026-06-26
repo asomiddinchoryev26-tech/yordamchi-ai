@@ -6,21 +6,24 @@ export const PATHS = {
   FORGOT_PASSWORD: '/forgot-password',
 
   STUDENT: {
-    ROOT:       '/dashboard',
-    LESSONS:    '/dashboard/lessons',
-    ATTENDANCE: '/dashboard/attendance',
-    TESTS:      '/dashboard/tests',
-    PROFILE:    '/dashboard/profile',
+    ROOT:         '/dashboard',
+    LESSONS:      '/dashboard/lessons',
+    ATTENDANCE:   '/dashboard/attendance',
+    TESTS:        '/dashboard/tests',
+    PROFILE:      '/dashboard/profile',
+    ACHIEVEMENTS: '/dashboard/achievements',
+    AI_ASSISTANT: '/dashboard/ai-assistant',
   },
 
   TEACHER: {
-    ROOT:       '/teacher',
-    STUDENTS:   '/teacher/students',
-    GROUPS:     '/teacher/groups',
-    COURSES:    '/teacher/courses',
-    ATTENDANCE: '/teacher/attendance',
-    TESTS:      '/teacher/tests',
-    PROFILE:    '/teacher/profile',
+    ROOT:         '/teacher',
+    STUDENTS:     '/teacher/students',
+    GROUPS:       '/teacher/groups',
+    COURSES:      '/teacher/courses',
+    ATTENDANCE:   '/teacher/attendance',
+    TESTS:        '/teacher/tests',
+    PROFILE:      '/teacher/profile',
+    ACHIEVEMENTS: '/teacher/achievements',
   },
 
   ADMIN: {

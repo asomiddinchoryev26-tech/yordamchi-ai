@@ -25,6 +25,7 @@ export type Translations = {
   profile: string
   courses: string
   myCourses: string
+  achievements: string
   logout: string
   // Auth
   login: string
@@ -147,6 +148,8 @@ export type Translations = {
   emailSentDesc: string
   spamNote: string
   resetLinkSentTo: string
+  // AI Assistant
+  aiAssistant: string
 }
 
 // ─── O'ZBEK ──────────────────────────────────────────────────────────────────
@@ -172,6 +175,7 @@ const uz: Translations = {
   profile: 'Profil',
   courses: 'Kurslar',
   myCourses: 'Darslarim',
+  achievements: 'Yutuqlar',
   logout: 'Chiqish',
   login: 'Kirish',
   register: "Ro'yxatdan o'tish",
@@ -287,6 +291,7 @@ const uz: Translations = {
   emailSentDesc: 'manziliga parolni tiklash havolasi yuborildi.',
   spamNote: 'Agar email kelmasa, spam papkani tekshiring.',
   resetLinkSentTo: 'Tiklash havolasi yuborildi',
+  aiAssistant: 'AI Yordamchi',
 }
 
 // ─── РУССКИЙ ─────────────────────────────────────────────────────────────────
@@ -312,6 +317,7 @@ const ru: Translations = {
   profile: 'Профиль',
   courses: 'Курсы',
   myCourses: 'Мои уроки',
+  achievements: 'Достижения',
   logout: 'Выйти',
   login: 'Войти',
   register: 'Зарегистрироваться',
@@ -427,6 +433,7 @@ const ru: Translations = {
   emailSentDesc: 'на этот адрес отправлена ссылка для сброса пароля.',
   spamNote: 'Если письмо не пришло, проверьте папку спам.',
   resetLinkSentTo: 'Ссылка отправлена на',
+  aiAssistant: 'ИИ Ассистент',
 }
 
 // ─── ENGLISH ─────────────────────────────────────────────────────────────────
@@ -452,6 +459,7 @@ const en: Translations = {
   profile: 'Profile',
   courses: 'Courses',
   myCourses: 'My Lessons',
+  achievements: 'Achievements',
   logout: 'Logout',
   login: 'Login',
   register: 'Register',
@@ -567,6 +575,7 @@ const en: Translations = {
   emailSentDesc: 'A password reset link has been sent to this address.',
   spamNote: "If you don't receive it, check your spam folder.",
   resetLinkSentTo: 'Reset link sent to',
+  aiAssistant: 'AI Assistant',
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────

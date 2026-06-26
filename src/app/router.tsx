@@ -12,10 +12,8 @@ import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
 import NotFound from '@/components/common/NotFound'
-
 export const router = createBrowserRouter([
   {
-
     path: PATHS.HOME,
     element: <App />,
     children: [

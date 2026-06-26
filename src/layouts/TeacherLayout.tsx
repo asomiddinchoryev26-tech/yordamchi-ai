@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Home, GraduationCap, Users, BookOpen, CheckSquare, FileText, User,
+  Home, GraduationCap, Users, BookOpen, CheckSquare, FileText, User, Award,
 } from 'lucide-react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Navbar } from '@/components/layout/Navbar'
@@ -10,14 +10,26 @@ import type { SidebarNavSection } from '@/components/layout/Sidebar'
 import { PATHS } from '@/routes/paths'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { UserAvatar } from '@/components/identity'
+import { useProfile } from '@/hooks/useProfile'
 
 export default function TeacherLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const auth     = useAuth()
-  const navigate = useNavigate()
-  const { t }    = useLanguage()
-  const userName = auth.user?.name ?? t.teacherRole
-  const initial  = userName.charAt(0).toUpperCase()
+  const auth        = useAuth()
+  const { profile } = useProfile()
+  const navigate    = useNavigate()
+  const { t }       = useLanguage()
+  const userName    = profile?.fullName ?? auth.user?.name ?? t.teacherRole
+  const initial     = userName.charAt(0).toUpperCase()
+
+  const avatarEl = (
+    <UserAvatar
+      name={userName}
+      avatarUrl={profile?.avatarUrl}
+      size="sm"
+      showStatus
+    />
+  )
 
   const NAV_SECTIONS: SidebarNavSection[] = [
     {
@@ -39,7 +51,8 @@ export default function TeacherLayout() {
     {
       title: t.otherSection,
       items: [
-        { label: t.profile, to: PATHS.TEACHER.PROFILE, icon: User },
+        { label: t.achievements, to: PATHS.TEACHER.ACHIEVEMENTS, icon: Award },
+        { label: t.profile,      to: PATHS.TEACHER.PROFILE,      icon: User  },
       ],
     },
   ]
@@ -82,6 +95,7 @@ export default function TeacherLayout() {
         userName={userName}
         userRole={t.teacherRole}
         userInitial={initial}
+        avatarNode={avatarEl}
         onLogout={handleLogout}
         summaryCard={
           <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-4 text-white">
@@ -127,6 +141,7 @@ export default function TeacherLayout() {
           userInitial={initial}
           avatarGradient="bg-gradient-to-br from-indigo-500 to-blue-600"
           searchPlaceholder={t.teacherSearchPlaceholder}
+          avatarNode={avatarEl}
         />
         <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
           <Outlet />

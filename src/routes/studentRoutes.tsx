@@ -7,6 +7,8 @@ import LessonsPage from '@/pages/student/LessonsPage'
 import AttendancePage from '@/pages/student/AttendancePage'
 import TestsPage from '@/pages/student/TestsPage'
 import ProfilePage from '@/pages/student/ProfilePage'
+import AchievementsPage from '@/pages/student/AchievementsPage'
+import AIAssistantPage from '@/pages/student/AIAssistantPage'
 
 export const studentRoutes: RouteObject[] = [
   {
@@ -19,11 +21,13 @@ export const studentRoutes: RouteObject[] = [
             path: 'dashboard',
             element: <StudentLayout />,
             children: [
-              { index: true,        element: <StudentDashboardPage /> },
-              { path: 'lessons',    element: <LessonsPage />          },
-              { path: 'attendance', element: <AttendancePage />       },
-              { path: 'tests',      element: <TestsPage />            },
-              { path: 'profile',    element: <ProfilePage />          },
+              { index: true,            element: <StudentDashboardPage /> },
+              { path: 'lessons',        element: <LessonsPage />          },
+              { path: 'attendance',     element: <AttendancePage />       },
+              { path: 'tests',          element: <TestsPage />            },
+              { path: 'profile',        element: <ProfilePage />          },
+              { path: 'achievements',   element: <AchievementsPage />     },
+              { path: 'ai-assistant',   element: <AIAssistantPage />      },
             ],
           },
         ],

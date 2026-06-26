@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { Home, BookOpen, CheckSquare, FileText, User } from 'lucide-react'
+import { Home, BookOpen, CheckSquare, FileText, User, Award } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Navbar } from '@/components/layout/Navbar'
@@ -9,24 +9,39 @@ import type { SidebarNavSection } from '@/components/layout/Sidebar'
 import { PATHS } from '@/routes/paths'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { AsomiddinAIMenuIcon } from '@/components/ai'
+import { UserAvatar } from '@/components/identity'
+import { useProfile } from '@/hooks/useProfile'
 
 export default function StudentLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const auth     = useAuth()
-  const navigate = useNavigate()
-  const { t }    = useLanguage()
-  const userName = auth.user?.name ?? t.studentRole
-  const initial  = userName.charAt(0).toUpperCase()
+  const auth        = useAuth()
+  const { profile } = useProfile()
+  const navigate    = useNavigate()
+  const { t }       = useLanguage()
+  const userName    = profile?.fullName ?? auth.user?.name ?? t.studentRole
+  const initial     = userName.charAt(0).toUpperCase()
+
+  const avatarEl = (
+    <UserAvatar
+      name={userName}
+      avatarUrl={profile?.avatarUrl}
+      size="sm"
+      showStatus
+    />
+  )
 
   const NAV_SECTIONS: SidebarNavSection[] = [
     {
       title: t.menuSection,
       items: [
-        { label: t.dashboard,  to: PATHS.STUDENT.ROOT,       icon: Home        },
-        { label: t.myCourses,  to: PATHS.STUDENT.LESSONS,    icon: BookOpen    },
-        { label: t.attendance, to: PATHS.STUDENT.ATTENDANCE, icon: CheckSquare },
-        { label: t.tests,      to: PATHS.STUDENT.TESTS,      icon: FileText    },
-        { label: t.profile,    to: PATHS.STUDENT.PROFILE,    icon: User        },
+        { label: t.dashboard,    to: PATHS.STUDENT.ROOT,         icon: Home        },
+        { label: t.myCourses,   to: PATHS.STUDENT.LESSONS,      icon: BookOpen    },
+        { label: t.attendance,  to: PATHS.STUDENT.ATTENDANCE,   icon: CheckSquare },
+        { label: t.tests,       to: PATHS.STUDENT.TESTS,        icon: FileText    },
+        { label: t.achievements,to: PATHS.STUDENT.ACHIEVEMENTS, icon: Award       },
+        { label: t.aiAssistant, to: PATHS.STUDENT.AI_ASSISTANT, icon: AsomiddinAIMenuIcon },
+        { label: t.profile,     to: PATHS.STUDENT.PROFILE,      icon: User        },
       ],
     },
   ]
@@ -94,6 +109,7 @@ export default function StudentLayout() {
         userName={userName}
         userRole={t.studentRole}
         userInitial={initial}
+        avatarNode={avatarEl}
         onLogout={handleLogout}
         summaryCard={
           <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white">
@@ -144,6 +160,7 @@ export default function StudentLayout() {
           userInitial={initial}
           avatarGradient="bg-gradient-to-br from-blue-500 to-indigo-600"
           searchPlaceholder={t.studentSearchPlaceholder}
+          avatarNode={avatarEl}
         />
         <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
           <Outlet />

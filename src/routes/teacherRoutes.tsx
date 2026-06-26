@@ -10,6 +10,7 @@ import CreateCoursePage from '@/pages/teacher/CreateCoursePage'
 import AttendancePage from '@/pages/teacher/AttendancePage'
 import TestsPage from '@/pages/teacher/TestsPage'
 import ProfilePage from '@/pages/teacher/ProfilePage'
+import AchievementsPage from '@/pages/teacher/AchievementsPage'
 
 export const teacherRoutes: RouteObject[] = [
   {
@@ -29,6 +30,7 @@ export const teacherRoutes: RouteObject[] = [
               { path: 'courses/new',  element: <CreateCoursePage />     },
               { path: 'attendance',   element: <AttendancePage />       },
               { path: 'tests',        element: <TestsPage />            },
+              { path: 'achievements', element: <AchievementsPage />    },
               { path: 'profile',      element: <ProfilePage />          },
             ],
           },

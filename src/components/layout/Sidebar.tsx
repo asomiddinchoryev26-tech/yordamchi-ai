@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import type { ComponentType, ReactNode } from 'react'
-import { X, LogOut } from 'lucide-react'
+import { X, LogOut, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import logoSrc from '@/assets/images/logo.svg'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -30,6 +30,8 @@ export interface SidebarProps {
   userName:     string
   userRole:     string
   userInitial:  string
+  /** Pass a <UserAvatar> node to replace the default inline avatar */
+  avatarNode?:  ReactNode
   summaryCard?: ReactNode
   onLogout?:    () => void
 }
@@ -66,6 +68,7 @@ export function Sidebar({
   userName,
   userRole,
   userInitial,
+  avatarNode,
   summaryCard,
   onLogout,
 }: SidebarProps) {
@@ -151,19 +154,28 @@ export function Sidebar({
 
         {/* User profile / logout */}
         <div className="px-2.5 sm:px-3 py-3 border-t border-gray-100 dark:border-gray-700 flex-shrink-0">
+          <div className="flex items-center gap-2.5 px-3 py-2 mb-1">
+            {/* Avatar: custom node or fallback */}
+            {avatarNode ?? (
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                {userInitial}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate leading-tight">{userName}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userRole}</p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={() => onLogout?.()}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 group transition-colors text-left"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 group transition-colors text-left"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-              {userInitial}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{userName}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{userRole}</p>
-            </div>
-            <LogOut className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-red-400 transition-colors flex-shrink-0" />
+            <LogOut className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
+            <span className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-red-500 transition-colors font-medium">
+              Chiqish
+            </span>
+            <ChevronRight className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 ml-auto" />
           </button>
         </div>
       </aside>
