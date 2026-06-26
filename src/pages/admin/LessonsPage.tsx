@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
-import { BookOpen, AlertCircle, Search, ChevronDown } from 'lucide-react'
+import { BookOpen, AlertCircle, Search, ChevronDown, Video, Paperclip } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { lessonService } from '@/services/lesson.service'
 import { groupService } from '@/services/group.service'
+import { attachmentService, getVideoEmbedUrl } from '@/services/attachment.service'
+import type { AttachmentRow } from '@/services/attachment.service'
 import type { LessonWithDetails } from '@/services/lesson.service'
 import type { GroupWithRelations } from '@/services/group.service'
 
@@ -20,6 +22,8 @@ export default function AdminLessonsPage() {
   const [search,   setSearch]   = useState('')
   const [groupFilter, setGroupFilter] = useState('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [attachments,       setAttachments]       = useState<Record<string, AttachmentRow[]>>({})
+  const [attachmentsLoaded, setAttachmentsLoaded] = useState<Set<string>>(new Set())
 
   useEffect(() => { void load() }, [])
 
@@ -142,11 +146,24 @@ export default function AdminLessonsPage() {
             const grp     = lesson.group    as any
             const teacher = lesson.teacher  as any
             const isExp   = expandedId === lesson.id
+            const embedUrl = lesson.video_url ? getVideoEmbedUrl(lesson.video_url) : null
+            const lessonAtts = attachments[lesson.id] ?? []
+            const attLoaded  = attachmentsLoaded.has(lesson.id)
+
             return (
-              <div key={lesson.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              <div key={lesson.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <button
                   type="button"
-                  onClick={() => setExpandedId(isExp ? null : lesson.id)}
+                  onClick={async () => {
+                    setExpandedId(isExp ? null : lesson.id)
+                    if (!isExp && !attachmentsLoaded.has(lesson.id)) {
+                      try {
+                        const data = await attachmentService.getForLesson(lesson.id)
+                        setAttachments(prev => ({ ...prev, [lesson.id]: data }))
+                        setAttachmentsLoaded(prev => new Set(prev).add(lesson.id))
+                      } catch { /* non-critical */ }
+                    }
+                  }}
                   className="w-full text-left flex items-start gap-4 p-4"
                 >
                   <div
@@ -160,16 +177,28 @@ export default function AdminLessonsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-gray-900 text-sm">{lesson.title}</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{lesson.title}</span>
                       <span className={cn(
                         'text-[11px] font-semibold px-2 py-0.5 rounded-full',
-                        lesson.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                        lesson.is_published
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                       )}>
                         {lesson.is_published ? 'Nashr' : 'Qoralama'}
                       </span>
+                      {embedUrl && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex items-center gap-0.5">
+                          <Video className="w-3 h-3" /> Video
+                        </span>
+                      )}
+                      {attLoaded && lessonAtts.length > 0 && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 flex items-center gap-0.5">
+                          <Paperclip className="w-3 h-3" /> {lessonAtts.length}
+                        </span>
+                      )}
                     </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
-                      {grp && <span className="font-medium text-gray-600">{grp.name}</span>}
+                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-gray-500 flex-wrap">
+                      {grp && <span className="font-medium text-gray-600 dark:text-gray-300">{grp.name}</span>}
                       {teacher && <span>{teacher.full_name ?? 'O\'qituvchi'}</span>}
                       {subj && <span style={{ color: subj.color }}>{subj.name}</span>}
                       {lesson.lesson_date && <span>{fmtDate(lesson.lesson_date)}</span>}
@@ -178,11 +207,41 @@ export default function AdminLessonsPage() {
                   <ChevronDown className={cn('w-4 h-4 text-gray-400 flex-shrink-0 transition-transform', isExp && 'rotate-180')} />
                 </button>
                 {isExp && (
-                  <div className="border-t border-gray-100 px-4 py-3">
-                    {lesson.content
-                      ? <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{lesson.content}</p>
-                      : <p className="text-sm text-gray-400 italic">Matn qo'shilmagan</p>
-                    }
+                  <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-3 space-y-4">
+                    {lesson.content && (
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                        {lesson.content}
+                      </p>
+                    )}
+                    {embedUrl && (
+                      <div className="rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <iframe
+                          src={embedUrl}
+                          title={lesson.title}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full"
+                          style={{ aspectRatio: '16/9', display: 'block' }}
+                        />
+                      </div>
+                    )}
+                    {!lesson.content && !embedUrl && (
+                      <p className="text-sm text-gray-400 dark:text-gray-500 italic">Kontent qo'shilmagan</p>
+                    )}
+                    {attLoaded && lessonAtts.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                          <Paperclip className="w-3.5 h-3.5" /> Biriktirmalar ({lessonAtts.length})
+                        </p>
+                        <div className="space-y-1">
+                          {lessonAtts.map(att => (
+                            <div key={att.id} className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2 px-2 py-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <span>{att.file_name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
