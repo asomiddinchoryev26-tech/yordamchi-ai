@@ -3,9 +3,14 @@ import {
   Send, Plus, Trash2, MessageSquare, Search,
   PanelLeftOpen, PanelLeftClose, AlertCircle, Loader2,
   Copy, Check, ThumbsUp, ThumbsDown, RefreshCw,
-  Paperclip, Mic, SidebarClose, SidebarOpen,
+  Mic, SidebarClose, SidebarOpen,
+  Camera, ImageIcon, FileText as FileIcon, X as XIcon,
 } from 'lucide-react'
 import { AITeacherPanel } from '@/components/ai-teacher'
+// Sprint 3.3 — Vision integration (file attachment in AI Assistant)
+import { supabase }              from '@/lib/supabase'
+import { processImage, validateFile } from '@/ai-brain/vision/imageProcessor'
+import { buildVisionChatPrompt }      from '@/ai-brain/vision/promptBuilder'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
@@ -279,9 +284,16 @@ export default function AIAssistantPage() {
   const [search,        setSearch]        = useState('')
   const [streamingId,   setStreamingId]   = useState<string | null>(null)
 
+  // Sprint 3.3: file attachment state
+  const [attachedFile,   setAttachedFile]   = useState<File | null>(null)
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null)
+
   const bottomRef    = useRef<HTMLDivElement>(null)
   const inputRef     = useRef<HTMLTextAreaElement>(null)
   const chatAreaRef  = useRef<HTMLDivElement>(null)
+  const cameraInputRef  = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
+  const pdfInputRef     = useRef<HTMLInputElement>(null)
   const studentId        = auth.user?.id        ?? ''
   const studentName      = auth.user?.name      ?? 'Talaba'
   const studentAvatarUrl = auth.user?.avatarUrl ?? null
@@ -339,46 +351,115 @@ export default function AIAssistantPage() {
     finally   { setIsTyping(false) }
   }
 
+  // ── Sprint 3.3: File attachment helpers ─────────────────────────────────────
+
+  function handleFileSelect(file: File) {
+    const { valid, errorCode } = validateFile(file)
+    if (!valid) { setError(errorCode ?? 'Fayl noto\'g\'ri'); return }
+    if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
+    setAttachedFile(file)
+    setFilePreviewUrl(URL.createObjectURL(file))
+    setError(null)
+  }
+
+  function clearFile() {
+    if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
+    setAttachedFile(null)
+    setFilePreviewUrl(null)
+  }
+
+  function onFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0]
+    if (f) handleFileSelect(f)
+    e.target.value = ''
+  }
+
+  async function callVisionInAssistant(
+    imageBase64: string, mimeType: string,
+    systemInstruction: string, userQuestion: string,
+  ): Promise<string> {
+    const { data, error: fnError } = await supabase.functions.invoke('ai-vision', {
+      body: { imageBase64, mimeType, systemInstruction, userMessage: userQuestion },
+    })
+    if (fnError) {
+      const ctx = (fnError as unknown as { context?: { error?: string } }).context
+      throw new Error(ctx?.error ?? fnError.message)
+    }
+    if (!data?.response) throw new Error('ai_empty_response')
+    return data.response as string
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+
   async function handleSend() {
     const text = input.trim()
-    if (!text || !activeConvId || isTyping) return
+    if (!text && !attachedFile) return   // allow send if file attached without text
+    if (!activeConvId || isTyping) return
 
     setInput(''); setError(null)
     if (inputRef.current) inputRef.current.style.height = 'auto'
 
+    // Capture file before clearing (async work happens after)
+    const file = attachedFile
+    if (file) clearFile()
+
+    // Build user-facing content (text + optional file name indicator)
+    const displayContent = file
+      ? (text ? `${text}\n📎 ${file.name}` : `📎 ${file.name}`)
+      : text
+
     const tempMsg: UIMessage = {
-      id: `temp-${Date.now()}`, role: 'user', content: text, created_at: new Date().toISOString(),
+      id: `temp-${Date.now()}`, role: 'user', content: displayContent, created_at: new Date().toISOString(),
     }
     const newMsgs = [...messages, tempMsg]
     setMessages(newMsgs)
 
     try {
-      const savedUser = await aiChatService.addMessage(activeConvId, 'user', text)
+      const savedUser = await aiChatService.addMessage(activeConvId, 'user', displayContent)
 
       if (messages.filter(m => m.role === 'user').length === 0) {
-        const title = text.slice(0, 40) + (text.length > 40 ? '…' : '')
+        const titleBase = text || file?.name || 'Yangi suhbat'
+        const title = titleBase.slice(0, 40) + (titleBase.length > 40 ? '…' : '')
         void aiChatService.updateTitle(activeConvId, title)
         setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, title } : c))
       }
 
       setIsTyping(true)
-      const history = [
-        ...newMsgs.filter(m => !m.id.startsWith('temp')), savedUser,
-      ].map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
-
       const currentCtx = context ?? {
         studentName, groups: [], recentLessons: [],
         testStats: { passed: 0, total: 0, avgPct: 0 }, attPct: null, attTotal: 0,
       }
 
-      // Sprint 3.1: Record user message in memory before sending
-      intelligenceService.recordUserMessage(activeConvId, text, currentCtx)
+      let aiResponse: string
 
-      const aiResponse = await aiProvider.complete(history, currentCtx, {
-        userId:          studentId,
-        conversationId:  activeConvId,
-        lastUserMessage: text,
-      })
+      if (file) {
+        // ── Sprint 3.3: Vision path ────────────────────────────────────────
+        const processed = await processImage(file)
+        const profile   = intelligenceService.getProfile(currentCtx, studentId)
+        const { systemInstruction } = buildVisionChatPrompt(
+          processed, profile,
+          (language === 'uz' || language === 'ru' || language === 'en') ? language : 'uz',
+        )
+        const question = text || (
+          language === 'ru' ? 'Проанализируйте и объясните это изображение'
+          : language === 'en' ? 'Analyze and explain this image'
+          : 'Bu rasmni tahlil qiling va tushuntiring'
+        )
+        aiResponse = await callVisionInAssistant(processed.base64, processed.mimeType, systemInstruction, question)
+      } else {
+        // ── Sprint 3.1: Text path ──────────────────────────────────────────
+        const history = [
+          ...newMsgs.filter(m => !m.id.startsWith('temp')), savedUser,
+        ].map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
+
+        intelligenceService.recordUserMessage(activeConvId, text, currentCtx)
+
+        aiResponse = await aiProvider.complete(history, currentCtx, {
+          userId:          studentId,
+          conversationId:  activeConvId,
+          lastUserMessage: text,
+        })
+      }
 
       const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', aiResponse)
       setMessages(prev => [...prev.filter(m => m.id !== tempMsg.id), savedUser, savedAI])
@@ -387,8 +468,7 @@ export default function AIAssistantPage() {
         prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c),
       )
 
-      // Sprint 3.1: Record AI response + auto-detect mistakes
-      intelligenceService.recordAIResponse(activeConvId, aiResponse, text, currentCtx)
+      intelligenceService.recordAIResponse(activeConvId, aiResponse, displayContent, currentCtx)
 
     } catch {
       setError("Xabar yuborishda xatolik. Qayta urinib ko'ring.")
@@ -825,21 +905,40 @@ export default function AIAssistantPage() {
         {activeConvId && (
           <div className="border-t border-gray-100/80 dark:border-white/[0.06] bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md px-4 py-4 flex-shrink-0">
             <div className="max-w-3xl mx-auto">
+              {/* Sprint 3.3: File attachment area */}
+              {attachedFile && filePreviewUrl && (
+                <div className="flex items-center gap-2 mb-2 px-1">
+                  {attachedFile.type === 'application/pdf' ? (
+                    <div className="flex items-center gap-2 bg-gray-50 dark:bg-white/[0.05] border border-gray-200/60 dark:border-white/[0.08] rounded-xl px-3 py-2">
+                      <FileIcon className="w-4 h-4 text-red-500 flex-shrink-0" aria-hidden="true" />
+                      <span className="text-[12px] font-medium text-gray-700 dark:text-gray-300 truncate max-w-[200px]">{attachedFile.name}</span>
+                    </div>
+                  ) : (
+                    <img src={filePreviewUrl} alt="Attached" className="h-16 max-w-[120px] rounded-xl object-cover border border-gray-200/60 dark:border-white/[0.08] shadow-sm" />
+                  )}
+                  <button
+                    type="button"
+                    onClick={clearFile}
+                    className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    aria-label="Faylni olib tashlash"
+                  >
+                    <XIcon className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+
               {/* Input container with gradient focus ring */}
               <div
-                className="flex items-end gap-3 bg-white dark:bg-white/[0.05] border border-gray-200/80 dark:border-white/[0.09] rounded-2xl px-4 py-3 shadow-sm transition-all duration-200 focus-within:shadow-[0_0_0_2px_rgba(91,92,246,0.25)] focus-within:border-brand/40 dark:focus-within:border-brand/40"
+                className={cn(
+                  'rounded-2xl border bg-white dark:bg-white/[0.05] shadow-sm transition-all duration-200',
+                  'focus-within:shadow-[0_0_0_2px_rgba(91,92,246,0.25)] focus-within:border-brand/40 dark:focus-within:border-brand/40',
+                  attachedFile
+                    ? 'border-brand/30 dark:border-brand/25'
+                    : 'border-gray-200/80 dark:border-white/[0.09]',
+                )}
               >
-                {/* Attachment placeholder */}
-                <button
-                  type="button"
-                  disabled
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 dark:text-gray-600 flex-shrink-0 mb-0.5 cursor-not-allowed"
-                  title="Fayl biriktirish (tez orada)"
-                  aria-label="Fayl biriktirish (hali tayyor emas)"
-                >
-                  <Paperclip className="w-4 h-4" aria-hidden="true" />
-                </button>
-
+                {/* Input row */}
+                <div className="flex items-end gap-3 px-4 py-3">
                 {/* Textarea */}
                 <textarea
                   ref={inputRef}
@@ -847,11 +946,13 @@ export default function AIAssistantPage() {
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   placeholder={
-                    language === 'ru'
-                      ? 'Задайте вопрос...  (Enter — отправить, Shift+Enter — новая строка)'
-                      : language === 'en'
-                        ? 'Ask a question...  (Enter to send, Shift+Enter for new line)'
-                        : 'Xabar yozing…  (Enter — yuborish, Shift+Enter — yangi qator)'
+                    attachedFile
+                      ? (language === 'ru' ? 'Задайте вопрос об этом файле (или оставьте пустым)…'
+                        : language === 'en' ? 'Ask a question about this file (or leave empty)…'
+                        : 'Bu haqida savol bering yoki bo\'sh qoldiring…')
+                      : (language === 'ru' ? 'Задайте вопрос или прикрепите файл…'
+                        : language === 'en' ? 'Ask anything or attach a file…'
+                        : 'Savol bering yoki fayl biriktiring…')
                   }
                   rows={1}
                   disabled={isTyping}
@@ -874,17 +975,17 @@ export default function AIAssistantPage() {
                 <motion.button
                   type="button"
                   onClick={() => void handleSend()}
-                  disabled={!input.trim() || isTyping}
-                  whileHover={input.trim() && !isTyping ? { scale: 1.08 } : {}}
-                  whileTap={input.trim() && !isTyping ? { scale: 0.93 } : {}}
+                  disabled={(!input.trim() && !attachedFile) || isTyping}
+                  whileHover={(input.trim() || attachedFile) && !isTyping ? { scale: 1.08 } : {}}
+                  whileTap={(input.trim() || attachedFile) && !isTyping ? { scale: 0.93 } : {}}
                   transition={{ duration: 0.12 }}
                   className={cn(
                     'w-9 h-9 flex items-center justify-center rounded-xl flex-shrink-0 transition-all duration-200 mb-0.5',
-                    input.trim() && !isTyping
+                    (input.trim() || attachedFile) && !isTyping
                       ? 'text-white shadow-md hover:shadow-lg'
                       : 'bg-gray-100/80 dark:bg-white/[0.06] text-gray-400 dark:text-gray-500 cursor-not-allowed',
                   )}
-                  style={input.trim() && !isTyping ? {
+                  style={(input.trim() || attachedFile) && !isTyping ? {
                     background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)',
                     boxShadow: '0 4px 12px rgba(91,92,246,0.4)',
                   } : {}}
@@ -894,7 +995,30 @@ export default function AIAssistantPage() {
                     ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                     : <Send className="w-[15px] h-[15px]" aria-hidden="true" />}
                 </motion.button>
-              </div>
+                </div>{/* end input row */}
+
+                {/* Sprint 3.3: File picker buttons */}
+                <div className="flex items-center gap-0.5 px-4 pb-2.5">
+                  {/* Camera */}
+                  <label className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-brand-light hover:bg-brand/5 dark:hover:bg-brand/8 transition-all duration-150 cursor-pointer">
+                    <Camera className="w-3.5 h-3.5" aria-hidden="true" />
+                    {language === 'ru' ? 'Камера' : language === 'en' ? 'Camera' : 'Kamera'}
+                    <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="sr-only" onChange={onFileInputChange} disabled={isTyping} />
+                  </label>
+                  {/* Gallery */}
+                  <label className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-brand-light hover:bg-brand/5 dark:hover:bg-brand/8 transition-all duration-150 cursor-pointer">
+                    <ImageIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                    {language === 'ru' ? 'Галерея' : language === 'en' ? 'Gallery' : 'Galereya'}
+                    <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={onFileInputChange} disabled={isTyping} />
+                  </label>
+                  {/* PDF */}
+                  <label className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-brand-light hover:bg-brand/5 dark:hover:bg-brand/8 transition-all duration-150 cursor-pointer">
+                    <FileIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                    PDF
+                    <input ref={pdfInputRef} type="file" accept="application/pdf" className="sr-only" onChange={onFileInputChange} disabled={isTyping} />
+                  </label>
+                </div>
+              </div>{/* end input container */}
 
               <p className="text-center text-[10px] text-gray-300 dark:text-gray-700 mt-2.5 select-none tracking-wide">
                 Asomiddin AI · Gemini 2.5 Flash · Enter — yuborish

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { Home, BookOpen, CheckSquare, FileText, User, Award, Calendar, Bell, Settings, ScanSearch } from 'lucide-react'
+import { Home, BookOpen, CheckSquare, FileText, User, Award, Calendar, Bell, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Navbar } from '@/components/layout/Navbar'
@@ -41,7 +41,7 @@ export default function StudentLayout() {
         { label: t.tests,         to: PATHS.STUDENT.TESTS,        icon: FileText    },
         { label: t.achievements,  to: PATHS.STUDENT.ACHIEVEMENTS, icon: Award                },
         { label: t.aiAssistant,   to: PATHS.STUDENT.AI_ASSISTANT, icon: AsomiddinAIMenuIcon  },
-        { label: 'AI Vision',     to: PATHS.STUDENT.AI_VISION,    icon: ScanSearch, tag: 'New' },
+        // AI Vision merged into AI Assistant (Sprint 3.3)
       ],
     },
     {
