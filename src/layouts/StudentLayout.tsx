@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { Home, BookOpen, CheckSquare, FileText, User, Award } from 'lucide-react'
+import { Home, BookOpen, CheckSquare, FileText, User, Award, Calendar, Bell, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Navbar } from '@/components/layout/Navbar'
@@ -33,15 +33,23 @@ export default function StudentLayout() {
 
   const NAV_SECTIONS: SidebarNavSection[] = [
     {
-      title: t.menuSection,
+      title: t.learningSection,
       items: [
-        { label: t.dashboard,    to: PATHS.STUDENT.ROOT,         icon: Home        },
-        { label: t.myCourses,   to: PATHS.STUDENT.LESSONS,      icon: BookOpen    },
-        { label: t.attendance,  to: PATHS.STUDENT.ATTENDANCE,   icon: CheckSquare },
-        { label: t.tests,       to: PATHS.STUDENT.TESTS,        icon: FileText    },
-        { label: t.achievements,to: PATHS.STUDENT.ACHIEVEMENTS, icon: Award       },
-        { label: t.aiAssistant, to: PATHS.STUDENT.AI_ASSISTANT, icon: AsomiddinAIMenuIcon },
-        { label: t.profile,     to: PATHS.STUDENT.PROFILE,      icon: User        },
+        { label: t.dashboard,     to: PATHS.STUDENT.ROOT,         icon: Home        },
+        { label: t.myCourses,     to: PATHS.STUDENT.LESSONS,      icon: BookOpen    },
+        { label: t.attendance,    to: PATHS.STUDENT.ATTENDANCE,   icon: CheckSquare },
+        { label: t.tests,         to: PATHS.STUDENT.TESTS,        icon: FileText    },
+        { label: t.achievements,  to: PATHS.STUDENT.ACHIEVEMENTS, icon: Award       },
+        { label: t.aiAssistant,   to: PATHS.STUDENT.AI_ASSISTANT, icon: AsomiddinAIMenuIcon },
+      ],
+    },
+    {
+      title: t.otherSection,
+      items: [
+        { label: t.profile,        to: PATHS.STUDENT.PROFILE,       icon: User     },
+        { label: t.notifications,  to: PATHS.STUDENT.PROFILE,       icon: Bell,     tag: 'Soon' },
+        { label: 'Kalendar',       to: PATHS.STUDENT.PROFILE,       icon: Calendar, tag: 'Soon' },
+        { label: t.settings,       to: PATHS.STUDENT.PROFILE,       icon: Settings, tag: 'Soon' },
       ],
     },
   ]
