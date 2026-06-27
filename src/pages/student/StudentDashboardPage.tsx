@@ -18,6 +18,8 @@ import {
   TrendingUp, ChevronRight, Star, Lock,
   // Sprint 4.7 additions — new visual icons only
   Flame, Award, Target, Bell, BarChart3, Users, Download,
+  // Sprint 4.7 Final Hero additions
+  Brain, Sparkles, Code2,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -164,6 +166,42 @@ function HeroParticles() {
           animate={{ y: [0, -14, 0], opacity: [0.25, 0.85, 0.25], scale: [0.8, 1.2, 0.8] }}
           transition={{ duration: 3.2 + p.d * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
         />
+      ))}
+    </div>
+  )
+}
+
+// ─── Hero: floating AI icons ──────────────────────────────────────────────────
+
+const AI_ICON_CFG = [
+  { Icon: Brain,     x: '8%',  y: '22%', s: 18, c: '#5B7FFF', d: 0,    dy: -10 },
+  { Icon: Sparkles,  x: '88%', y: '18%', s: 16, c: '#A78BFA', d: 0.8,  dy: -8  },
+  { Icon: Zap,       x: '82%', y: '68%', s: 15, c: '#818CF8', d: 1.5,  dy: -12 },
+  { Icon: Code2,     x: '6%',  y: '72%', s: 16, c: '#7C3AED', d: 2.3,  dy: -8  },
+  { Icon: BookOpen,  x: '48%', y: '92%', s: 14, c: '#C4B5FD', d: 1.1,  dy: -6  },
+  { Icon: Star,      x: '92%', y: '44%', s: 13, c: '#93BBFF', d: 0.5,  dy: -10 },
+  { Icon: Trophy,    x: '3%',  y: '46%', s: 14, c: '#6366F1', d: 1.9,  dy: -8  },
+] as const
+
+function FloatingAIIcons() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      {AI_ICON_CFG.map(({ Icon, x, y, s, c, d, dy }, i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{ left: x, top: y }}
+          animate={{ y: [0, dy, 0], opacity: [0.18, 0.45, 0.18], rotate: [-4, 4, -4] }}
+          transition={{ duration: 4 + d * 0.5, repeat: Infinity, ease: 'easeInOut', delay: d }}
+        >
+          <Icon
+            aria-hidden="true"
+            style={{
+              width: s, height: s, color: c,
+              filter: `drop-shadow(0 0 6px ${c}) drop-shadow(0 0 12px ${c}50)`,
+            }}
+          />
+        </motion.div>
       ))}
     </div>
   )
@@ -412,19 +450,23 @@ function HomeAIInput({ onSubmit }: { onSubmit: (text: string) => void }) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSubmit(text); setText('') }
   }
 
+  const hasText = text.trim().length > 0
+
   return (
     <div
-      className="rounded-[20px] overflow-hidden"
+      className="rounded-[22px] overflow-hidden transition-all duration-200"
       style={{
-        background: 'rgba(255,255,255,0.05)',
-        backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        border: '1px solid rgba(255,255,255,0.10)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+        background: 'rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(32px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+        border: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: hasText
+          ? '0 0 0 2px rgba(91,127,255,0.3), 0 12px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)'
+          : '0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.07)',
       }}
     >
-      {/* Textarea row */}
-      <div className="flex items-end gap-3 px-4 py-3">
+      {/* Textarea + Send */}
+      <div className="flex items-end gap-3 px-4 pt-4 pb-3">
         <textarea
           ref={inputRef}
           value={text}
@@ -432,28 +474,35 @@ function HomeAIInput({ onSubmit }: { onSubmit: (text: string) => void }) {
           onKeyDown={handleKeyDown}
           placeholder="Savolingizni yozing yoki rasm/PDF yuklang…"
           rows={1}
-          className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 resize-none outline-none leading-6 max-h-28 py-0.5"
+          className="flex-1 bg-transparent text-[14px] text-white/90 placeholder:text-white/30 resize-none outline-none leading-[1.6] max-h-28 py-0.5 font-medium"
           aria-label="AI ga savol yozing"
         />
-        {/* Send */}
+        {/* Send button */}
         <motion.button
           type="button"
           onClick={() => { onSubmit(text); setText('') }}
-          whileHover={{ scale: 1.08 }}
+          whileHover={{ scale: 1.08, y: -1 }}
           whileTap={{ scale: 0.93 }}
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white"
+          transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 text-white mb-0.5"
           style={{
-            background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)',
-            boxShadow: '0 4px 16px rgba(91,92,246,0.45)',
+            background: hasText
+              ? 'linear-gradient(135deg, #5B7FFF 0%, #7C3AED 100%)'
+              : 'rgba(255,255,255,0.08)',
+            boxShadow: hasText ? '0 6px 20px rgba(91,127,255,0.5), inset 0 1px 0 rgba(255,255,255,0.2)' : 'none',
+            transition: 'background 0.2s ease, box-shadow 0.2s ease',
           }}
           aria-label="Yuborish"
         >
-          <Send className="w-4 h-4" aria-hidden="true" />
+          <Send className="w-4 h-4" style={{ color: hasText ? 'white' : 'rgba(255,255,255,0.3)' }} aria-hidden="true" />
         </motion.button>
       </div>
 
+      {/* Divider */}
+      <div className="h-px mx-4" style={{ background: 'rgba(255,255,255,0.07)' }} />
+
       {/* Action buttons row */}
-      <div className="flex items-center gap-0.5 px-4 pb-3">
+      <div className="flex items-center gap-0.5 px-3 py-2">
         {[
           { icon: Camera,    label: 'Kamera' },
           { icon: ImageIcon, label: 'Galereya' },
@@ -464,12 +513,13 @@ function HomeAIInput({ onSubmit }: { onSubmit: (text: string) => void }) {
             key={label}
             type="button"
             onClick={() => onSubmit('')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11.5px] font-semibold text-white/50 hover:text-white/80 hover:bg-white/[0.07] transition-all duration-150"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11.5px] font-semibold text-white/35 hover:text-white/75 hover:bg-white/[0.08] transition-all duration-150"
           >
             <Icon className="w-3.5 h-3.5" aria-hidden="true" />
             {label}
           </button>
         ))}
+        <span className="ml-auto text-[10px] text-white/20 pr-1 select-none">Enter ↵</span>
       </div>
     </div>
   )
@@ -511,47 +561,73 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
         <div className="absolute inset-0 opacity-[0.015]"
           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', backgroundSize: '160px' }} />
       </div>
-      {/* Floating particles */}
+      {/* Floating dots + AI icons */}
       <HeroParticles />
+      <FloatingAIIcons />
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
-        {/* Left: Dynamic greeting + content */}
-        <motion.div variants={STAGGER} initial="hidden" animate="show" className="space-y-5">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 lg:gap-10 items-center">
 
-          {/* Dynamic time-based greeting block */}
-          <motion.div variants={FADE_UP} className="space-y-1">
-            {/* Greeting + name */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight tracking-tight">
-                {greeting},&nbsp;
-                <span
-                  style={{
-                    background: 'linear-gradient(135deg, #818CF8 0%, #C4B5FD 50%, #A78BFA 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  {name}
-                </span>
-                &nbsp;<span className="not-italic">👋</span>
-              </h1>
-            </div>
+        {/* ── LEFT: Greeting + Content ──────────────────────────────────────── */}
+        <motion.div variants={STAGGER} initial="hidden" animate="show" className="space-y-6">
 
-            {/* Weekday + date */}
-            <div className="flex items-center gap-3">
+          {/* Greeting block */}
+          <motion.div variants={FADE_UP} className="space-y-2">
+            {/* Time + weekday + date row */}
+            <div className="flex items-center gap-2.5 flex-wrap">
               <div
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold"
-                style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.22)', color: '#C4B5FD' }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold backdrop-blur-sm"
+                style={{
+                  background: 'rgba(34,197,94,0.1)',
+                  border: '1px solid rgba(34,197,94,0.25)',
+                  color: '#86efac',
+                }}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
+                <motion.span
+                  className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                  animate={{ opacity: [1, 0.4, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  aria-hidden="true"
+                />
                 Bugun {weekday}
               </div>
-              <span className="text-[12px] text-white/30 font-medium">{date}</span>
+              <span className="text-[12px] text-white/35 font-medium tracking-wide">{date}</span>
             </div>
+
+            {/* Greeting headline */}
+            <h1 className="text-[2.2rem] sm:text-[2.6rem] font-black text-white leading-[1.08] tracking-tight">
+              {greeting},
+              <br />
+              <span
+                style={{
+                  background: 'linear-gradient(120deg, #93BBFF 0%, #C4B5FD 45%, #A78BFA 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {name}
+              </span>{' '}
+              <span
+                aria-label="qo'l silkitish"
+                style={{ display: 'inline-block' }}
+              >
+                <motion.span
+                  style={{ display: 'inline-block' }}
+                  animate={{ rotate: [0, 20, -5, 20, 0] }}
+                  transition={{ duration: 1.6, delay: 0.8, repeat: Infinity, repeatDelay: 4, ease: 'easeInOut' }}
+                >
+                  👋
+                </motion.span>
+              </span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-[15px] text-white/45 max-w-sm leading-relaxed mt-1">
+              Imtihondan qo&apos;rqmang — bugun qaysi mavzuni o&apos;rganamiz?
+            </p>
           </motion.div>
 
-          {/* AI availability badge */}
+          {/* AI badge */}
           <motion.div variants={FADE_UP}>
             <Badge
               variant="brand"
@@ -563,98 +639,101 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
             </Badge>
           </motion.div>
 
-          {/* Subtitle */}
-          <motion.div variants={FADE_UP}>
-            <p className="text-[15px] text-white/50 max-w-md leading-relaxed">
-              Imtihondan qo&apos;rqmang — bugun qaysi mavzuni o&apos;rganamiz?
-            </p>
-          </motion.div>
-
-          {/* CTA buttons (PRESERVED navigate calls — premium visual) */}
+          {/* CTA buttons (navigate logic PRESERVED) */}
           <motion.div variants={FADE_UP} className="flex flex-wrap gap-3">
-            {/* Primary — brand gradient with glow */}
+            {/* Primary */}
             <motion.button
               type="button"
               onClick={() => navigate(PATHS.STUDENT.AI_ASSISTANT)}
               whileHover={{ scale: 1.04, y: -3 }}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-              className="relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-[18px] text-white font-bold text-[14px] overflow-hidden group"
+              className="relative inline-flex items-center gap-2.5 px-7 py-[14px] rounded-[18px] text-white font-bold text-[14px] overflow-hidden group"
               style={{
                 background: 'linear-gradient(135deg, #5B7FFF 0%, #7C3AED 100%)',
-                boxShadow: '0 6px 28px rgba(91,127,255,0.55), 0 2px 8px rgba(91,127,255,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+                boxShadow: '0 8px 32px rgba(91,127,255,0.5), 0 2px 8px rgba(91,127,255,0.25), inset 0 1px 0 rgba(255,255,255,0.18)',
               }}
             >
-              {/* Shimmer on hover */}
               <span
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                style={{ background: 'linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.12) 50%, transparent 80%)' }}
+                style={{ background: 'linear-gradient(105deg, transparent 15%, rgba(255,255,255,0.15) 50%, transparent 85%)' }}
                 aria-hidden="true"
               />
               <Zap className="w-4 h-4 relative z-10" aria-hidden="true" />
               <span className="relative z-10">AI bilan suhbatni boshlash</span>
             </motion.button>
 
-            {/* Secondary — glass with animated arrow */}
+            {/* Secondary */}
             <motion.button
               type="button"
               onClick={() => navigate(PATHS.STUDENT.LESSONS)}
               whileHover={{ scale: 1.03, y: -1 }}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-              className="group inline-flex items-center gap-2 px-5 py-3.5 rounded-[18px] text-white/65 hover:text-white/90 font-semibold text-[14px] transition-colors duration-150"
+              className="group inline-flex items-center gap-2 px-6 py-[14px] rounded-[18px] text-white/60 hover:text-white/90 font-semibold text-[14px] transition-all duration-200"
               style={{
                 background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.14)',
-                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.13)',
+                backdropFilter: 'blur(16px)',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(91,127,255,0.35)'
+                ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(91,127,255,0.10)'
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.13)'
+                ;(e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)'
               }}
             >
               Darslarim
               <motion.span
-                animate={{ x: [0, 2, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                animate={{ x: [0, 3, 0] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
               >
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </motion.span>
             </motion.button>
           </motion.div>
 
-          {/* Home AI Input (PRESERVED — same onSubmit handler, same navigate target) */}
+          {/* AI Input (PRESERVED — onSubmit, navigate) */}
           <motion.div variants={FADE_UP} className="max-w-lg">
             <HomeAIInput onSubmit={(text) => {
               navigate(text ? PATHS.STUDENT.AI_ASSISTANT : PATHS.STUDENT.AI_ASSISTANT)
             }} />
           </motion.div>
 
-          {/* Quick Prompt Chips (PRESERVED — same navigate call, same QUICK_TOPICS) */}
-          <motion.div variants={FADE_UP} className="flex flex-wrap gap-2 pt-1">
+          {/* Quick Topics (navigate PRESERVED) */}
+          <motion.div variants={FADE_UP} className="flex flex-wrap gap-2">
             {QUICK_TOPICS.map((topic, i) => (
               <motion.button
                 key={topic}
                 type="button"
                 onClick={() => navigate(PATHS.STUDENT.AI_ASSISTANT)}
-                whileHover={{ scale: 1.05, y: -1 }}
-                whileTap={{ scale: 0.97 }}
-                initial={{ opacity: 0, y: 10 }}
+                whileTap={{ scale: 0.96 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + i * 0.06, duration: 0.3, ease: EASE }}
-                className="px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold border transition-all duration-150"
+                transition={{ delay: 0.55 + i * 0.06, duration: 0.3, ease: EASE }}
+                className="px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200"
                 style={{
                   background: 'rgba(255,255,255,0.06)',
-                  borderColor: 'rgba(255,255,255,0.12)',
-                  color: 'rgba(255,255,255,0.72)',
+                  border: '1px solid rgba(255,255,255,0.11)',
+                  color: 'rgba(255,255,255,0.65)',
                 }}
                 onMouseEnter={e => {
-                  const el = e.currentTarget
-                  el.style.background = 'rgba(99,102,241,0.2)'
-                  el.style.borderColor = 'rgba(99,102,241,0.4)'
-                  el.style.color = '#C4B5FD'
+                  const el = e.currentTarget as HTMLButtonElement
+                  el.style.background = 'rgba(91,127,255,0.18)'
+                  el.style.borderColor = 'rgba(91,127,255,0.5)'
+                  el.style.color = '#93BBFF'
+                  el.style.boxShadow = '0 0 16px rgba(91,127,255,0.2), inset 0 0 0 1px rgba(91,127,255,0.25)'
+                  el.style.transform = 'translateY(-2px) scale(1.03)'
                 }}
                 onMouseLeave={e => {
-                  const el = e.currentTarget
+                  const el = e.currentTarget as HTMLButtonElement
                   el.style.background = 'rgba(255,255,255,0.06)'
-                  el.style.borderColor = 'rgba(255,255,255,0.12)'
-                  el.style.color = 'rgba(255,255,255,0.72)'
+                  el.style.borderColor = 'rgba(255,255,255,0.11)'
+                  el.style.color = 'rgba(255,255,255,0.65)'
+                  el.style.boxShadow = 'none'
+                  el.style.transform = 'none'
                 }}
               >
                 {topic}
@@ -663,15 +742,42 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
           </motion.div>
         </motion.div>
 
-        {/* Right: Premium Student Illustration (replaces RobotMascot visually) */}
+        {/* ── RIGHT: Premium Student Illustration ──────────────────────────── */}
+        {/* visible on all screens — below text on mobile, right column on lg */}
         <motion.div
-          className="hidden lg:flex items-center justify-center pr-2"
-          initial={{ opacity: 0, x: 30, scale: 0.85 }}
+          className="flex items-center justify-center lg:justify-end"
+          initial={{ opacity: 0, x: 24, scale: 0.88 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
+          transition={{ duration: 0.75, delay: 0.25, ease: EASE }}
         >
-          <StudentIllustration />
+          {/* Neon glow ring around illustration */}
+          <div className="relative">
+            {/* Outer pulse ring */}
+            <motion.div
+              className="absolute -inset-8 rounded-full"
+              style={{ border: '1px solid rgba(91,127,255,0.2)' }}
+              animate={{ scale: [1, 1.06, 1], opacity: [0.5, 0.15, 0.5] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+              aria-hidden="true"
+            />
+            {/* Middle ring */}
+            <motion.div
+              className="absolute -inset-4 rounded-full"
+              style={{ border: '1px solid rgba(124,58,237,0.25)' }}
+              animate={{ scale: [1, 1.04, 1], opacity: [0.6, 0.2, 0.6] }}
+              transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
+              aria-hidden="true"
+            />
+            {/* Core glow */}
+            <div
+              className="absolute inset-0 rounded-full blur-3xl opacity-30"
+              style={{ background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 50%, transparent 70%)' }}
+              aria-hidden="true"
+            />
+            <StudentIllustration />
+          </div>
         </motion.div>
+
       </div>
     </div>
   )
