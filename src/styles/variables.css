@@ -1,13 +1,106 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+ * variables.css — Sprint 4 Design System: Semantic CSS custom properties
+ * These variables are consumed by UI components (Button, Card, Input, etc.)
+ * They automatically respond to light/dark theme via .dark class.
+ * ──────────────────────────────────────────────────────────────────────────────*/
+
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Consolas, monospace;
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+  --font-sans:    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:    ui-monospace, 'Cascadia Code', 'Source Code Pro', Consolas, monospace;
   --font-heading: var(--font-sans);
 
-  --transition-fast: 150ms ease;
-  --transition-base: 200ms ease;
-  --transition-slow: 300ms ease;
+  /* ── Transitions ─────────────────────────────────────────────────────────── */
+  --t-fast:   100ms cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --t-base:   200ms cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --t-slow:   350ms cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --t-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* ── Component: Button ───────────────────────────────────────────────────── */
+  --btn-primary-bg:      linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%);
+  --btn-primary-hover:   linear-gradient(135deg, #4F46E5 0%, #6D28D9 100%);
+  --btn-primary-shadow:  0 4px 14px rgba(91,92,246,0.38), 0 2px 4px rgba(91,92,246,0.2);
+  --btn-primary-color:   #ffffff;
+
+  --btn-secondary-bg:    rgba(91,92,246,0.08);
+  --btn-secondary-hover: rgba(91,92,246,0.14);
+  --btn-secondary-color: #5B5CF6;
+  --btn-secondary-border: rgba(91,92,246,0.25);
+
+  --btn-ghost-hover:     rgba(0,0,0,0.05);
+  --btn-ghost-color:     #374151;
+
+  --btn-danger-bg:       linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  --btn-danger-shadow:   0 4px 14px rgba(239,68,68,0.35);
+
+  --btn-outline-border:  rgba(91,92,246,0.4);
+  --btn-outline-color:   #5B5CF6;
+
+  /* ── Component: Card ─────────────────────────────────────────────────────── */
+  --card-bg:       #ffffff;
+  --card-border:   rgba(0,0,0,0.07);
+  --card-shadow:   0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --card-radius:   24px;
+
+  /* ── Component: Input ────────────────────────────────────────────────────── */
+  --input-bg:          #ffffff;
+  --input-border:      rgba(0,0,0,0.12);
+  --input-border-focus: rgba(91,92,246,0.5);
+  --input-color:       #0F172A;
+  --input-placeholder: rgba(15,23,42,0.38);
+  --input-shadow-focus: 0 0 0 3px rgba(91,92,246,0.15);
+  --input-radius:      14px;
+
+  /* ── Component: Badge ────────────────────────────────────────────────────── */
+  --badge-default-bg:    rgba(99,102,241,0.1);
+  --badge-default-color: #4F46E5;
+
+  /* ── Scrollbar ────────────────────────────────────────────────────────────── */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0,0,0,0.15);
 }
+
+/* ── Dark theme overrides ────────────────────────────────────────────────────── */
+.dark {
+  /* Button */
+  --btn-ghost-hover:     rgba(255,255,255,0.06);
+  --btn-ghost-color:     #CBD5E1;
+
+  --btn-secondary-bg:    rgba(91,92,246,0.12);
+  --btn-secondary-hover: rgba(91,92,246,0.18);
+  --btn-secondary-color: #818CF8;
+  --btn-secondary-border: rgba(91,92,246,0.3);
+
+  --btn-outline-border:  rgba(91,92,246,0.45);
+  --btn-outline-color:   #818CF8;
+
+  /* Card */
+  --card-bg:     #131A30;
+  --card-border: rgba(255,255,255,0.07);
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
+
+  /* Input */
+  --input-bg:          rgba(255,255,255,0.05);
+  --input-border:      rgba(255,255,255,0.10);
+  --input-border-focus: rgba(129,140,248,0.6);
+  --input-color:       #E2E8F0;
+  --input-placeholder: rgba(226,232,240,0.32);
+  --input-shadow-focus: 0 0 0 3px rgba(129,140,248,0.18);
+
+  /* Badge */
+  --badge-default-bg:    rgba(99,102,241,0.15);
+  --badge-default-color: #818CF8;
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(255,255,255,0.12);
+}
+
+/* ── Premium scrollbar ────────────────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+*::-webkit-scrollbar        { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
+*::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(91,92,246,0.4); }
