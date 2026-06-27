@@ -99,6 +99,76 @@ const STAGGER_FAST = {
   show:   { opacity: 1, transition: { staggerChildren: 0.05 } },
 }
 
+// ─── Premium design tokens ────────────────────────────────────────────────────
+
+const GLASS_ELEVATED = {
+  background:            'rgba(255,255,255,0.055)',
+  backdropFilter:        'blur(24px) saturate(200%)',
+  WebkitBackdropFilter:  'blur(24px) saturate(200%)',
+  border:                '1px solid rgba(255,255,255,0.10)',
+  boxShadow:             '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
+} as const
+
+// ─── Animated number counter (IntersectionObserver, no deps) ─────────────────
+
+function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const ref  = useRef<HTMLSpanElement>(null)
+  const [val, setVal] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      obs.disconnect()
+      const start = performance.now()
+      const DUR   = 1400
+      const tick  = (now: number) => {
+        const t    = Math.min((now - start) / DUR, 1)
+        const ease = 1 - Math.pow(1 - t, 3)
+        setVal(Math.round(target * ease))
+        if (t < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }, { threshold: 0.3 })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [target])
+
+  return <span ref={ref}>{val}{suffix}</span>
+}
+
+// ─── Hero: floating particles ─────────────────────────────────────────────────
+
+const HERO_PARTICLES = [
+  { x: '7%',  y: '18%', s: 3, c: '#818CF8', d: 0   },
+  { x: '78%', y: '12%', s: 4, c: '#A78BFA', d: 0.7 },
+  { x: '93%', y: '42%', s: 3, c: '#6366F1', d: 1.3 },
+  { x: '86%', y: '72%', s: 5, c: '#7C3AED', d: 0.4 },
+  { x: '4%',  y: '62%', s: 4, c: '#C4B5FD', d: 1.9 },
+  { x: '42%', y: '90%', s: 3, c: '#818CF8', d: 1.0 },
+  { x: '22%', y: '6%',  s: 4, c: '#A78BFA', d: 2.5 },
+  { x: '58%', y: '8%',  s: 2, c: '#6366F1', d: 1.6 },
+  { x: '12%', y: '82%', s: 3, c: '#C4B5FD', d: 0.3 },
+] as const
+
+function HeroParticles() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+      {HERO_PARTICLES.map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full"
+          style={{ left: p.x, top: p.y, width: p.s, height: p.s, background: p.c,
+            boxShadow: `0 0 ${p.s * 3}px ${p.c}` }}
+          animate={{ y: [0, -14, 0], opacity: [0.25, 0.85, 0.25], scale: [0.8, 1.2, 0.8] }}
+          transition={{ duration: 3.2 + p.d * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
+        />
+      ))}
+    </div>
+  )
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
@@ -144,182 +214,182 @@ function getLiveDate() {
   return { greeting: getTimeGreeting(hour), weekday, date: `${dd}.${mm}.${yyyy}` }
 }
 
-// ─── Sprint 4.7 Phase 1: Student Illustration (CSS art, no assets) ────────────
+// ─── Sprint 4.7 Phase 1.5: Premium Student Illustration ──────────────────────
 
 function StudentIllustration() {
-  const EASE_SPRING: [number,number,number,number] = [0.21,0.47,0.32,0.98]
-
   return (
-    <div className="relative w-52 h-64 flex items-end justify-center select-none" aria-hidden="true">
-      {/* Background radial glow */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-      >
-        <div
-          className="w-52 h-52 rounded-full blur-3xl opacity-30"
-          style={{ background: 'radial-gradient(circle, #6366F1 0%, #7C3AED 40%, transparent 70%)' }}
-        />
+    <div className="relative w-56 h-68 flex items-end justify-center select-none" aria-hidden="true">
+      {/* Multi-layer ambient glow */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute w-64 h-64 rounded-full blur-[80px] opacity-25"
+          style={{ background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 45%, transparent 70%)' }} />
+        <div className="absolute w-40 h-40 rounded-full blur-[40px] opacity-20 -translate-y-4"
+          style={{ background: 'radial-gradient(circle, #818CF8, transparent 70%)' }} />
       </div>
 
+      {/* Main floating group */}
       <motion.div
         className="relative z-10 flex flex-col items-center"
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ y: [0, -12, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
       >
         {/* Head */}
         <div
-          className="w-14 h-14 rounded-full relative overflow-hidden flex-shrink-0"
-          style={{ background: 'linear-gradient(145deg, #F0C4A0, #D4926A)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+          className="w-[60px] h-[62px] rounded-[50%] relative flex-shrink-0"
+          style={{
+            background: 'linear-gradient(160deg, #FDDBB4 0%, #E8A87C 55%, #D4926A 100%)',
+            boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
+          }}
         >
-          {/* Hair */}
-          <div
-            className="absolute top-0 inset-x-0 h-7 rounded-t-full"
-            style={{ background: 'linear-gradient(145deg, #1A1040, #2D1B69)' }}
-          />
+          {/* Hair + hood */}
+          <div className="absolute -top-1 inset-x-0 h-[34px] rounded-t-[50%] overflow-hidden"
+            style={{ background: 'linear-gradient(160deg, #1A0D4A 0%, #2D1B69 60%, #1E1B4B 100%)' }}>
+            {/* Hair shine */}
+            <div className="absolute top-1 left-3 w-6 h-2 rounded-full opacity-20"
+              style={{ background: 'rgba(255,255,255,0.5)' }} />
+          </div>
+          {/* Eyes */}
+          <div className="absolute flex gap-2.5" style={{ top: '44%', left: '50%', transform: 'translateX(-50%)' }}>
+            {[0, 1].map(i => (
+              <div key={i} className="w-2.5 h-2 rounded-full" style={{ background: '#1A1040' }} />
+            ))}
+          </div>
+          {/* Smile */}
+          <div className="absolute" style={{ bottom: '22%', left: '50%', transform: 'translateX(-50%)', width: 10, height: 4, borderBottom: '2px solid rgba(120,70,40,0.6)', borderRadius: '0 0 10px 10px' }} />
           {/* Ears */}
-          <div className="absolute top-5 -left-1 w-3 h-4 rounded-full" style={{ background: '#D4926A' }} />
-          <div className="absolute top-5 -right-1 w-3 h-4 rounded-full" style={{ background: '#D4926A' }} />
+          <div className="absolute top-[38%] -left-[6px] w-[10px] h-[13px] rounded-full"
+            style={{ background: 'linear-gradient(90deg, #E8A87C, #D4926A)' }} />
+          <div className="absolute top-[38%] -right-[6px] w-[10px] h-[13px] rounded-full"
+            style={{ background: 'linear-gradient(270deg, #E8A87C, #D4926A)' }} />
         </div>
 
         {/* Neck */}
-        <div className="w-5 h-2 flex-shrink-0" style={{ background: '#D4926A' }} />
+        <div className="w-[18px] h-[10px] flex-shrink-0 -mt-px"
+          style={{ background: 'linear-gradient(180deg,#D4926A,#C07E58)' }} />
 
         {/* Hoodie body */}
         <div
-          className="relative w-28 h-28 rounded-[28px] flex flex-col items-center justify-center flex-shrink-0"
+          className="relative w-[120px] h-[120px] flex items-center justify-center flex-shrink-0"
           style={{
-            background: 'linear-gradient(145deg, #1A1040 0%, #2D1B69 45%, #1E1B4B 100%)',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+            borderRadius: '30px 30px 24px 24px',
+            background: 'linear-gradient(160deg, #1C1050 0%, #2D1B69 35%, #23184A 65%, #1A1040 100%)',
+            boxShadow: '0 10px 36px rgba(91,127,255,0.28), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.09)',
           }}
         >
-          {/* Hood behind head */}
-          <div
-            className="absolute -top-3 inset-x-4 h-8 rounded-t-[28px]"
-            style={{ background: 'linear-gradient(180deg, #2D1B69, #1A1040)' }}
-          />
-
-          {/* Brand Y on hoodie */}
+          {/* Hood arch */}
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-[78px] h-[28px] rounded-t-[50%]"
+            style={{ background: 'linear-gradient(180deg,#2D1B69 0%,#1C1050 100%)' }} />
+          {/* Hoodie shine overlay */}
+          <div className="absolute inset-0 opacity-[0.07]"
+            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,1) 0%, transparent 45%)', borderRadius: 'inherit' }} />
+          {/* Kangaroo pocket */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-16 h-6 rounded-xl"
+            style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.06)' }} />
+          {/* Brand Y */}
           <motion.span
-            className="text-3xl font-black relative z-10"
+            className="relative z-10 font-black select-none"
             style={{
-              background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 50%, #A78BFA 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              fontSize: 32,
+              background: 'linear-gradient(135deg, #93BBFF 0%, #5B7FFF 40%, #A78BFA 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+              filter: 'drop-shadow(0 0 10px rgba(91,127,255,0.7))',
             }}
-            animate={{ opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            Y
-          </motion.span>
-
+            animate={{
+              filter: [
+                'drop-shadow(0 0 8px rgba(91,127,255,0.5))',
+                'drop-shadow(0 0 20px rgba(91,127,255,0.95))',
+                'drop-shadow(0 0 8px rgba(91,127,255,0.5))',
+              ],
+            }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+          >Y</motion.span>
           {/* Left arm */}
-          <div
-            className="absolute top-3 -left-4 w-5 h-14 rounded-full -rotate-6"
-            style={{ background: 'linear-gradient(145deg, #2D1B69, #1A1040)' }}
-          />
+          <div className="absolute top-2 -left-[18px] w-[18px] h-[58px] rounded-full"
+            style={{ background: 'linear-gradient(180deg,#2D1B69 0%,#1A1040 100%)', transform: 'rotate(-8deg)', transformOrigin: 'top center' }} />
           {/* Right arm */}
-          <div
-            className="absolute top-3 -right-4 w-5 h-14 rounded-full rotate-6"
-            style={{ background: 'linear-gradient(145deg, #2D1B69, #1A1040)' }}
-          />
-
-          {/* Left hand */}
-          <div className="absolute -bottom-2 -left-2 w-5 h-5 rounded-full" style={{ background: '#D4926A' }} />
-          {/* Right hand */}
-          <div className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full" style={{ background: '#D4926A' }} />
+          <div className="absolute top-2 -right-[18px] w-[18px] h-[58px] rounded-full"
+            style={{ background: 'linear-gradient(180deg,#2D1B69 0%,#1A1040 100%)', transform: 'rotate(8deg)', transformOrigin: 'top center' }} />
+          {/* Hands */}
+          <div className="absolute -bottom-3 -left-2 w-6 h-6 rounded-full"
+            style={{ background: 'radial-gradient(circle at 35% 35%, #F0C4A0, #D4926A)' }} />
+          <div className="absolute -bottom-3 -right-2 w-6 h-6 rounded-full"
+            style={{ background: 'radial-gradient(circle at 65% 35%, #F0C4A0, #D4926A)' }} />
         </div>
 
         {/* Laptop */}
-        <div className="relative -mt-1 flex-shrink-0">
-          {/* Screen */}
+        <div className="relative flex-shrink-0 mt-0.5">
+          {/* Screen lid */}
           <div
-            className="w-28 h-16 rounded-[10px] flex items-center justify-center overflow-hidden relative"
+            className="w-[116px] h-[68px] rounded-t-[10px] rounded-b-sm relative overflow-hidden"
             style={{
-              background: '#060916',
-              border: '2px solid rgba(99,102,241,0.5)',
-              boxShadow: '0 0 24px rgba(99,102,241,0.3), inset 0 0 16px rgba(99,102,241,0.08)',
+              background: '#060B1A',
+              border: '1.5px solid rgba(91,127,255,0.55)',
+              boxShadow: '0 0 28px rgba(91,127,255,0.35), 0 0 8px rgba(91,127,255,0.2), inset 0 0 24px rgba(91,127,255,0.07)',
             }}
           >
-            {/* Screen ambient glow */}
-            <div
-              className="absolute inset-0 opacity-15"
-              style={{ background: 'radial-gradient(circle at 50% 100%, #6366F1, transparent 65%)' }}
-            />
-            {/* Scan line animation */}
-            <motion.div
-              className="absolute inset-x-0 h-px opacity-40"
-              style={{ background: 'linear-gradient(90deg, transparent, #818CF8, transparent)' }}
+            {/* Screen glow */}
+            <div className="absolute inset-0 opacity-20"
+              style={{ background: 'radial-gradient(ellipse at 50% 110%, #5B7FFF, transparent 60%)' }} />
+            {/* Scan line */}
+            <motion.div className="absolute inset-x-0 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(147,187,255,0.6) 50%, transparent 100%)' }}
               animate={{ top: ['0%', '100%'] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: 'linear' }}
-            />
-            {/* Glowing Y on screen */}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} />
+            {/* Code lines (decorative) */}
+            <div className="absolute top-3 left-4 space-y-1.5">
+              {[60, 80, 45, 70].map((w, i) => (
+                <div key={i} className="h-[2px] rounded-full opacity-20"
+                  style={{ width: w, background: i % 2 === 0 ? '#818CF8' : '#A78BFA' }} />
+              ))}
+            </div>
+            {/* Y logo center */}
             <motion.span
-              className="relative z-10 text-xl font-black"
+              className="absolute top-1/2 right-5 -translate-y-1/2 font-black text-[18px]"
               style={{
-                background: 'linear-gradient(135deg, #A5B4FC, #6366F1)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 8px rgba(99,102,241,0.8))',
+                background: 'linear-gradient(135deg,#93BBFF,#5B7FFF)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               }}
-              animate={{
-                filter: [
-                  'drop-shadow(0 0 6px rgba(99,102,241,0.6))',
-                  'drop-shadow(0 0 16px rgba(99,102,241,1))',
-                  'drop-shadow(0 0 6px rgba(99,102,241,0.6))',
-                ],
-                scale: [0.95, 1.05, 0.95],
-              }}
+              animate={{ opacity: [0.6, 1, 0.6], scale: [0.9, 1.1, 0.9] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              Y
-            </motion.span>
+            >Y</motion.span>
           </div>
-          {/* Laptop hinge */}
-          <div
-            className="w-1 h-2 mx-auto"
-            style={{ background: 'linear-gradient(180deg,#374151,#1F2937)' }}
-          />
-          {/* Laptop base */}
-          <div
-            className="w-32 h-2 rounded-b-lg -mt-0.5"
+          {/* Hinge strip */}
+          <div className="h-[3px] rounded-none"
+            style={{ background: 'linear-gradient(90deg,#1F2937,#374151,#1F2937)' }} />
+          {/* Base */}
+          <div className="w-[128px] h-[7px] rounded-b-[6px] -mx-1.5"
             style={{
-              background: 'linear-gradient(145deg, #374151, #1F2937)',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.4)',
-            }}
-          />
-          {/* Laptop shadow */}
-          <div
-            className="w-28 h-2 mx-auto rounded-full mt-1 blur-md opacity-50"
-            style={{ background: 'rgba(99,102,241,0.4)' }}
-          />
+              background: 'linear-gradient(180deg,#374151,#1F2937)',
+              boxShadow: '0 6px 16px rgba(0,0,0,0.5)',
+            }} />
+          {/* Cast shadow */}
+          <div className="w-24 h-2 mx-auto rounded-full mt-1.5 blur-md opacity-40"
+            style={{ background: '#5B7FFF' }} />
         </div>
       </motion.div>
 
-      {/* Floating particles */}
+      {/* Orbiting particles */}
       {[
-        { top: '15%', left: '8%',  size: 5, delay: 0,    color: '#818CF8' },
-        { top: '30%', right: '5%', size: 4, delay: 0.8,  color: '#A78BFA' },
-        { top: '60%', left: '5%',  size: 3, delay: 1.5,  color: '#6366F1' },
-        { top: '70%', right: '8%', size: 5, delay: 2.2,  color: '#7C3AED' },
-        { top: '10%', right:'15%', size: 3, delay: 0.4,  color: '#C4B5FD' },
+        { top: '10%', left: '10%', s: 4, c: '#818CF8', d: 0   },
+        { top: '25%', right:'6%',  s: 3, c: '#A78BFA', d: 0.7 },
+        { top: '62%', left: '4%',  s: 3, c: '#6366F1', d: 1.4 },
+        { top: '74%', right:'6%',  s: 5, c: '#7C3AED', d: 2.1 },
+        { top: '8%',  right:'18%', s: 3, c: '#93BBFF', d: 0.4 },
+        { top: '88%', left: '28%', s: 2, c: '#C4B5FD', d: 1.8 },
       ].map((p, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full pointer-events-none"
           style={{
             top: p.top, left: (p as any).left, right: (p as any).right,
-            width: p.size, height: p.size,
-            background: p.color,
-            boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
+            width: p.s, height: p.s,
+            background: p.c,
+            boxShadow: `0 0 ${p.s * 2.5}px ${p.c}`,
           }}
-          animate={{ y: [-4, 4, -4], opacity: [0.4, 1, 0.4] }}
-          transition={{ duration: 2.5 + p.delay * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
+          animate={{ y: [-5, 5, -5], opacity: [0.3, 0.9, 0.3], scale: [0.8, 1.3, 0.8] }}
+          transition={{ duration: 2.8 + p.d * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
         />
       ))}
-
-      {void EASE_SPRING}
     </div>
   )
 }
@@ -414,30 +484,35 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
 
   return (
     <div
-      className="relative overflow-hidden rounded-[28px] px-6 py-8 sm:px-10 sm:py-10"
+      className="relative overflow-hidden rounded-[28px] px-6 py-10 sm:px-10 sm:py-12"
       style={{
-        background: 'linear-gradient(145deg, #07091A 0%, #0E1230 40%, #130D2E 75%, #080C1F 100%)',
-        boxShadow: '0 1px 0 rgba(255,255,255,0.05) inset, 0 24px 64px rgba(0,0,0,0.4)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: 'linear-gradient(145deg, #070B18 0%, #0C1235 30%, #130D30 60%, #090C20 100%)',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.07) inset, 0 32px 80px rgba(0,0,0,0.5)',
+        border: '1px solid rgba(255,255,255,0.07)',
       }}
     >
-      {/* Ambient background orbs */}
+      {/* Layered ambient orbs */}
       <div className="absolute pointer-events-none inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-32 right-16 w-96 h-96 rounded-full blur-[100px] opacity-20"
-          style={{ background: 'radial-gradient(circle, #6366F1 0%, transparent 65%)' }} />
-        <div className="absolute -bottom-20 left-10 w-72 h-72 rounded-full blur-[80px] opacity-15"
-          style={{ background: 'radial-gradient(circle, #7C3AED 0%, transparent 65%)' }} />
-        <div className="absolute top-1/3 right-1/3 w-52 h-52 rounded-full blur-[60px] opacity-08"
+        <div className="absolute -top-40 right-12 w-[500px] h-[500px] rounded-full blur-[120px] opacity-15"
+          style={{ background: 'radial-gradient(circle, #5B7FFF 0%, transparent 60%)' }} />
+        <div className="absolute -bottom-24 -left-12 w-[400px] h-[400px] rounded-full blur-[100px] opacity-12"
+          style={{ background: 'radial-gradient(circle, #7C3AED 0%, transparent 60%)' }} />
+        <div className="absolute top-1/2 right-1/4 w-72 h-72 rounded-full blur-[80px] opacity-10"
           style={{ background: 'radial-gradient(circle, #3B82F6 0%, transparent 65%)' }} />
-        {/* Grid pattern */}
+        {/* Grid mesh overlay */}
         <div
-          className="absolute inset-0 opacity-[0.025]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
+        {/* Noise vignette */}
+        <div className="absolute inset-0 opacity-[0.015]"
+          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")', backgroundSize: '160px' }} />
       </div>
+      {/* Floating particles */}
+      <HeroParticles />
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
         {/* Left: Dynamic greeting + content */}
@@ -495,32 +570,52 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
             </p>
           </motion.div>
 
-          {/* CTA buttons (PRESERVED — same navigate calls) */}
+          {/* CTA buttons (PRESERVED navigate calls — premium visual) */}
           <motion.div variants={FADE_UP} className="flex flex-wrap gap-3">
+            {/* Primary — brand gradient with glow */}
             <motion.button
               type="button"
               onClick={() => navigate(PATHS.STUDENT.AI_ASSISTANT)}
-              whileHover={{ scale: 1.03, y: -2 }}
+              whileHover={{ scale: 1.04, y: -3 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-[18px] text-white font-bold text-[14px] transition-opacity hover:opacity-90"
+              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              className="relative inline-flex items-center gap-2.5 px-7 py-3.5 rounded-[18px] text-white font-bold text-[14px] overflow-hidden group"
               style={{
-                background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)',
-                boxShadow: '0 8px 24px rgba(91,92,246,0.45), 0 2px 8px rgba(91,92,246,0.2)',
+                background: 'linear-gradient(135deg, #5B7FFF 0%, #7C3AED 100%)',
+                boxShadow: '0 6px 28px rgba(91,127,255,0.55), 0 2px 8px rgba(91,127,255,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
               }}
             >
-              <Zap className="w-4 h-4" aria-hidden="true" />
-              AI bilan suhbatni boshlash
+              {/* Shimmer on hover */}
+              <span
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                style={{ background: 'linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.12) 50%, transparent 80%)' }}
+                aria-hidden="true"
+              />
+              <Zap className="w-4 h-4 relative z-10" aria-hidden="true" />
+              <span className="relative z-10">AI bilan suhbatni boshlash</span>
             </motion.button>
 
+            {/* Secondary — glass with animated arrow */}
             <motion.button
               type="button"
               onClick={() => navigate(PATHS.STUDENT.LESSONS)}
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.03, y: -1 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-[18px] text-white/65 hover:text-white/90 font-semibold text-[14px] transition-all border border-white/[0.12] hover:border-white/25 hover:bg-white/[0.05]"
+              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              className="group inline-flex items-center gap-2 px-5 py-3.5 rounded-[18px] text-white/65 hover:text-white/90 font-semibold text-[14px] transition-colors duration-150"
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.14)',
+                backdropFilter: 'blur(12px)',
+              }}
             >
               Darslarim
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              <motion.span
+                animate={{ x: [0, 2, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </motion.span>
             </motion.button>
           </motion.div>
 
@@ -604,35 +699,41 @@ function StatsSection() {
         <motion.div
           key={s.label}
           variants={FADE_UP}
-          whileHover={{ y: -4, scale: 1.015 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="rounded-[20px] p-5 border cursor-default"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderColor: 'rgba(255,255,255,0.07)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
-          }}
+          whileHover={{ y: -5, scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          className="rounded-[22px] p-5 cursor-default relative overflow-hidden group"
+          style={{ ...GLASS_ELEVATED, borderColor: `${s.color}18` }}
         >
-          {/* Top icon bar */}
+          {/* Hover glow */}
           <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-sm mb-3"
-            style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[22px] pointer-events-none"
+            style={{ background: `radial-gradient(ellipse at 50% 0%, ${s.color}0C, transparent 65%)` }}
+            aria-hidden="true"
+          />
+          {/* Icon */}
+          <div
+            className="w-9 h-9 rounded-2xl flex items-center justify-center mb-4 relative z-10"
+            style={{ background: `${s.color}15`, border: `1px solid ${s.color}28`, boxShadow: `0 0 16px ${s.color}15` }}
           >
-            <CheckCircle className="w-4 h-4" style={{ color: s.color }} aria-hidden="true" />
+            <CheckCircle className="w-4.5 h-4.5" style={{ color: s.color, width: 18, height: 18 }} aria-hidden="true" />
           </div>
-
+          {/* Value */}
           <div
-            className="text-[1.9rem] font-black leading-none mb-1.5 tracking-tight"
+            className="text-[2rem] font-black leading-none mb-2 tracking-tight relative z-10"
             style={{ color: s.color }}
           >
             {s.value}
           </div>
-          <p className="text-[12px] text-white/50 font-medium leading-snug">{s.label}</p>
-
-          {/* Bottom accent line */}
-          <div className="mt-3 h-[2px] rounded-full" style={{ background: `linear-gradient(90deg, ${s.color}60, transparent)` }} />
+          <p className="text-[11.5px] text-white/45 font-medium leading-snug relative z-10">{s.label}</p>
+          {/* Accent line */}
+          <motion.div
+            className="absolute bottom-0 inset-x-0 h-[2px]"
+            style={{ background: `linear-gradient(90deg, ${s.color}70, ${s.color}20, transparent)` }}
+            initial={{ scaleX: 0, originX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, ease: EASE, delay: 0.2 }}
+          />
         </motion.div>
       ))}
     </motion.div>
@@ -649,10 +750,7 @@ function WeakTopicsCard({ avgPct, loading }: { avgPct: number; loading: boolean 
     <div
       className="rounded-[24px] p-5 border h-full"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderColor: 'rgba(255,255,255,0.07)',
+        ...GLASS_ELEVATED, borderColor: undefined,
       }}
     >
       <div className="flex items-center gap-2 mb-4">
@@ -725,10 +823,7 @@ function CoursesCard({
     <div
       className="rounded-[24px] p-5 border h-full"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderColor: 'rgba(255,255,255,0.07)',
+        ...GLASS_ELEVATED, borderColor: undefined,
       }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -803,10 +898,7 @@ function RecentActivityCard({ tests, loading }: { tests: SDTest[]; loading: bool
     <div
       className="rounded-[24px] border overflow-hidden"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderColor: 'rgba(255,255,255,0.07)',
+        ...GLASS_ELEVATED, borderColor: undefined,
       }}
     >
       <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.06]">
@@ -885,10 +977,7 @@ function ScoreCard({ snapshot, loading, attPct }: { snapshot: ScoreSnapshot | nu
     <div
       className="rounded-[24px] p-5 border h-full"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderColor: 'rgba(255,255,255,0.07)',
+        ...GLASS_ELEVATED, borderColor: undefined,
       }}
     >
       <div className="flex items-center gap-2 mb-4">
@@ -942,10 +1031,7 @@ function ComingSoonCard() {
     <div
       className="rounded-[24px] p-5 border h-full"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderColor: 'rgba(255,255,255,0.07)',
+        ...GLASS_ELEVATED, borderColor: undefined,
       }}
     >
       <div className="flex items-center gap-2 mb-4">
@@ -1094,10 +1180,10 @@ const PersonalStatsRow = memo(function PersonalStatsRow({
 }) {
   const activeCount = groups.filter(g => g.status === 'active').length
   const stats = [
-    { icon: BookOpen,  label: 'Faol kurslar',    value: loading ? '…' : String(activeCount),     color: '#6366F1', sub: `${groups.length} ta jami` },
-    { icon: FileIcon,  label: 'Test topshirildi', value: loading ? '…' : String(tests.length),   color: '#22C55E', sub: 'umumiy'                    },
-    { icon: Award,     label: "O'rtacha ball",    value: loading ? '…' : `${avgScore}%`,          color: '#F59E0B', sub: 'testlar bo\'yicha'          },
-    { icon: Users,     label: 'Davomat',          value: loading ? '…' : (attPct !== null ? `${attPct}%` : '—'), color: '#14B8A6', sub: "darslarning" },
+    { icon: BookOpen, label: 'Faol kurslar',    numericVal: activeCount,             suffix: '',  color: '#5B7FFF', sub: `${groups.length} ta jami`   },
+    { icon: FileIcon, label: 'Test topshirildi', numericVal: tests.length,            suffix: '',  color: '#22C55E', sub: 'umumiy'                      },
+    { icon: Award,    label: "O'rtacha ball",    numericVal: avgScore,                suffix: '%', color: '#F59E0B', sub: "testlar bo'yicha"             },
+    { icon: Users,    label: 'Davomat',          numericVal: attPct ?? 0,             suffix: attPct !== null ? '%' : '', color: '#14B8A6', sub: "darslarning" },
   ]
 
   return (
@@ -1110,50 +1196,54 @@ const PersonalStatsRow = memo(function PersonalStatsRow({
         <motion.div
           key={s.label}
           variants={FADE_UP}
-          whileHover={{ y: -3, scale: 1.015 }}
-          transition={{ duration: 0.18 }}
-          className="rounded-[20px] p-4 border relative overflow-hidden"
+          whileHover={{ y: -5, scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+          className="rounded-[22px] p-5 relative overflow-hidden group"
           style={{
-            background: 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderColor: `${s.color}20`,
-            boxShadow: `0 4px 20px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04)`,
+            ...GLASS_ELEVATED,
+            border: `1px solid ${s.color}20`,
+            boxShadow: `0 6px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)`,
           }}
         >
-          {/* Glow accent */}
+          {/* Hover glow */}
           <div
-            className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-20 pointer-events-none"
-            style={{ background: s.color }}
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-[22px]"
+            style={{ background: `radial-gradient(ellipse at 20% 20%, ${s.color}12, transparent 60%)` }}
             aria-hidden="true"
           />
-          <div className="relative">
+          {/* Corner glow orb */}
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-25 pointer-events-none"
+            style={{ background: s.color }} aria-hidden="true" />
+
+          <div className="relative z-10">
+            {/* Icon */}
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
-              style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}
+              className="w-10 h-10 rounded-2xl flex items-center justify-center mb-4"
+              style={{ background: `${s.color}18`, border: `1px solid ${s.color}28`, boxShadow: `0 0 16px ${s.color}18` }}
             >
-              <s.icon className="w-4 h-4" style={{ color: s.color }} aria-hidden="true" />
+              <s.icon className="w-5 h-5" style={{ color: s.color, width: 18, height: 18 }} aria-hidden="true" />
             </div>
-            <motion.div
-              className="text-2xl font-black leading-none mb-1"
-              style={{ color: s.color }}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
-            >
-              {s.value}
-            </motion.div>
-            <p className="text-[11px] font-bold text-white/60 leading-tight">{s.label}</p>
-            <p className="text-[10px] text-white/25 mt-0.5">{s.sub}</p>
+            {/* Animated number */}
+            <div className="text-[2rem] font-black leading-none mb-1.5" style={{ color: s.color }}>
+              {loading ? (
+                <span className="text-white/20">—</span>
+              ) : (s.numericVal === 0 && s.suffix === '' && attPct === null && s.label === 'Davomat') ? (
+                <span className="text-white/20">—</span>
+              ) : (
+                <AnimatedCounter target={s.numericVal} suffix={s.suffix} />
+              )}
+            </div>
+            <p className="text-[12px] font-bold text-white/65 leading-tight">{s.label}</p>
+            <p className="text-[10.5px] text-white/28 mt-0.5">{s.sub}</p>
           </div>
+          {/* Bottom accent */}
           <motion.div
-            className="absolute bottom-0 inset-x-0 h-[2px] rounded-b-[20px]"
-            style={{ background: `linear-gradient(90deg, ${s.color}60, transparent)` }}
+            className="absolute bottom-0 inset-x-0 h-[2.5px]"
+            style={{ background: `linear-gradient(90deg, ${s.color}80, ${s.color}20, transparent)` }}
             initial={{ scaleX: 0, originX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.4 + i * 0.07, duration: 0.8, ease: EASE }}
+            transition={{ delay: 0.35 + i * 0.07, duration: 0.9, ease: EASE }}
           />
         </motion.div>
       ))}
@@ -1289,10 +1379,7 @@ function AchievementsShowcase({
       transition={{ duration: 0.45, ease: EASE }}
       className="rounded-[24px] p-5 border"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderColor: 'rgba(255,255,255,0.07)',
+        ...GLASS_ELEVATED, borderColor: undefined,
       }}
     >
       {/* Header */}
