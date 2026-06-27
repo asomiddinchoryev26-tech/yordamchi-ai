@@ -107,7 +107,7 @@ export default function StudentLayout() {
       : t.noGroupStudent
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+    <div className="min-h-screen flex" style={{ background: '#070B14' }}>
 
       <Sidebar
         isOpen={sidebarOpen}
@@ -121,32 +121,38 @@ export default function StudentLayout() {
         avatarNode={avatarEl}
         onLogout={handleLogout}
         summaryCard={
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white">
-            <p className="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-3">
+          /* Premium dark glass summary card */
+          <div
+            className="rounded-[18px] p-4 text-white"
+            style={{
+              background: 'rgba(99,102,241,0.10)',
+              border: '1px solid rgba(99,102,241,0.22)',
+              backdropFilter: 'blur(16px)',
+            }}
+          >
+            <p className="text-[9.5px] font-bold text-white/30 uppercase tracking-[0.15em] mb-3">
               {t.myResultsStudent}
             </p>
             <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="bg-white/10 rounded-xl p-2 text-center">
-                <p className="text-lg font-bold leading-tight">
-                  {stats.groups > 0 ? stats.groups : '—'}
-                </p>
-                <p className="text-[9px] text-blue-200 mt-0.5">{t.courseLabel}</p>
-              </div>
-              <div className="bg-white/10 rounded-xl p-2 text-center">
-                <p className="text-lg font-bold leading-tight">
-                  {stats.passed > 0 ? stats.passed : '—'}
-                </p>
-                <p className="text-[9px] text-blue-200 mt-0.5">{t.completedTests}</p>
-              </div>
-              <div className="bg-white/10 rounded-xl p-2 text-center">
-                <p className="text-lg font-bold leading-tight">
-                  {stats.attPct !== null ? `${stats.attPct}%` : '—'}
-                </p>
-                <p className="text-[9px] text-blue-200 mt-0.5">{t.attendancePct}</p>
-              </div>
+              {[
+                { value: stats.groups > 0 ? stats.groups : '—', label: t.courseLabel,    color: '#818CF8' },
+                { value: stats.passed > 0 ? stats.passed : '—', label: t.completedTests, color: '#34D399' },
+                { value: stats.attPct !== null ? `${stats.attPct}%` : '—', label: t.attendancePct, color: '#FCD34D' },
+              ].map(s => (
+                <div
+                  key={s.label}
+                  className="rounded-xl p-2 text-center"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.07)' }}
+                >
+                  <p className="text-base font-black leading-tight" style={{ color: s.color }}>
+                    {s.value}
+                  </p>
+                  <p className="text-[8.5px] text-white/35 mt-0.5">{s.label}</p>
+                </div>
+              ))}
             </div>
             {stats.attPct !== null && (
-              <div className="h-1.5 bg-blue-500/40 rounded-full overflow-hidden">
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
                 <div
                   className={cn(
                     'h-full rounded-full transition-all',
@@ -156,12 +162,12 @@ export default function StudentLayout() {
                 />
               </div>
             )}
-            <p className="text-[10px] text-blue-300 mt-1.5">{statsDesc}</p>
+            <p className="text-[9.5px] text-white/30 mt-1.5">{statsDesc}</p>
           </div>
         }
       />
 
-      <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
+      <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden" style={{ background: '#070B14' }}>
         <Navbar
           onMenuClick={() => setSidebarOpen(true)}
           notificationCount={0}

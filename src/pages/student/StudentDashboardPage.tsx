@@ -19,7 +19,7 @@ import {
   // Sprint 4.7 additions — new visual icons only
   Flame, Award, Target, Bell, BarChart3, Users, Download,
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -123,132 +123,207 @@ function getWeakTopics(avgPct: number): Array<{ name: string; pct: number }> {
   ]
 }
 
-// ─── AI Robot Mascot ──────────────────────────────────────────────────────────
+// ─── Sprint 4.7 Phase 1: Dynamic greeting helpers (pure, no side effects) ─────
 
-const CHAT_MSGS = ["Salom! 👋", "Bugun nima o'rganamiz?", "Savolingiz bormi?"]
+const UZ_DAYS = ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'] as const
 
-function RobotMascot() {
-  const [chatIdx, setChatIdx] = useState(-1)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+function getTimeGreeting(hour: number): string {
+  if (hour >= 5  && hour < 12) return 'Xayrli tong'
+  if (hour >= 12 && hour < 17) return 'Xayrli kun'
+  if (hour >= 17 && hour < 21) return 'Xayrli kech'
+  return 'Xayrli tun'
+}
 
-  useEffect(() => {
-    let i = 0
-    function showNext() {
-      setChatIdx(i)
-      timerRef.current = setTimeout(() => {
-        setChatIdx(-1)
-        i = (i + 1) % CHAT_MSGS.length
-        timerRef.current = setTimeout(showNext, 1000)
-      }, 2800)
-    }
-    timerRef.current = setTimeout(showNext, 1200)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [])
+function getLiveDate() {
+  const now     = new Date()
+  const hour    = now.getHours()
+  const weekday = UZ_DAYS[now.getDay()]
+  const dd      = String(now.getDate()).padStart(2, '0')
+  const mm      = String(now.getMonth() + 1).padStart(2, '0')
+  const yyyy    = now.getFullYear()
+  return { greeting: getTimeGreeting(hour), weekday, date: `${dd}.${mm}.${yyyy}` }
+}
+
+// ─── Sprint 4.7 Phase 1: Student Illustration (CSS art, no assets) ────────────
+
+function StudentIllustration() {
+  const EASE_SPRING: [number,number,number,number] = [0.21,0.47,0.32,0.98]
 
   return (
-    <div className="relative flex items-center justify-center select-none">
-      {/* Background glow */}
+    <div className="relative w-52 h-64 flex items-end justify-center select-none" aria-hidden="true">
+      {/* Background radial glow */}
       <div
-        className="absolute w-52 h-52 rounded-full opacity-30 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #6366F1 0%, #7C3AED 50%, transparent 80%)' }}
-        aria-hidden="true"
-      />
-
-      {/* Robot body */}
-      <motion.div
-        className="relative z-10"
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
       >
-        {/* Antenna */}
-        <div className="flex flex-col items-center mb-1" aria-hidden="true">
-          <motion.div
-            className="w-4 h-4 rounded-full"
-            style={{ background: 'linear-gradient(135deg, #818CF8, #6366F1)' }}
-            animate={{ boxShadow: ['0 0 6px #6366F1', '0 0 16px #6366F1', '0 0 6px #6366F1'] }}
-            transition={{ duration: 1.8, repeat: Infinity }}
-          />
-          <div className="w-[2px] h-5 bg-brand/40 rounded-full" />
-        </div>
+        <div
+          className="w-52 h-52 rounded-full blur-3xl opacity-30"
+          style={{ background: 'radial-gradient(circle, #6366F1 0%, #7C3AED 40%, transparent 70%)' }}
+        />
+      </div>
 
+      <motion.div
+        className="relative z-10 flex flex-col items-center"
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+      >
         {/* Head */}
         <div
-          className="w-32 h-36 rounded-[32px] relative overflow-hidden border border-brand/30"
-          style={{
-            background: 'linear-gradient(145deg, #1A1040 0%, #2D1B69 40%, #1E1B4B 100%)',
-            boxShadow: '0 0 40px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
-          }}
-          aria-hidden="true"
+          className="w-14 h-14 rounded-full relative overflow-hidden flex-shrink-0"
+          style={{ background: 'linear-gradient(145deg, #F0C4A0, #D4926A)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
         >
-          {/* Visor shine */}
-          <div className="absolute inset-0 opacity-20"
-            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%)' }} />
+          {/* Hair */}
+          <div
+            className="absolute top-0 inset-x-0 h-7 rounded-t-full"
+            style={{ background: 'linear-gradient(145deg, #1A1040, #2D1B69)' }}
+          />
+          {/* Ears */}
+          <div className="absolute top-5 -left-1 w-3 h-4 rounded-full" style={{ background: '#D4926A' }} />
+          <div className="absolute top-5 -right-1 w-3 h-4 rounded-full" style={{ background: '#D4926A' }} />
+        </div>
 
-          {/* Eyes row */}
-          <div className="flex justify-center gap-4 pt-7">
-            {[0, 1].map(i => (
-              <div key={i} className="relative">
-                {/* White iris */}
-                <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-inner">
-                  {/* Glowing pupil */}
-                  <motion.div
-                    className="w-4 h-4 rounded-full"
-                    style={{ background: 'linear-gradient(135deg, #818CF8, #6366F1)' }}
-                    animate={{ scale: [1, 1.15, 1] }}
-                    transition={{ duration: 2.2, repeat: Infinity, delay: i * 0.35, ease: 'easeInOut' }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Neck */}
+        <div className="w-5 h-2 flex-shrink-0" style={{ background: '#D4926A' }} />
 
-          {/* Smile */}
-          <div className="flex justify-center mt-3">
-            <div className="w-10 h-3 rounded-b-full border-b-[3px] border-white/50" />
-          </div>
+        {/* Hoodie body */}
+        <div
+          className="relative w-28 h-28 rounded-[28px] flex flex-col items-center justify-center flex-shrink-0"
+          style={{
+            background: 'linear-gradient(145deg, #1A1040 0%, #2D1B69 45%, #1E1B4B 100%)',
+            boxShadow: '0 8px 32px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+          }}
+        >
+          {/* Hood behind head */}
+          <div
+            className="absolute -top-3 inset-x-4 h-8 rounded-t-[28px]"
+            style={{ background: 'linear-gradient(180deg, #2D1B69, #1A1040)' }}
+          />
 
-          {/* Chest panel */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-16 h-6 rounded-xl bg-brand/20 border border-brand/25 flex items-center justify-center gap-1.5">
-            {[0, 1, 2].map(i => (
-              <motion.div
-                key={i}
-                className="w-1.5 h-1.5 rounded-full bg-brand-light/70"
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.28 }}
-              />
-            ))}
+          {/* Brand Y on hoodie */}
+          <motion.span
+            className="text-3xl font-black relative z-10"
+            style={{
+              background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 50%, #A78BFA 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+            animate={{ opacity: [0.8, 1, 0.8] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            Y
+          </motion.span>
+
+          {/* Left arm */}
+          <div
+            className="absolute top-3 -left-4 w-5 h-14 rounded-full -rotate-6"
+            style={{ background: 'linear-gradient(145deg, #2D1B69, #1A1040)' }}
+          />
+          {/* Right arm */}
+          <div
+            className="absolute top-3 -right-4 w-5 h-14 rounded-full rotate-6"
+            style={{ background: 'linear-gradient(145deg, #2D1B69, #1A1040)' }}
+          />
+
+          {/* Left hand */}
+          <div className="absolute -bottom-2 -left-2 w-5 h-5 rounded-full" style={{ background: '#D4926A' }} />
+          {/* Right hand */}
+          <div className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full" style={{ background: '#D4926A' }} />
+        </div>
+
+        {/* Laptop */}
+        <div className="relative -mt-1 flex-shrink-0">
+          {/* Screen */}
+          <div
+            className="w-28 h-16 rounded-[10px] flex items-center justify-center overflow-hidden relative"
+            style={{
+              background: '#060916',
+              border: '2px solid rgba(99,102,241,0.5)',
+              boxShadow: '0 0 24px rgba(99,102,241,0.3), inset 0 0 16px rgba(99,102,241,0.08)',
+            }}
+          >
+            {/* Screen ambient glow */}
+            <div
+              className="absolute inset-0 opacity-15"
+              style={{ background: 'radial-gradient(circle at 50% 100%, #6366F1, transparent 65%)' }}
+            />
+            {/* Scan line animation */}
+            <motion.div
+              className="absolute inset-x-0 h-px opacity-40"
+              style={{ background: 'linear-gradient(90deg, transparent, #818CF8, transparent)' }}
+              animate={{ top: ['0%', '100%'] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'linear' }}
+            />
+            {/* Glowing Y on screen */}
+            <motion.span
+              className="relative z-10 text-xl font-black"
+              style={{
+                background: 'linear-gradient(135deg, #A5B4FC, #6366F1)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                filter: 'drop-shadow(0 0 8px rgba(99,102,241,0.8))',
+              }}
+              animate={{
+                filter: [
+                  'drop-shadow(0 0 6px rgba(99,102,241,0.6))',
+                  'drop-shadow(0 0 16px rgba(99,102,241,1))',
+                  'drop-shadow(0 0 6px rgba(99,102,241,0.6))',
+                ],
+                scale: [0.95, 1.05, 0.95],
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              Y
+            </motion.span>
           </div>
+          {/* Laptop hinge */}
+          <div
+            className="w-1 h-2 mx-auto"
+            style={{ background: 'linear-gradient(180deg,#374151,#1F2937)' }}
+          />
+          {/* Laptop base */}
+          <div
+            className="w-32 h-2 rounded-b-lg -mt-0.5"
+            style={{
+              background: 'linear-gradient(145deg, #374151, #1F2937)',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.4)',
+            }}
+          />
+          {/* Laptop shadow */}
+          <div
+            className="w-28 h-2 mx-auto rounded-full mt-1 blur-md opacity-50"
+            style={{ background: 'rgba(99,102,241,0.4)' }}
+          />
         </div>
       </motion.div>
 
-      {/* Chat bubble */}
-      <AnimatePresence>
-        {chatIdx >= 0 && (
-          <motion.div
-            key={chatIdx}
-            initial={{ opacity: 0, scale: 0.75, y: 8, x: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 4 }}
-            transition={{ duration: 0.28, ease: EASE }}
-            className="absolute -top-4 left-[calc(100%-8px)] whitespace-nowrap"
-            style={{
-              background: 'rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255,255,255,0.18)',
-              borderRadius: '16px 16px 16px 4px',
-              padding: '8px 12px',
-              color: 'white',
-              fontSize: '13px',
-              fontWeight: 500,
-            }}
-          >
-            {CHAT_MSGS[chatIdx]}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Floating particles */}
+      {[
+        { top: '15%', left: '8%',  size: 5, delay: 0,    color: '#818CF8' },
+        { top: '30%', right: '5%', size: 4, delay: 0.8,  color: '#A78BFA' },
+        { top: '60%', left: '5%',  size: 3, delay: 1.5,  color: '#6366F1' },
+        { top: '70%', right: '8%', size: 5, delay: 2.2,  color: '#7C3AED' },
+        { top: '10%', right:'15%', size: 3, delay: 0.4,  color: '#C4B5FD' },
+      ].map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            top: p.top, left: (p as any).left, right: (p as any).right,
+            width: p.size, height: p.size,
+            background: p.color,
+            boxShadow: `0 0 ${p.size * 2}px ${p.color}`,
+          }}
+          animate={{ y: [-4, 4, -4], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 2.5 + p.delay * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
+        />
+      ))}
+
+      {void EASE_SPRING}
     </div>
   )
 }
+
 
 // ─── Quick Prompt Chips ───────────────────────────────────────────────────────
 
@@ -330,31 +405,78 @@ function HomeAIInput({ onSubmit }: { onSubmit: (text: string) => void }) {
   )
 }
 
-// ─── Section: Hero ────────────────────────────────────────────────────────────
+// ─── Section: Hero (Sprint 4.7 Phase 1 — Premium redesign with greeting) ─────
+// All navigation logic preserved: navigate(PATHS.STUDENT.AI_ASSISTANT/LESSONS)
+// All existing functionality: HomeAIInput, quick chips, CTA buttons
 
 function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<typeof useNavigate> }) {
+  const { greeting, weekday, date } = getLiveDate()
+
   return (
     <div
-      className="relative overflow-hidden rounded-[28px] px-6 py-8 sm:px-10 sm:py-12"
+      className="relative overflow-hidden rounded-[28px] px-6 py-8 sm:px-10 sm:py-10"
       style={{
-        background: 'linear-gradient(145deg, #080C1A 0%, #0F1228 40%, #130D2E 80%, #0D1122 100%)',
-        boxShadow: '0 1px 0 rgba(255,255,255,0.05) inset',
+        background: 'linear-gradient(145deg, #07091A 0%, #0E1230 40%, #130D2E 75%, #080C1F 100%)',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.05) inset, 0 24px 64px rgba(0,0,0,0.4)',
+        border: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      {/* Background orbs */}
+      {/* Ambient background orbs */}
       <div className="absolute pointer-events-none inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-24 right-24 w-80 h-80 rounded-full blur-[80px] opacity-25"
-          style={{ background: 'radial-gradient(circle, #6366F1 0%, transparent 70%)' }} />
-        <div className="absolute -bottom-16 left-16 w-64 h-64 rounded-full blur-[64px] opacity-20"
-          style={{ background: 'radial-gradient(circle, #7C3AED 0%, transparent 70%)' }} />
-        <div className="absolute top-1/2 left-1/2 w-48 h-48 rounded-full blur-[48px] opacity-10"
-          style={{ background: 'radial-gradient(circle, #818CF8 0%, transparent 70%)' }} />
+        <div className="absolute -top-32 right-16 w-96 h-96 rounded-full blur-[100px] opacity-20"
+          style={{ background: 'radial-gradient(circle, #6366F1 0%, transparent 65%)' }} />
+        <div className="absolute -bottom-20 left-10 w-72 h-72 rounded-full blur-[80px] opacity-15"
+          style={{ background: 'radial-gradient(circle, #7C3AED 0%, transparent 65%)' }} />
+        <div className="absolute top-1/3 right-1/3 w-52 h-52 rounded-full blur-[60px] opacity-08"
+          style={{ background: 'radial-gradient(circle, #3B82F6 0%, transparent 65%)' }} />
+        {/* Grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
       </div>
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
-        {/* Left: Copy */}
+        {/* Left: Dynamic greeting + content */}
         <motion.div variants={STAGGER} initial="hidden" animate="show" className="space-y-5">
-          {/* Badge */}
+
+          {/* Dynamic time-based greeting block */}
+          <motion.div variants={FADE_UP} className="space-y-1">
+            {/* Greeting + name */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight tracking-tight">
+                {greeting},&nbsp;
+                <span
+                  style={{
+                    background: 'linear-gradient(135deg, #818CF8 0%, #C4B5FD 50%, #A78BFA 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {name}
+                </span>
+                &nbsp;<span className="not-italic">👋</span>
+              </h1>
+            </div>
+
+            {/* Weekday + date */}
+            <div className="flex items-center gap-3">
+              <div
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold"
+                style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.22)', color: '#C4B5FD' }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
+                Bugun {weekday}
+              </div>
+              <span className="text-[12px] text-white/30 font-medium">{date}</span>
+            </div>
+          </motion.div>
+
+          {/* AI availability badge */}
           <motion.div variants={FADE_UP}>
             <Badge
               variant="brand"
@@ -366,39 +488,21 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
             </Badge>
           </motion.div>
 
-          {/* Headline */}
-          <motion.div variants={FADE_UP}>
-            <h1 className="text-3xl sm:text-4xl xl:text-[2.6rem] font-black text-white leading-[1.1] tracking-tight">
-              Imtihondan qo&apos;rqmang.
-              <span
-                className="block mt-1"
-                style={{
-                  background: 'linear-gradient(135deg, #818CF8 0%, #C4B5FD 50%, #818CF8 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                AI o&apos;qituvchingiz 24/7 tayyor.
-              </span>
-            </h1>
-          </motion.div>
-
           {/* Subtitle */}
           <motion.div variants={FADE_UP}>
-            <p className="text-base text-white/55 max-w-md leading-relaxed">
-              Salom, <strong className="text-white/80">{name}</strong>! Bugun qaysi mavzuni o&apos;rganamiz?
+            <p className="text-[15px] text-white/50 max-w-md leading-relaxed">
+              Imtihondan qo&apos;rqmang — bugun qaysi mavzuni o&apos;rganamiz?
             </p>
           </motion.div>
 
-          {/* CTA buttons */}
+          {/* CTA buttons (PRESERVED — same navigate calls) */}
           <motion.div variants={FADE_UP} className="flex flex-wrap gap-3">
             <motion.button
               type="button"
               onClick={() => navigate(PATHS.STUDENT.AI_ASSISTANT)}
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-[18px] text-white font-bold text-[14px] transition-opacity hover:opacity-92"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-[18px] text-white font-bold text-[14px] transition-opacity hover:opacity-90"
               style={{
                 background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)',
                 boxShadow: '0 8px 24px rgba(91,92,246,0.45), 0 2px 8px rgba(91,92,246,0.2)',
@@ -415,21 +519,19 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
               whileTap={{ scale: 0.97 }}
               className="inline-flex items-center gap-2 px-5 py-3 rounded-[18px] text-white/65 hover:text-white/90 font-semibold text-[14px] transition-all border border-white/[0.12] hover:border-white/25 hover:bg-white/[0.05]"
             >
-              Qanday ishlaydi?
+              Darslarim
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </motion.button>
           </motion.div>
 
-          {/* Home AI Input */}
+          {/* Home AI Input (PRESERVED — same onSubmit handler, same navigate target) */}
           <motion.div variants={FADE_UP} className="max-w-lg">
             <HomeAIInput onSubmit={(text) => {
-              navigate(text
-                ? PATHS.STUDENT.AI_ASSISTANT
-                : PATHS.STUDENT.AI_ASSISTANT)
+              navigate(text ? PATHS.STUDENT.AI_ASSISTANT : PATHS.STUDENT.AI_ASSISTANT)
             }} />
           </motion.div>
 
-          {/* Quick Prompt Chips */}
+          {/* Quick Prompt Chips (PRESERVED — same navigate call, same QUICK_TOPICS) */}
           <motion.div variants={FADE_UP} className="flex flex-wrap gap-2 pt-1">
             {QUICK_TOPICS.map((topic, i) => (
               <motion.button
@@ -466,14 +568,14 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
           </motion.div>
         </motion.div>
 
-        {/* Right: Robot Mascot */}
+        {/* Right: Premium Student Illustration (replaces RobotMascot visually) */}
         <motion.div
-          className="hidden lg:flex items-center justify-center pr-4"
-          initial={{ opacity: 0, x: 30, scale: 0.9 }}
+          className="hidden lg:flex items-center justify-center pr-2"
+          initial={{ opacity: 0, x: 30, scale: 0.85 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
         >
-          <RobotMascot />
+          <StudentIllustration />
         </motion.div>
       </div>
     </div>
