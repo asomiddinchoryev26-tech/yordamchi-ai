@@ -19,7 +19,7 @@ import {
   // Sprint 4.7 additions — new visual icons only
   Flame, Award, Target, Bell, BarChart3, Users, Download,
   // Sprint 4.7 Final Hero additions
-  Brain, Sparkles, Code2,
+  Brain, Sparkles, Code2, Atom, Calculator, FlaskConical,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -174,13 +174,18 @@ function HeroParticles() {
 // ─── Hero: floating AI icons ──────────────────────────────────────────────────
 
 const AI_ICON_CFG = [
-  { Icon: Brain,     x: '8%',  y: '22%', s: 18, c: '#5B7FFF', d: 0,    dy: -10 },
-  { Icon: Sparkles,  x: '88%', y: '18%', s: 16, c: '#A78BFA', d: 0.8,  dy: -8  },
-  { Icon: Zap,       x: '82%', y: '68%', s: 15, c: '#818CF8', d: 1.5,  dy: -12 },
-  { Icon: Code2,     x: '6%',  y: '72%', s: 16, c: '#7C3AED', d: 2.3,  dy: -8  },
-  { Icon: BookOpen,  x: '48%', y: '92%', s: 14, c: '#C4B5FD', d: 1.1,  dy: -6  },
-  { Icon: Star,      x: '92%', y: '44%', s: 13, c: '#93BBFF', d: 0.5,  dy: -10 },
-  { Icon: Trophy,    x: '3%',  y: '46%', s: 14, c: '#6366F1', d: 1.9,  dy: -8  },
+  { Icon: Brain,        x: '5%',   y: '14%', s: 20, c: '#5B7FFF', d: 0,    dy: -12 },
+  { Icon: Sparkles,     x: '87%',  y: '10%', s: 18, c: '#A78BFA', d: 0.8,  dy: -10 },
+  { Icon: Zap,          x: '80%',  y: '62%', s: 16, c: '#818CF8', d: 1.5,  dy: -14 },
+  { Icon: Code2,        x: '3%',   y: '68%', s: 17, c: '#7C3AED', d: 2.3,  dy: -9  },
+  { Icon: BookOpen,     x: '44%',  y: '93%', s: 15, c: '#C4B5FD', d: 1.1,  dy: -7  },
+  { Icon: Star,         x: '93%',  y: '38%', s: 14, c: '#93BBFF', d: 0.5,  dy: -11 },
+  { Icon: Trophy,       x: '1%',   y: '40%', s: 15, c: '#6366F1', d: 1.9,  dy: -9  },
+  { Icon: Atom,         x: '88%',  y: '82%', s: 18, c: '#22D3EE', d: 0.3,  dy: -13 },
+  { Icon: Calculator,   x: '14%',  y: '86%', s: 15, c: '#34D399', d: 2.7,  dy: -8  },
+  { Icon: FlaskConical, x: '72%',  y: '5%',  s: 16, c: '#F59E0B', d: 1.4,  dy: -10 },
+  { Icon: BookOpen,     x: '28%',  y: '2%',  s: 14, c: '#818CF8', d: 3.1,  dy: -7  },
+  { Icon: Sparkles,     x: '64%',  y: '90%', s: 13, c: '#A78BFA', d: 2.0,  dy: -8  },
 ] as const
 
 function FloatingAIIcons() {
@@ -252,180 +257,271 @@ function getLiveDate() {
   return { greeting: getTimeGreeting(hour), weekday, date: `${dd}.${mm}.${yyyy}` }
 }
 
-// ─── Sprint 4.7 Phase 1.5: Premium Student Illustration ──────────────────────
+// ─── Sprint 4.7 Final: Premium Student Illustration (25% larger, richer) ─────
 
 function StudentIllustration() {
+  // All dimensions 25% larger than Phase 1.5
   return (
-    <div className="relative w-56 h-68 flex items-end justify-center select-none" aria-hidden="true">
-      {/* Multi-layer ambient glow */}
+    <div
+      className="relative select-none flex items-end justify-center"
+      style={{ width: 280, height: 340 }}
+      aria-hidden="true"
+    >
+      {/* Deep multi-layer ambient glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="absolute w-64 h-64 rounded-full blur-[80px] opacity-25"
-          style={{ background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 45%, transparent 70%)' }} />
-        <div className="absolute w-40 h-40 rounded-full blur-[40px] opacity-20 -translate-y-4"
-          style={{ background: 'radial-gradient(circle, #818CF8, transparent 70%)' }} />
+        <div className="absolute rounded-full blur-[100px] opacity-30"
+          style={{ width: 280, height: 280, background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 40%, transparent 68%)' }} />
+        <div className="absolute rounded-full blur-[60px] opacity-20 -translate-y-8"
+          style={{ width: 180, height: 180, background: 'radial-gradient(circle, #818CF8, transparent 70%)' }} />
+        <div className="absolute rounded-full blur-[40px] opacity-15 translate-y-12"
+          style={{ width: 140, height: 140, background: 'radial-gradient(circle, #3B82F6, transparent 70%)' }} />
       </div>
 
       {/* Main floating group */}
       <motion.div
         className="relative z-10 flex flex-col items-center"
-        animate={{ y: [0, -12, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ y: [0, -14, 0] }}
+        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
       >
-        {/* Head */}
+        {/* ── HEAD ──────────────────────────────────────────────────────────── */}
         <div
-          className="w-[60px] h-[62px] rounded-[50%] relative flex-shrink-0"
           style={{
-            background: 'linear-gradient(160deg, #FDDBB4 0%, #E8A87C 55%, #D4926A 100%)',
-            boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
+            width: 75, height: 78,
+            borderRadius: '50%',
+            background: 'linear-gradient(160deg, #FDDBB4 0%, #F0C4A0 40%, #E8A87C 70%, #D4926A 100%)',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2)',
+            position: 'relative', flexShrink: 0,
           }}
         >
-          {/* Hair + hood */}
-          <div className="absolute -top-1 inset-x-0 h-[34px] rounded-t-[50%] overflow-hidden"
-            style={{ background: 'linear-gradient(160deg, #1A0D4A 0%, #2D1B69 60%, #1E1B4B 100%)' }}>
-            {/* Hair shine */}
-            <div className="absolute top-1 left-3 w-6 h-2 rounded-full opacity-20"
-              style={{ background: 'rgba(255,255,255,0.5)' }} />
+          {/* Hair */}
+          <div style={{
+            position: 'absolute', top: -1, left: 0, right: 0, height: 42,
+            background: 'linear-gradient(160deg, #1A0D4A 0%, #2D1B69 50%, #1E1B4B 100%)',
+            borderRadius: '50% 50% 0 0', overflow: 'hidden',
+          }}>
+            {/* Hair specular */}
+            <div style={{ position: 'absolute', top: 4, left: 12, width: 28, height: 8,
+              background: 'rgba(255,255,255,0.12)', borderRadius: '50%' }} />
           </div>
           {/* Eyes */}
-          <div className="absolute flex gap-2.5" style={{ top: '44%', left: '50%', transform: 'translateX(-50%)' }}>
-            {[0, 1].map(i => (
-              <div key={i} className="w-2.5 h-2 rounded-full" style={{ background: '#1A1040' }} />
-            ))}
+          <div style={{ position: 'absolute', top: '47%', left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', gap: 11 }}>
+            <div style={{ width: 11, height: 9, background: '#1A1040', borderRadius: '50%',
+              boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
+            <div style={{ width: 11, height: 9, background: '#1A1040', borderRadius: '50%',
+              boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
           </div>
           {/* Smile */}
-          <div className="absolute" style={{ bottom: '22%', left: '50%', transform: 'translateX(-50%)', width: 10, height: 4, borderBottom: '2px solid rgba(120,70,40,0.6)', borderRadius: '0 0 10px 10px' }} />
+          <div style={{ position: 'absolute', bottom: '20%', left: '50%',
+            transform: 'translateX(-50%)', width: 16, height: 5,
+            borderBottom: '2.5px solid rgba(140,80,40,0.55)',
+            borderRadius: '0 0 12px 12px' }} />
           {/* Ears */}
-          <div className="absolute top-[38%] -left-[6px] w-[10px] h-[13px] rounded-full"
-            style={{ background: 'linear-gradient(90deg, #E8A87C, #D4926A)' }} />
-          <div className="absolute top-[38%] -right-[6px] w-[10px] h-[13px] rounded-full"
-            style={{ background: 'linear-gradient(270deg, #E8A87C, #D4926A)' }} />
+          <div style={{ position: 'absolute', top: '42%', left: -7, width: 13, height: 16,
+            background: 'linear-gradient(90deg,#E8A87C,#D4926A)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', top: '42%', right: -7, width: 13, height: 16,
+            background: 'linear-gradient(270deg,#E8A87C,#D4926A)', borderRadius: '50%' }} />
         </div>
 
         {/* Neck */}
-        <div className="w-[18px] h-[10px] flex-shrink-0 -mt-px"
-          style={{ background: 'linear-gradient(180deg,#D4926A,#C07E58)' }} />
+        <div style={{ width: 22, height: 12, flexShrink: 0, marginTop: -1,
+          background: 'linear-gradient(180deg,#D4926A,#C07E58)' }} />
 
-        {/* Hoodie body */}
+        {/* ── HOODIE BODY ───────────────────────────────────────────────────── */}
         <div
-          className="relative w-[120px] h-[120px] flex items-center justify-center flex-shrink-0"
           style={{
-            borderRadius: '30px 30px 24px 24px',
-            background: 'linear-gradient(160deg, #1C1050 0%, #2D1B69 35%, #23184A 65%, #1A1040 100%)',
-            boxShadow: '0 10px 36px rgba(91,127,255,0.28), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.09)',
+            position: 'relative', width: 150, height: 148,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            borderRadius: '36px 36px 28px 28px',
+            background: 'linear-gradient(160deg, #1C1050 0%, #2E1C6E 25%, #251868 55%, #1A1040 85%, #150D35 100%)',
+            boxShadow: '0 12px 44px rgba(91,127,255,0.32), 0 4px 12px rgba(0,0,0,0.45), inset 0 2px 0 rgba(255,255,255,0.10)',
           }}
         >
           {/* Hood arch */}
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-[78px] h-[28px] rounded-t-[50%]"
-            style={{ background: 'linear-gradient(180deg,#2D1B69 0%,#1C1050 100%)' }} />
-          {/* Hoodie shine overlay */}
-          <div className="absolute inset-0 opacity-[0.07]"
-            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,1) 0%, transparent 45%)', borderRadius: 'inherit' }} />
+          <div style={{
+            position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
+            width: 96, height: 34,
+            background: 'linear-gradient(180deg,#2D1B69 0%,#1C1050 100%)',
+            borderRadius: '50% 50% 0 0',
+          }} />
+          {/* Hoodie specular shine */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 30%, transparent 55%)',
+            borderRadius: 'inherit',
+          }} />
+          {/* Side shadow for 3D depth */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(90deg, rgba(0,0,0,0.15) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.12) 100%)',
+            borderRadius: 'inherit',
+          }} />
           {/* Kangaroo pocket */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-16 h-6 rounded-xl"
-            style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.06)' }} />
-          {/* Brand Y */}
+          <div style={{
+            position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
+            width: 68, height: 26,
+            background: 'rgba(0,0,0,0.22)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 12,
+          }} />
+          {/* Brand Y — glowing */}
           <motion.span
-            className="relative z-10 font-black select-none"
             style={{
-              fontSize: 32,
+              fontSize: 40, fontWeight: 900, lineHeight: 1,
+              position: 'relative', zIndex: 10,
               background: 'linear-gradient(135deg, #93BBFF 0%, #5B7FFF 40%, #A78BFA 100%)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              filter: 'drop-shadow(0 0 10px rgba(91,127,255,0.7))',
+              userSelect: 'none',
             }}
             animate={{
               filter: [
-                'drop-shadow(0 0 8px rgba(91,127,255,0.5))',
-                'drop-shadow(0 0 20px rgba(91,127,255,0.95))',
-                'drop-shadow(0 0 8px rgba(91,127,255,0.5))',
+                'drop-shadow(0 0 10px rgba(91,127,255,0.55))',
+                'drop-shadow(0 0 24px rgba(91,127,255,1)) drop-shadow(0 0 48px rgba(91,127,255,0.4))',
+                'drop-shadow(0 0 10px rgba(91,127,255,0.55))',
               ],
             }}
-            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
           >Y</motion.span>
           {/* Left arm */}
-          <div className="absolute top-2 -left-[18px] w-[18px] h-[58px] rounded-full"
-            style={{ background: 'linear-gradient(180deg,#2D1B69 0%,#1A1040 100%)', transform: 'rotate(-8deg)', transformOrigin: 'top center' }} />
+          <div style={{
+            position: 'absolute', top: 8, left: -22, width: 22, height: 72,
+            background: 'linear-gradient(180deg,#2E1C6E 0%,#1A1040 100%)',
+            borderRadius: 20, transform: 'rotate(-9deg)', transformOrigin: 'top center',
+            boxShadow: '-3px 4px 12px rgba(0,0,0,0.3)',
+          }} />
           {/* Right arm */}
-          <div className="absolute top-2 -right-[18px] w-[18px] h-[58px] rounded-full"
-            style={{ background: 'linear-gradient(180deg,#2D1B69 0%,#1A1040 100%)', transform: 'rotate(8deg)', transformOrigin: 'top center' }} />
+          <div style={{
+            position: 'absolute', top: 8, right: -22, width: 22, height: 72,
+            background: 'linear-gradient(180deg,#2E1C6E 0%,#1A1040 100%)',
+            borderRadius: 20, transform: 'rotate(9deg)', transformOrigin: 'top center',
+            boxShadow: '3px 4px 12px rgba(0,0,0,0.3)',
+          }} />
           {/* Hands */}
-          <div className="absolute -bottom-3 -left-2 w-6 h-6 rounded-full"
-            style={{ background: 'radial-gradient(circle at 35% 35%, #F0C4A0, #D4926A)' }} />
-          <div className="absolute -bottom-3 -right-2 w-6 h-6 rounded-full"
-            style={{ background: 'radial-gradient(circle at 65% 35%, #F0C4A0, #D4926A)' }} />
+          <div style={{
+            position: 'absolute', bottom: -14, left: -8, width: 26, height: 26,
+            background: 'radial-gradient(circle at 35% 30%, #FDDBB4, #D4926A)',
+            borderRadius: '50%', boxShadow: '0 3px 8px rgba(0,0,0,0.25)',
+          }} />
+          <div style={{
+            position: 'absolute', bottom: -14, right: -8, width: 26, height: 26,
+            background: 'radial-gradient(circle at 65% 30%, #FDDBB4, #D4926A)',
+            borderRadius: '50%', boxShadow: '0 3px 8px rgba(0,0,0,0.25)',
+          }} />
         </div>
 
-        {/* Laptop */}
-        <div className="relative flex-shrink-0 mt-0.5">
+        {/* ── LAPTOP ──────────────────────────────────────────────────────────── */}
+        <div style={{ position: 'relative', flexShrink: 0, marginTop: 2 }}>
           {/* Screen lid */}
-          <div
-            className="w-[116px] h-[68px] rounded-t-[10px] rounded-b-sm relative overflow-hidden"
-            style={{
-              background: '#060B1A',
-              border: '1.5px solid rgba(91,127,255,0.55)',
-              boxShadow: '0 0 28px rgba(91,127,255,0.35), 0 0 8px rgba(91,127,255,0.2), inset 0 0 24px rgba(91,127,255,0.07)',
-            }}
-          >
-            {/* Screen glow */}
-            <div className="absolute inset-0 opacity-20"
-              style={{ background: 'radial-gradient(ellipse at 50% 110%, #5B7FFF, transparent 60%)' }} />
+          <div style={{
+            width: 145, height: 86,
+            borderRadius: '12px 12px 3px 3px',
+            background: 'linear-gradient(160deg,#060B1A 0%,#080E22 100%)',
+            border: '1.5px solid rgba(91,127,255,0.6)',
+            boxShadow: '0 0 32px rgba(91,127,255,0.4), 0 0 12px rgba(91,127,255,0.25), inset 0 0 30px rgba(91,127,255,0.08)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* Screen ambient glow */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'radial-gradient(ellipse at 50% 120%, rgba(91,127,255,0.25), transparent 58%)',
+            }} />
+            {/* Screen bezel highlight */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+              background: 'linear-gradient(90deg, transparent, rgba(147,187,255,0.4), transparent)',
+            }} />
             {/* Scan line */}
-            <motion.div className="absolute inset-x-0 h-px"
-              style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(147,187,255,0.6) 50%, transparent 100%)' }}
+            <motion.div
+              style={{
+                position: 'absolute', left: 0, right: 0, height: 1,
+                background: 'linear-gradient(90deg, transparent 0%, rgba(147,187,255,0.7) 50%, transparent 100%)',
+              }}
               animate={{ top: ['0%', '100%'] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} />
-            {/* Code lines (decorative) */}
-            <div className="absolute top-3 left-4 space-y-1.5">
-              {[60, 80, 45, 70].map((w, i) => (
-                <div key={i} className="h-[2px] rounded-full opacity-20"
-                  style={{ width: w, background: i % 2 === 0 ? '#818CF8' : '#A78BFA' }} />
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'linear' }}
+            />
+            {/* Code lines (editor style) */}
+            <div style={{ position: 'absolute', top: 10, left: 10 }}>
+              {[['#5B7FFF', 72], ['#A78BFA', 96], ['#93BBFF', 52], ['#5B7FFF', 84], ['#818CF8', 64]].map(([c, w], i) => (
+                <div key={i} style={{
+                  width: w as number, height: 2,
+                  background: c as string,
+                  opacity: 0.22 + (i % 2) * 0.08,
+                  borderRadius: 2,
+                  marginTop: i === 0 ? 0 : 6,
+                  paddingLeft: i > 0 && i < 4 ? 10 : 0,
+                }} />
               ))}
             </div>
-            {/* Y logo center */}
+            {/* Y logo - glowing on screen */}
             <motion.span
-              className="absolute top-1/2 right-5 -translate-y-1/2 font-black text-[18px]"
               style={{
+                position: 'absolute', top: '50%', right: 16,
+                transform: 'translateY(-50%)',
+                fontSize: 22, fontWeight: 900,
                 background: 'linear-gradient(135deg,#93BBFF,#5B7FFF)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               }}
-              animate={{ opacity: [0.6, 1, 0.6], scale: [0.9, 1.1, 0.9] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              animate={{
+                filter: [
+                  'drop-shadow(0 0 6px rgba(91,127,255,0.7))',
+                  'drop-shadow(0 0 18px rgba(91,127,255,1)) drop-shadow(0 0 32px rgba(91,127,255,0.5))',
+                  'drop-shadow(0 0 6px rgba(91,127,255,0.7))',
+                ],
+                scale: [0.92, 1.08, 0.92],
+              }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
             >Y</motion.span>
           </div>
-          {/* Hinge strip */}
-          <div className="h-[3px] rounded-none"
-            style={{ background: 'linear-gradient(90deg,#1F2937,#374151,#1F2937)' }} />
+          {/* Hinge */}
+          <div style={{ height: 3, background: 'linear-gradient(90deg,#111827,#374151,#111827)' }} />
           {/* Base */}
-          <div className="w-[128px] h-[7px] rounded-b-[6px] -mx-1.5"
-            style={{
-              background: 'linear-gradient(180deg,#374151,#1F2937)',
-              boxShadow: '0 6px 16px rgba(0,0,0,0.5)',
-            }} />
+          <div style={{
+            width: 160, height: 8, marginLeft: -7.5,
+            background: 'linear-gradient(180deg,#2D3748,#1F2937)',
+            borderRadius: '0 0 8px 8px',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.55)',
+          }} />
+          {/* Keyboard row */}
+          <div style={{
+            position: 'absolute', bottom: 2, left: 10, right: 10, height: 4,
+            background: 'linear-gradient(180deg,rgba(255,255,255,0.05),transparent)',
+            borderRadius: 2,
+          }} />
           {/* Cast shadow */}
-          <div className="w-24 h-2 mx-auto rounded-full mt-1.5 blur-md opacity-40"
-            style={{ background: '#5B7FFF' }} />
+          <div style={{
+            width: 120, height: 8, margin: '6px auto 0',
+            borderRadius: '50%',
+            background: 'rgba(91,127,255,0.35)',
+            filter: 'blur(10px)',
+            opacity: 0.45,
+          }} />
         </div>
       </motion.div>
 
-      {/* Orbiting particles */}
+      {/* Orbiting dot particles */}
       {[
-        { top: '10%', left: '10%', s: 4, c: '#818CF8', d: 0   },
-        { top: '25%', right:'6%',  s: 3, c: '#A78BFA', d: 0.7 },
-        { top: '62%', left: '4%',  s: 3, c: '#6366F1', d: 1.4 },
-        { top: '74%', right:'6%',  s: 5, c: '#7C3AED', d: 2.1 },
-        { top: '8%',  right:'18%', s: 3, c: '#93BBFF', d: 0.4 },
-        { top: '88%', left: '28%', s: 2, c: '#C4B5FD', d: 1.8 },
+        { top: '8%',  left: '8%',  s: 5, c: '#818CF8', d: 0   },
+        { top: '22%', right: '4%', s: 4, c: '#A78BFA', d: 0.8 },
+        { top: '58%', left: '3%',  s: 4, c: '#6366F1', d: 1.5 },
+        { top: '76%', right: '5%', s: 6, c: '#7C3AED', d: 2.2 },
+        { top: '5%',  right: '16%',s: 4, c: '#93BBFF', d: 0.4 },
+        { top: '90%', left: '25%', s: 3, c: '#C4B5FD', d: 1.8 },
+        { top: '42%', left: '2%',  s: 3, c: '#5B7FFF', d: 1.2 },
+        { top: '68%', right: '18%',s: 3, c: '#818CF8', d: 3.0 },
       ].map((p, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full pointer-events-none"
           style={{
-            top: p.top, left: (p as any).left, right: (p as any).right,
-            width: p.s, height: p.s,
-            background: p.c,
-            boxShadow: `0 0 ${p.s * 2.5}px ${p.c}`,
+            top: p.top,
+            left: (p as Record<string,unknown>).left as string | undefined,
+            right: (p as Record<string,unknown>).right as string | undefined,
+            width: p.s, height: p.s, background: p.c,
+            boxShadow: `0 0 ${p.s * 3}px ${p.c}`,
           }}
-          animate={{ y: [-5, 5, -5], opacity: [0.3, 0.9, 0.3], scale: [0.8, 1.3, 0.8] }}
-          transition={{ duration: 2.8 + p.d * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
+          animate={{ y: [-6, 6, -6], opacity: [0.25, 0.9, 0.25], scale: [0.7, 1.4, 0.7] }}
+          transition={{ duration: 3 + p.d * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
         />
       ))}
     </div>
@@ -565,7 +661,7 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
       <HeroParticles />
       <FloatingAIIcons />
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 lg:gap-10 items-center">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-center">
 
         {/* ── LEFT: Greeting + Content ──────────────────────────────────────── */}
         <motion.div variants={STAGGER} initial="hidden" animate="show" className="space-y-6">
@@ -750,28 +846,57 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 0.75, delay: 0.25, ease: EASE }}
         >
-          {/* Neon glow ring around illustration */}
-          <div className="relative">
-            {/* Outer pulse ring */}
+          {/* Neon ring system — 3 rings + strong core glow */}
+          <div className="relative flex items-center justify-center">
+            {/* Outermost slow pulse ring */}
             <motion.div
-              className="absolute -inset-8 rounded-full"
-              style={{ border: '1px solid rgba(91,127,255,0.2)' }}
-              animate={{ scale: [1, 1.06, 1], opacity: [0.5, 0.15, 0.5] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute rounded-full pointer-events-none"
+              style={{ width: 360, height: 360, border: '1px solid rgba(91,127,255,0.15)' }}
+              animate={{ scale: [1, 1.07, 1], opacity: [0.4, 0.1, 0.4] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
               aria-hidden="true"
             />
-            {/* Middle ring */}
+            {/* Middle ring — faster */}
             <motion.div
-              className="absolute -inset-4 rounded-full"
-              style={{ border: '1px solid rgba(124,58,237,0.25)' }}
-              animate={{ scale: [1, 1.04, 1], opacity: [0.6, 0.2, 0.6] }}
-              transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
+              className="absolute rounded-full pointer-events-none"
+              style={{ width: 300, height: 300, border: '1.5px solid rgba(91,127,255,0.28)' }}
+              animate={{ scale: [1, 1.05, 1], opacity: [0.65, 0.2, 0.65] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
               aria-hidden="true"
             />
-            {/* Core glow */}
+            {/* Inner ring — strongest */}
+            <motion.div
+              className="absolute rounded-full pointer-events-none"
+              style={{ width: 240, height: 240, border: '1.5px solid rgba(124,58,237,0.4)',
+                boxShadow: '0 0 20px rgba(91,127,255,0.15), inset 0 0 20px rgba(91,127,255,0.08)' }}
+              animate={{ scale: [1, 1.04, 1], opacity: [0.8, 0.3, 0.8] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
+              aria-hidden="true"
+            />
+            {/* Rotating gradient ring */}
+            <motion.div
+              className="absolute rounded-full pointer-events-none"
+              style={{ width: 270, height: 270,
+                background: 'conic-gradient(from 0deg, transparent 60%, rgba(91,127,255,0.18) 70%, rgba(124,58,237,0.14) 80%, transparent 100%)',
+              }}
+              animate={{ rotate: [0, 360] }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+              aria-hidden="true"
+            />
+            {/* Core radial glow */}
             <div
-              className="absolute inset-0 rounded-full blur-3xl opacity-30"
-              style={{ background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 50%, transparent 70%)' }}
+              className="absolute rounded-full pointer-events-none blur-[60px]"
+              style={{ width: 220, height: 220,
+                background: 'radial-gradient(circle, rgba(91,127,255,0.45) 0%, rgba(124,58,237,0.25) 45%, transparent 70%)',
+              }}
+              aria-hidden="true"
+            />
+            {/* Bottom ground reflection */}
+            <div
+              className="absolute bottom-0 pointer-events-none blur-2xl opacity-40"
+              style={{ width: 200, height: 30, transform: 'translateY(60%)',
+                background: 'radial-gradient(ellipse at center, rgba(91,127,255,0.6), transparent 70%)',
+              }}
               aria-hidden="true"
             />
             <StudentIllustration />
