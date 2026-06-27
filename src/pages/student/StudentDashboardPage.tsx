@@ -1,16 +1,23 @@
 /**
  * pages/student/StudentDashboardPage.tsx
- * Sprint 4.2 — Premium Home Page Redesign
+ * Sprint 4.7 — Premium Student Dashboard Experience (UI/UX enhancement)
+ * Sprint 4.2 — Premium Home Page Redesign (base layer preserved)
  *
  * ALL DATA FETCHING LOGIC IS PRESERVED UNCHANGED.
- * Only the visual rendering layer has been redesigned.
+ * Only the visual rendering layer has been redesigned / extended.
+ *
+ * Sprint 4.7 additions (visual-only, no business logic impact):
+ *   QuickActionsBar, PersonalStatsRow, ContinueLearningCard,
+ *   AchievementsShowcase, DashboardSidebar
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import {
   Camera, ImageIcon, FileText as FileIcon, Mic, Send,
   ArrowRight, CheckCircle, BookOpen, Clock, Zap, Trophy,
   TrendingUp, ChevronRight, Star, Lock,
+  // Sprint 4.7 additions — new visual icons only
+  Flame, Award, Target, Bell, BarChart3, Users, Download,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -920,6 +927,639 @@ function PremiumBanner({ navigate }: { navigate: ReturnType<typeof useNavigate> 
   )
 }
 
+// ═══════════════════════ SPRINT 4.7: NEW VISUAL-ONLY COMPONENTS ═══════════════
+
+// ─── Quick Actions Bar ────────────────────────────────────────────────────────
+
+const QUICK_NAV_ITEMS = [
+  { icon: BookOpen,   label: 'Darslar',   color: '#6366F1', path: PATHS.STUDENT.LESSONS      },
+  { icon: Zap,        label: 'AI Yordam', color: '#8B5CF6', path: PATHS.STUDENT.AI_ASSISTANT  },
+  { icon: FileIcon,   label: 'Testlar',   color: '#22C55E', path: PATHS.STUDENT.TESTS         },
+  { icon: Camera,     label: 'AI Vision', color: '#3B82F6', path: PATHS.STUDENT.AI_VISION     },
+  { icon: Trophy,     label: 'Yutuqlar',  color: '#F59E0B', path: PATHS.STUDENT.ACHIEVEMENTS  },
+  { icon: Clock,      label: 'Davomat',   color: '#14B8A6', path: PATHS.STUDENT.ATTENDANCE    },
+  { icon: BarChart3,  label: 'Natijalar', color: '#EC4899', path: PATHS.STUDENT.ACHIEVEMENTS  },
+  { icon: Star,       label: 'Profil',    color: '#A78BFA', path: PATHS.STUDENT.PROFILE       },
+] as const
+
+function QuickActionsBar({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: EASE, delay: 0.1 }}
+      className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none"
+      aria-label="Tez harakat menyusi"
+    >
+      {QUICK_NAV_ITEMS.map(({ icon: Icon, label, color, path }, i) => (
+        <motion.button
+          key={label}
+          type="button"
+          onClick={() => navigate(path)}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 + i * 0.04, duration: 0.3, ease: EASE }}
+          whileHover={{ y: -2, scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-[18px] flex-shrink-0 min-w-[68px] transition-all duration-150"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.07)',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = `${color}15`; (e.currentTarget as HTMLButtonElement).style.borderColor = `${color}30` }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.07)' }}
+        >
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center"
+            style={{ background: `${color}18`, border: `1px solid ${color}25` }}
+          >
+            <Icon className="w-4 h-4" style={{ color }} aria-hidden="true" />
+          </div>
+          <span className="text-[10.5px] font-semibold text-white/45 whitespace-nowrap">{label}</span>
+        </motion.button>
+      ))}
+    </motion.div>
+  )
+}
+
+// ─── Personal Stats Row ───────────────────────────────────────────────────────
+
+const PersonalStatsRow = memo(function PersonalStatsRow({
+  groups, tests, avgScore, attPct, loading,
+}: {
+  groups: SDGroup[]; tests: SDTest[]; avgScore: number
+  attPct: number | null; loading: boolean
+}) {
+  const activeCount = groups.filter(g => g.status === 'active').length
+  const stats = [
+    { icon: BookOpen,  label: 'Faol kurslar',    value: loading ? '…' : String(activeCount),     color: '#6366F1', sub: `${groups.length} ta jami` },
+    { icon: FileIcon,  label: 'Test topshirildi', value: loading ? '…' : String(tests.length),   color: '#22C55E', sub: 'umumiy'                    },
+    { icon: Award,     label: "O'rtacha ball",    value: loading ? '…' : `${avgScore}%`,          color: '#F59E0B', sub: 'testlar bo\'yicha'          },
+    { icon: Users,     label: 'Davomat',          value: loading ? '…' : (attPct !== null ? `${attPct}%` : '—'), color: '#14B8A6', sub: "darslarning" },
+  ]
+
+  return (
+    <motion.div
+      className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+      variants={STAGGER_FAST} initial="hidden"
+      whileInView="show" viewport={{ once: true, amount: 0.3 }}
+    >
+      {stats.map((s, i) => (
+        <motion.div
+          key={s.label}
+          variants={FADE_UP}
+          whileHover={{ y: -3, scale: 1.015 }}
+          transition={{ duration: 0.18 }}
+          className="rounded-[20px] p-4 border relative overflow-hidden"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderColor: `${s.color}20`,
+            boxShadow: `0 4px 20px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.04)`,
+          }}
+        >
+          {/* Glow accent */}
+          <div
+            className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-20 pointer-events-none"
+            style={{ background: s.color }}
+            aria-hidden="true"
+          />
+          <div className="relative">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center mb-3"
+              style={{ background: `${s.color}18`, border: `1px solid ${s.color}30` }}
+            >
+              <s.icon className="w-4 h-4" style={{ color: s.color }} aria-hidden="true" />
+            </div>
+            <motion.div
+              className="text-2xl font-black leading-none mb-1"
+              style={{ color: s.color }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 + i * 0.08, duration: 0.5 }}
+            >
+              {s.value}
+            </motion.div>
+            <p className="text-[11px] font-bold text-white/60 leading-tight">{s.label}</p>
+            <p className="text-[10px] text-white/25 mt-0.5">{s.sub}</p>
+          </div>
+          <motion.div
+            className="absolute bottom-0 inset-x-0 h-[2px] rounded-b-[20px]"
+            style={{ background: `linear-gradient(90deg, ${s.color}60, transparent)` }}
+            initial={{ scaleX: 0, originX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 + i * 0.07, duration: 0.8, ease: EASE }}
+          />
+        </motion.div>
+      ))}
+    </motion.div>
+  )
+})
+
+// ─── Continue Learning Card ───────────────────────────────────────────────────
+
+function ContinueLearningCard({
+  groups, loading, navigate,
+}: { groups: SDGroup[]; loading: boolean; navigate: ReturnType<typeof useNavigate> }) {
+  const course = groups.find(g => g.status === 'active')
+
+  if (loading) return (
+    <div className="rounded-[24px] p-5 border border-white/[0.07] animate-pulse"
+      style={{ background: 'rgba(255,255,255,0.03)' }}>
+      <div className="h-5 w-36 bg-white/[0.06] rounded-lg mb-4" />
+      <div className="h-16 bg-white/[0.04] rounded-2xl" />
+    </div>
+  )
+
+  if (!course) return null
+
+  const pct = course.att_total > 0 ? Math.round((course.att_present / course.att_total) * 100) : 0
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.45, ease: EASE }}
+      className="relative overflow-hidden rounded-[28px] px-6 py-6 sm:px-8 sm:py-7"
+      style={{
+        background: 'linear-gradient(145deg, #0E122A 0%, #15193A 50%, #10162E 100%)',
+        border: '1px solid rgba(99,102,241,0.2)',
+        boxShadow: '0 8px 32px rgba(91,92,246,0.18), 0 2px 8px rgba(0,0,0,0.3)',
+      }}
+    >
+      {/* Bg glow */}
+      <div className="absolute -top-12 right-12 w-56 h-56 rounded-full blur-[56px] opacity-20 pointer-events-none"
+        style={{ background: 'radial-gradient(circle,#6366F1,transparent)' }} aria-hidden="true" />
+
+      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+        {/* Course icon */}
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 shadow-lg"
+          style={{
+            background: course.subject
+              ? course.subject.color + '25'
+              : 'rgba(99,102,241,0.2)',
+            border: `2px solid ${course.subject?.color ?? '#6366F1'}35`,
+          }}
+        >
+          {course.subject?.icon ?? '📚'}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[10.5px] font-bold text-brand-light/60 uppercase tracking-widest mb-1">
+            O&apos;qishni davom ettiring
+          </p>
+          <h3 className="text-[16px] font-black text-white/85 truncate leading-tight">{course.name}</h3>
+          {course.subject && (
+            <p className="text-[12px] font-medium mt-0.5" style={{ color: course.subject.color }}>
+              {course.subject.name}
+            </p>
+          )}
+          {course.teacher_name && (
+            <p className="text-[11px] text-white/30 mt-0.5">{course.teacher_name} · {course.lesson_count} ta dars</p>
+          )}
+
+          {/* Progress */}
+          <div className="flex items-center gap-3 mt-3">
+            <div className="flex-1 h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: 'linear-gradient(90deg,#5B5CF6,#7C3AED)' }}
+                initial={{ width: 0 }}
+                whileInView={{ width: `${pct}%` }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, ease: EASE, delay: 0.3 }}
+              />
+            </div>
+            <span className="text-[11px] font-bold text-brand-light/70 flex-shrink-0">{pct}%</span>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <motion.button
+          type="button"
+          onClick={() => navigate(PATHS.STUDENT.LESSONS)}
+          whileHover={{ scale: 1.04, y: -1 }}
+          whileTap={{ scale: 0.97 }}
+          className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-[16px] text-white text-[13px] font-bold transition-opacity hover:opacity-90"
+          style={{
+            background: 'linear-gradient(135deg,#5B5CF6,#7C3AED)',
+            boxShadow: '0 6px 20px rgba(91,92,246,0.4)',
+          }}
+        >
+          Davom etish
+          <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        </motion.button>
+      </div>
+    </motion.div>
+  )
+}
+
+// ─── Achievements Showcase ────────────────────────────────────────────────────
+
+const TIER_STYLE: Record<string, { bg: string; border: string; label: string; labelColor: string }> = {
+  gold:    { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.3)',  label: 'Gold',    labelColor: '#FCD34D' },
+  silver:  { bg: 'rgba(156,163,175,0.15)',border: 'rgba(156,163,175,0.3)', label: 'Silver',  labelColor: '#D1D5DB' },
+  bronze:  { bg: 'rgba(180,83,9,0.15)',   border: 'rgba(180,83,9,0.3)',    label: 'Bronze',  labelColor: '#D97706' },
+  special: { bg: 'rgba(139,92,246,0.15)', border: 'rgba(139,92,246,0.35)', label: 'Special', labelColor: '#C4B5FD' },
+}
+
+const LOCKED_BADGES = [
+  { emoji: '🏆', name: 'Test chempioni',  desc: '10 ta testdan 80%+', tier: 'gold'    },
+  { emoji: '🔥', name: 'Ketma-ket faol',  desc: '7 kun ketma-ket',    tier: 'silver'  },
+  { emoji: '⭐', name: 'A\'lo talaba',    desc: 'Barcha testlar 90%+', tier: 'special' },
+  { emoji: '💎', name: 'Bilim ustozi',    desc: '50 ta dars tugallash',tier: 'bronze'  },
+]
+
+function AchievementsShowcase({
+  achievements, loading,
+}: { achievements: EarnedAchievement[]; loading: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.45, ease: EASE }}
+      className="rounded-[24px] p-5 border"
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderColor: 'rgba(255,255,255,0.07)',
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+            <Award className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+          </div>
+          <h3 className="text-[13px] font-bold text-white/80">Yutuqlar</h3>
+        </div>
+        {achievements.length > 0 && (
+          <button
+            type="button"
+            className="text-[11px] font-semibold text-brand-light/60 hover:text-brand-light transition-colors flex items-center gap-0.5"
+          >
+            Barchasi <ChevronRight className="w-3 h-3" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="h-24 rounded-2xl bg-white/[0.04] animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {/* Earned achievements */}
+          {achievements.slice(0,4).map((a, i) => {
+            const tier = a.def?.tier ?? 'bronze'
+            const ts   = TIER_STYLE[tier]
+            return (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, scale: 0.85 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08, duration: 0.35, ease: EASE }}
+                whileHover={{ y: -3, scale: 1.03 }}
+                className="flex flex-col items-center gap-2 p-3 rounded-[18px] text-center"
+                style={{ background: ts.bg, border: `1px solid ${ts.border}` }}
+              >
+                <span className="text-3xl" aria-hidden="true">{a.def?.icon_emoji ?? '🏅'}</span>
+                <div>
+                  <p className="text-[11px] font-bold text-white/75 leading-tight">
+                    {a.def?.name?.uz ?? 'Yutuq'}
+                  </p>
+                  <span
+                    className="text-[9px] font-bold px-1.5 py-0.5 rounded-full mt-1 inline-block"
+                    style={{ background: `${ts.border}`, color: ts.labelColor }}
+                  >
+                    {ts.label}
+                  </span>
+                </div>
+              </motion.div>
+            )
+          })}
+
+          {/* Locked badge placeholders */}
+          {LOCKED_BADGES.slice(0, Math.max(0, 4 - achievements.slice(0,4).length)).map((b, i) => (
+              <motion.div
+                key={b.name}
+                initial={{ opacity: 0, scale: 0.85 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: (achievements.slice(0,4).length + i) * 0.08, duration: 0.35, ease: EASE }}
+                className="flex flex-col items-center gap-2 p-3 rounded-[18px] text-center opacity-35"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                <div className="relative">
+                  <span className="text-3xl grayscale" aria-hidden="true">{b.emoji}</span>
+                  <Lock className="absolute -bottom-1 -right-1 w-3.5 h-3.5 text-white/50" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-white/40 leading-tight">{b.name}</p>
+                  <p className="text-[9px] text-white/25 mt-0.5">{b.desc}</p>
+                </div>
+              </motion.div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+// ─── Dashboard Sidebar ────────────────────────────────────────────────────────
+
+const MOTIVATION_QUOTES = [
+  { text: "Bilim — eng kuchli qurol.", author: "Nelson Mandela" },
+  { text: "Har kuni bir qadam oldinga.",author: "YordamchiAI" },
+  { text: "Muvaffaqiyat odatdan tug'iladi.", author: "Aristotel" },
+]
+
+function DashboardSidebar({
+  tests, groups, attPct, navigate,
+}: {
+  tests: SDTest[]; groups: SDGroup[]
+  attPct: number | null; navigate: ReturnType<typeof useNavigate>
+}) {
+  // Visual-only streak calculation from test submission dates
+  const streak = (() => {
+    if (!tests.length) return 0
+    const dates = [...new Set(tests.map(t => new Date(t.submitted_at).toDateString()))].sort()
+    let s = 1
+    const today     = new Date().toDateString()
+    const yesterday = new Date(Date.now() - 86400000).toDateString()
+    if (dates[dates.length - 1] !== today && dates[dates.length - 1] !== yesterday) return 0
+    for (let i = dates.length - 1; i > 0; i--) {
+      const diff = (new Date(dates[i]).getTime() - new Date(dates[i - 1]).getTime()) / 86400000
+      if (Math.round(diff) === 1) s++
+      else break
+    }
+    return s
+  })()
+
+  const quote = MOTIVATION_QUOTES[new Date().getDate() % MOTIVATION_QUOTES.length]
+  const activeCount = groups.filter(g => g.status === 'active').length
+  const goalPct = Math.min(100, tests.length * 10) // visual goal metric
+
+  const glassCard = {
+    background: 'rgba(255,255,255,0.04)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '20px',
+  } as const
+
+  return (
+    <div className="space-y-3">
+
+      {/* Daily Goal */}
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease: EASE }}
+        className="p-4"
+        style={glassCard}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-7 h-7 rounded-xl bg-brand/15 border border-brand/20 flex items-center justify-center">
+            <Target className="w-3.5 h-3.5 text-brand-light" aria-hidden="true" />
+          </div>
+          <p className="text-[12.5px] font-bold text-white/75">Kunlik maqsad</p>
+        </div>
+        <div className="flex items-center gap-3 mb-3">
+          <ProgressRing value={goalPct} size={52} strokeWidth={5} color="#6366F1" animDelay={0.3} />
+          <div>
+            <p className="text-lg font-black text-white/80">{goalPct}%</p>
+            <p className="text-[11px] text-white/35">bajarildi</p>
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          {[
+            { label: 'Testlar',  done: tests.length > 0,      val: `${tests.length}/10`  },
+            { label: 'Kurslar',  done: activeCount > 0,        val: `${activeCount} ta`   },
+            { label: 'Davomat',  done: (attPct ?? 0) >= 80,    val: attPct ? `${attPct}%` : '—' },
+          ].map(g => (
+            <div key={g.label} className="flex items-center justify-between text-[11px]">
+              <span className="text-white/35">{g.label}</span>
+              <span className={g.done ? 'text-emerald-400 font-bold' : 'text-white/30'}>{g.val}</span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Study Streak */}
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease: EASE, delay: 0.08 }}
+        className="p-4"
+        style={glassCard}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-7 h-7 rounded-xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center">
+            <Flame className="w-3.5 h-3.5 text-orange-400" aria-hidden="true" />
+          </div>
+          <p className="text-[12.5px] font-bold text-white/75">Faollik zanjiri</p>
+        </div>
+        <div className="flex items-end gap-2 mb-3">
+          <motion.span
+            className="text-4xl font-black text-orange-400 leading-none"
+            initial={{ scale: 0.5, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 180, damping: 14, delay: 0.15 }}
+          >
+            {streak}
+          </motion.span>
+          <span className="text-[13px] text-white/40 mb-1">kun</span>
+        </div>
+        {/* Week dots */}
+        <div className="flex items-center gap-1.5">
+          {['D','S','Ch','P','J','Sh','Y'].map((d, i) => {
+            const active = i < (streak % 7)
+            return (
+              <div key={d} className="flex flex-col items-center gap-1">
+                <div
+                  className="w-5 h-5 rounded-lg transition-all"
+                  style={active
+                    ? { background: 'linear-gradient(135deg,#F97316,#EF4444)', boxShadow: '0 2px 8px rgba(249,115,22,0.4)' }
+                    : { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }
+                  }
+                />
+                <span className="text-[8px] text-white/25">{d}</span>
+              </div>
+            )
+          })}
+        </div>
+      </motion.div>
+
+      {/* Mini Leaderboard */}
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease: EASE, delay: 0.16 }}
+        className="p-4"
+        style={glassCard}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
+            <Users className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+          </div>
+          <p className="text-[12.5px] font-bold text-white/75">Guruh natijalar</p>
+        </div>
+        <div className="space-y-2">
+          {['1st', '2nd', '3rd'].map((rank, i) => {
+            const medals = ['🥇','🥈','🥉']
+            const colors = ['#FCD34D','#D1D5DB','#D97706']
+            const pcts   = [92, 84, 78]
+            return (
+              <div key={rank} className="flex items-center gap-2.5">
+                <span className="text-base" aria-hidden="true">{medals[i]}</span>
+                <div
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black text-white flex-shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.08)' }}
+                >
+                  {rank[0]}
+                </div>
+                <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ background: colors[i] }}
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${pcts[i]}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.9, ease: EASE, delay: 0.2 + i * 0.1 }}
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-white/40 w-8 text-right">{pcts[i]}%</span>
+              </div>
+            )
+          })}
+        </div>
+        <p className="text-[10px] text-white/20 mt-2.5 text-center">Vizual namuna · Sprint 4.8 da real ma&apos;lumotlar</p>
+      </motion.div>
+
+      {/* Notifications (visual-only) */}
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease: EASE, delay: 0.24 }}
+        className="p-4"
+        style={glassCard}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl bg-violet-500/15 border border-violet-500/20 flex items-center justify-center">
+              <Bell className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
+            </div>
+            <p className="text-[12.5px] font-bold text-white/75">Bildirishnomalar</p>
+          </div>
+          <span
+            className="text-[9px] font-black px-1.5 py-0.5 rounded-full"
+            style={{ background: 'rgba(139,92,246,0.25)', color: '#C4B5FD' }}
+          >
+            Yangi
+          </span>
+        </div>
+        <div className="space-y-2">
+          {[
+            { icon: '📚', text: "Yangi dars qo'shildi",         time: 'Hozir',   dot: true  },
+            { icon: '✅', text: 'Testlar baholandi',             time: '2s oldin', dot: false },
+            { icon: '🏆', text: "Yutuq olish chegarasiga yetdingiz", time: '1k oldin', dot: false },
+          ].map((n, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: 8 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 + i * 0.07, duration: 0.3, ease: EASE }}
+              className="flex items-start gap-2.5 p-2.5 rounded-xl transition-all hover:bg-white/[0.04]"
+            >
+              <span className="text-sm flex-shrink-0 mt-0.5" aria-hidden="true">{n.icon}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11.5px] font-medium text-white/65 leading-snug">{n.text}</p>
+                <p className="text-[9.5px] text-white/25 mt-0.5">{n.time}</p>
+              </div>
+              {n.dot && <span className="w-1.5 h-1.5 rounded-full bg-brand-light flex-shrink-0 mt-1.5" aria-hidden="true" />}
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Motivation card */}
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease: EASE, delay: 0.32 }}
+        className="relative overflow-hidden p-4"
+        style={{
+          background: 'linear-gradient(135deg,#1E1B4B 0%,#2D1B69 50%,#1A1035 100%)',
+          border: '1px solid rgba(99,102,241,0.25)',
+          borderRadius: '20px',
+        }}
+      >
+        <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-brand/20 blur-2xl pointer-events-none" aria-hidden="true" />
+        <Zap className="w-5 h-5 text-brand-light mb-2" aria-hidden="true" />
+        <p className="text-[13px] font-bold text-white/85 leading-snug mb-1">
+          &ldquo;{quote.text}&rdquo;
+        </p>
+        <p className="text-[10px] text-white/35">— {quote.author}</p>
+        <motion.button
+          type="button"
+          onClick={() => navigate(PATHS.STUDENT.AI_ASSISTANT)}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="mt-3 w-full py-2 text-[12px] font-bold text-brand-light/80 hover:text-brand-light rounded-xl transition-colors"
+          style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)' }}
+        >
+          AI bilan boshlash →
+        </motion.button>
+      </motion.div>
+
+      {/* Quick downloads row */}
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4, ease: EASE, delay: 0.4 }}
+        className="grid grid-cols-2 gap-2"
+      >
+        {[
+          { icon: Download, label: 'Materiallar', path: PATHS.STUDENT.LESSONS,  color: '#6366F1' },
+          { icon: Star,     label: 'Sertifikatlar', path: PATHS.STUDENT.ACHIEVEMENTS, color: '#F59E0B' },
+        ].map(({ icon: Icon, label, path, color }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => navigate(path)}
+            className="flex flex-col items-center gap-1.5 p-3 rounded-[16px] transition-all hover:bg-white/[0.06]"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <Icon className="w-4 h-4" style={{ color }} aria-hidden="true" />
+            <span className="text-[10.5px] font-semibold text-white/40">{label}</span>
+          </button>
+        ))}
+      </motion.div>
+
+    </div>
+  )
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // Main Page — ALL DATA FETCHING LOGIC PRESERVED UNCHANGED
 // ═════════════════════════════════════════════════════════════════════════════
@@ -1023,52 +1663,74 @@ export default function StudentDashboardPage() {
   const latestSnap  = snapshots[0] ?? null
   const userName    = auth.user?.name ?? 'Talaba'
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render (Sprint 4.7: enhanced layout with sidebar) ─────────────────────
   return (
     <div className="space-y-4 pb-8">
 
-      {/* 1. Hero */}
+      {/* 1. Hero (PRESERVED) */}
       <HeroSection name={userName} navigate={navigate} />
 
-      {/* 2. Statistics */}
-      <StatsSection />
+      {/* 2. Sprint 4.7: Quick Actions Bar */}
+      <QuickActionsBar navigate={navigate} />
 
-      {/* 3. Content Grid */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
-        variants={STAGGER}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.1 }}
-      >
-        {/* Weak Topics */}
-        <motion.div variants={FADE_UP}>
-          <WeakTopicsCard avgPct={avgScore} loading={loading} />
-        </motion.div>
+      {/* 3. Sprint 4.7: Personal Stats (real data from existing state) */}
+      <PersonalStatsRow
+        groups={groups} tests={tests}
+        avgScore={avgScore} attPct={attPct} loading={loading}
+      />
 
-        {/* Courses */}
-        <motion.div variants={FADE_UP}>
-          <CoursesCard groups={groups} loading={loading} navigate={navigate} />
-        </motion.div>
+      {/* 4. Main content + sidebar grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_272px] gap-4 items-start">
 
-        {/* Score */}
-        <motion.div variants={FADE_UP} className="md:col-span-2 xl:col-span-1">
-          <ScoreCard snapshot={latestSnap} loading={loading} attPct={attPct} />
-        </motion.div>
+        {/* ── Main column ── */}
+        <div className="space-y-4 min-w-0">
 
-        {/* Recent Activity */}
-        <motion.div variants={FADE_UP} className="md:col-span-2 xl:col-span-2">
-          <RecentActivityCard tests={tests} loading={loading} />
-        </motion.div>
+          {/* Global stats (PRESERVED) */}
+          <StatsSection />
 
-        {/* Coming Soon */}
-        <motion.div variants={FADE_UP}>
-          <ComingSoonCard />
-        </motion.div>
-      </motion.div>
+          {/* Content grid (PRESERVED — exactly as Sprint 4.2) */}
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+            variants={STAGGER}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.1 }}
+          >
+            <motion.div variants={FADE_UP}>
+              <WeakTopicsCard avgPct={avgScore} loading={loading} />
+            </motion.div>
+            <motion.div variants={FADE_UP}>
+              <CoursesCard groups={groups} loading={loading} navigate={navigate} />
+            </motion.div>
+            <motion.div variants={FADE_UP} className="md:col-span-2 xl:col-span-1">
+              <ScoreCard snapshot={latestSnap} loading={loading} attPct={attPct} />
+            </motion.div>
+            <motion.div variants={FADE_UP} className="md:col-span-2 xl:col-span-2">
+              <RecentActivityCard tests={tests} loading={loading} />
+            </motion.div>
+            <motion.div variants={FADE_UP}>
+              <ComingSoonCard />
+            </motion.div>
+          </motion.div>
 
-      {/* 4. Premium Banner */}
-      <PremiumBanner navigate={navigate} />
+          {/* Sprint 4.7: Continue Learning Card */}
+          <ContinueLearningCard groups={groups} loading={loading} navigate={navigate} />
+
+          {/* Sprint 4.7: Achievements Showcase (uses existing _achievements state) */}
+          <AchievementsShowcase achievements={_achievements} loading={loading} />
+
+          {/* Premium Banner (PRESERVED) */}
+          <PremiumBanner navigate={navigate} />
+        </div>
+
+        {/* ── Sidebar column (hidden on mobile, visible on xl+) ── */}
+        <div className="hidden xl:block">
+          <DashboardSidebar
+            tests={tests} groups={groups}
+            attPct={attPct} navigate={navigate}
+          />
+        </div>
+      </div>
     </div>
   )
 }
