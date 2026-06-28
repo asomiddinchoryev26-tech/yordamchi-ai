@@ -1,10 +1,21 @@
+/**
+ * pages/auth/RegisterPage.tsx
+ * V6 Design System — dark premium.
+ *
+ * ⚠️  ALL BUSINESS LOGIC PRESERVED UNCHANGED ⚠️
+ * auth.register(), navigate(), form state — identical.
+ */
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AlertCircle, CheckCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle, User, Mail, Lock, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
 import type { UserRole } from '@/types/auth.types'
+import logoSrc from '@/assets/images/logo.svg'
 import { useLanguage } from '@/contexts/LanguageContext'
+
+// ─── Business logic constants (PRESERVED EXACTLY) ─────────────────────────────
 
 const ROLE_PATH: Record<UserRole, string> = {
   student: PATHS.STUDENT.ROOT,
@@ -12,7 +23,33 @@ const ROLE_PATH: Record<UserRole, string> = {
   admin:   PATHS.ADMIN.ROOT,
 }
 
+// ─── V6 design tokens ─────────────────────────────────────────────────────────
+
+const PAGE_BG: React.CSSProperties = { background: '#070B14' }
+const CARD: React.CSSProperties = {
+  background:           'rgba(11,15,28,0.85)',
+  backdropFilter:       'blur(28px) saturate(200%)',
+  WebkitBackdropFilter: 'blur(28px) saturate(200%)',
+  border:               '1px solid rgba(255,255,255,0.08)',
+  boxShadow:            '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07)',
+  borderRadius:         22,
+  padding:              '2rem',
+}
+const INPUT_BASE: React.CSSProperties = {
+  width:        '100%',
+  background:   'rgba(255,255,255,0.05)',
+  border:       '1px solid rgba(255,255,255,0.10)',
+  borderRadius: 12,
+  color:        'rgba(255,255,255,0.85)',
+  fontSize:     14,
+  paddingTop:   10,
+  paddingBottom: 10,
+  outline:      'none',
+  transition:   'border-color 0.2s, box-shadow 0.2s',
+}
+
 export default function RegisterPage() {
+  // ── Business logic (PRESERVED EXACTLY) ───────────────────────────────────
   const auth     = useAuth()
   const navigate = useNavigate()
   const { t }    = useLanguage()
@@ -23,42 +60,56 @@ export default function RegisterPage() {
   const [password,    setPassword]    = useState('')
   const [formLoading, setFormLoading] = useState(false)
   const [emailSent,   setEmailSent]   = useState(false)
+  const [focusField,  setFocusField]  = useState<string | null>(null)
 
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
     setFormLoading(true)
     auth.clearError()
-
     const user = await auth.register({ name, email, password, role })
-
     if (user) {
       navigate(ROLE_PATH[user.role], { replace: true })
     } else if (!auth.error) {
       setEmailSent(true)
     }
-
     setFormLoading(false)
   }
 
-  // Email tasdiqlash xabari
+  const fi = (f: string): React.CSSProperties => ({
+    ...INPUT_BASE,
+    paddingLeft: 40,
+    paddingRight: 14,
+    ...(focusField === f ? {
+      borderColor: 'rgba(91,127,255,0.55)',
+      boxShadow: '0 0 0 3px rgba(91,127,255,0.13)',
+      background: 'rgba(255,255,255,0.07)',
+    } : {}),
+  })
+
+  // ── Email tasdiqlash xabari ───────────────────────────────────────────────
   if (emailSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-12">
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={PAGE_BG}>
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 text-center">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+          <div style={CARD}>
+            <div
+              className="w-16 h-16 rounded-[18px] flex items-center justify-center mx-auto mb-5"
+              style={{ background: 'rgba(34,197,94,0.14)', border: '1px solid rgba(34,197,94,0.28)' }}
+            >
+              <CheckCircle className="w-8 h-8 text-emerald-400" aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">
-              {t.checkEmailTitle}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
-              <span className="font-semibold text-gray-700 dark:text-gray-200">{email}</span>{' '}
+            <h2 className="text-[20px] font-black text-white text-center mb-2">{t.checkEmailTitle}</h2>
+            <p className="text-[13px] text-white/42 text-center mb-6 leading-relaxed">
+              <span className="font-bold text-white/72">{email}</span>{' '}
               {t.checkEmailDesc}
             </p>
             <Link
               to={PATHS.LOGIN}
-              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors"
+              className="w-full flex items-center justify-center py-[13px] rounded-[13px] text-white text-[14px] font-bold transition-all hover:opacity-90"
+              style={{
+                background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)',
+                boxShadow: '0 6px 24px rgba(91,127,255,0.40)',
+              }}
             >
               {t.goToLogin}
             </Link>
@@ -69,124 +120,168 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-1">{t.registerTitle}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t.registerSubtitle}</p>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10" style={PAGE_BG}>
+      {/* Ambient orbs */}
+      <div className="fixed -top-40 -left-40 w-96 h-96 rounded-full blur-[120px] opacity-15 pointer-events-none"
+        style={{ background: 'radial-gradient(circle,#5B7FFF,transparent)' }} aria-hidden="true" />
+      <div className="fixed bottom-0 right-0 w-96 h-96 rounded-full blur-[100px] opacity-12 pointer-events-none"
+        style={{ background: 'radial-gradient(circle,#7C3AED,transparent)' }} aria-hidden="true" />
+
+      <div className="relative w-full max-w-sm sm:max-w-[400px]">
+
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2.5 mb-7">
+          <div
+            className="w-9 h-9 rounded-[11px] flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)', boxShadow: '0 0 18px rgba(91,127,255,0.45)' }}
+          >
+            <img src={logoSrc} alt="Y" className="w-6 h-6" />
+          </div>
+          <span className="text-[17px] font-black text-white tracking-tight">YordamchiAI</span>
+        </div>
+
+        {/* Card */}
+        <div style={CARD}>
+          <div className="mb-5">
+            <h2 className="text-[21px] font-black text-white tracking-tight">{t.registerTitle}</h2>
+            <p className="text-[13px] text-white/38 mt-0.5">{t.registerSubtitle}</p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* To'liq ism */}
+            {/* Full name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="name" className="block text-[11.5px] font-bold text-white/40 uppercase tracking-[0.12em] mb-1.5">
                 {t.fullName}
               </label>
-              <input
-                id="name"
-                type="text"
-                required
-                value={name}
-                onChange={e => { setName(e.target.value); auth.clearError() }}
-                autoComplete="name"
-                placeholder={t.fullNamePlaceholder}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
-                           bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
-                           placeholder:text-gray-400 dark:placeholder:text-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                           focus:border-blue-500 transition-colors"
-              />
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'rgba(255,255,255,0.28)' }} aria-hidden="true" />
+                <input
+                  id="name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={e => { setName(e.target.value); auth.clearError() }}
+                  onFocus={() => setFocusField('name')}
+                  onBlur={() => setFocusField(null)}
+                  autoComplete="name"
+                  placeholder={t.fullNamePlaceholder}
+                  style={fi('name')}
+                />
+              </div>
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="reg-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="reg-email" className="block text-[11.5px] font-bold text-white/40 uppercase tracking-[0.12em] mb-1.5">
                 {t.emailLabel}
               </label>
-              <input
-                id="reg-email"
-                type="email"
-                required
-                value={email}
-                onChange={e => { setEmail(e.target.value); auth.clearError() }}
-                autoComplete="email"
-                placeholder="sizning@email.com"
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
-                           bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
-                           placeholder:text-gray-400 dark:placeholder:text-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                           focus:border-blue-500 transition-colors"
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'rgba(255,255,255,0.28)' }} aria-hidden="true" />
+                <input
+                  id="reg-email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => { setEmail(e.target.value); auth.clearError() }}
+                  onFocus={() => setFocusField('email')}
+                  onBlur={() => setFocusField(null)}
+                  autoComplete="email"
+                  placeholder="sizning@email.com"
+                  style={fi('email')}
+                />
+              </div>
             </div>
 
-            {/* Rol */}
+            {/* Role */}
             <div>
-              <label htmlFor="reg-role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="reg-role" className="block text-[11.5px] font-bold text-white/40 uppercase tracking-[0.12em] mb-1.5">
                 {t.roleLabel}
               </label>
-              <select
-                id="reg-role"
-                value={role}
-                onChange={e => setRole(e.target.value as UserRole)}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
-                           bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
-                           focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
-              >
-                <option value="student">{t.studentRole}</option>
-                <option value="teacher">{t.teacherRole}</option>
-              </select>
+              <div className="relative">
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'rgba(255,255,255,0.28)' }} aria-hidden="true" />
+                <select
+                  id="reg-role"
+                  value={role}
+                  onChange={e => setRole(e.target.value as UserRole)}
+                  style={{
+                    ...INPUT_BASE,
+                    paddingLeft: 14,
+                    paddingRight: 36,
+                    appearance: 'none',
+                    ...(focusField === 'role' ? {
+                      borderColor: 'rgba(91,127,255,0.55)',
+                      boxShadow: '0 0 0 3px rgba(91,127,255,0.13)',
+                    } : {}),
+                  }}
+                  onFocus={() => setFocusField('role')}
+                  onBlur={() => setFocusField(null)}
+                >
+                  <option value="student" style={{ background: '#0D1526' }}>{t.studentRole}</option>
+                  <option value="teacher" style={{ background: '#0D1526' }}>{t.teacherRole}</option>
+                </select>
+              </div>
             </div>
 
-            {/* Parol */}
+            {/* Password */}
             <div>
-              <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="reg-password" className="block text-[11.5px] font-bold text-white/40 uppercase tracking-[0.12em] mb-1.5">
                 {t.passwordLabel}
               </label>
-              <input
-                id="reg-password"
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={e => { setPassword(e.target.value); auth.clearError() }}
-                autoComplete="new-password"
-                placeholder={t.minPasswordHint}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
-                           bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
-                           placeholder:text-gray-400 dark:placeholder:text-gray-500
-                           focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                           focus:border-blue-500 transition-colors"
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'rgba(255,255,255,0.28)' }} aria-hidden="true" />
+                <input
+                  id="reg-password"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); auth.clearError() }}
+                  onFocus={() => setFocusField('pass')}
+                  onBlur={() => setFocusField(null)}
+                  autoComplete="new-password"
+                  placeholder={t.minPasswordHint}
+                  style={fi('pass')}
+                />
+              </div>
             </div>
 
-            {/* Xato xabari */}
+            {/* Error */}
             {auth.error && (
-              <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700 dark:text-red-400 leading-snug">{auth.error}</p>
+              <div
+                className="flex items-start gap-2.5 p-3 rounded-[12px]"
+                style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.22)' }}
+              >
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <p className="text-[12.5px] text-red-400 leading-snug">{auth.error}</p>
               </div>
             )}
 
-            {/* Ro'yxatdan o'tish tugmasi */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={formLoading}
-              className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold
-                         transition-colors shadow-md hover:shadow-lg
-                         disabled:opacity-60 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2"
+              className="w-full flex items-center justify-center gap-2 py-[13px] rounded-[13px] text-white text-[14px] font-bold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed mt-1"
+              style={{
+                background: 'linear-gradient(135deg,#5B7FFF 0%,#7C3AED 100%)',
+                boxShadow: '0 6px 24px rgba(91,127,255,0.40), inset 0 1px 0 rgba(255,255,255,0.16)',
+              }}
             >
               {formLoading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" aria-hidden="true" />
               ) : (
                 t.createAccount
               )}
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-center text-gray-500 dark:text-gray-400">
+          <p className="mt-5 text-[13px] text-center" style={{ color: 'rgba(255,255,255,0.36)' }}>
             {t.hasAccount}{' '}
-            <Link to={PATHS.LOGIN} className="text-blue-600 hover:underline font-semibold">
+            <Link to={PATHS.LOGIN} className="font-bold" style={{ color: '#93BBFF' }}>
               {t.login}
             </Link>
           </p>

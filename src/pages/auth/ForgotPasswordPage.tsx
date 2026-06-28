@@ -1,16 +1,40 @@
+/**
+ * pages/auth/ForgotPasswordPage.tsx
+ * V6 Design System — dark premium.
+ *
+ * ⚠️  ALL BUSINESS LOGIC PRESERVED UNCHANGED ⚠️
+ * supabase.auth.resetPasswordForEmail() call — identical.
+ */
+
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertCircle, CheckCircle, Mail } from 'lucide-react'
+import { AlertCircle, CheckCircle, Mail, ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { PATHS } from '@/routes/paths'
+import logoSrc from '@/assets/images/logo.svg'
 import { useLanguage } from '@/contexts/LanguageContext'
 
+// ─── V6 design tokens ─────────────────────────────────────────────────────────
+
+const PAGE_BG: React.CSSProperties = { background: '#070B14' }
+const CARD: React.CSSProperties = {
+  background:           'rgba(11,15,28,0.85)',
+  backdropFilter:       'blur(28px) saturate(200%)',
+  WebkitBackdropFilter: 'blur(28px) saturate(200%)',
+  border:               '1px solid rgba(255,255,255,0.08)',
+  boxShadow:            '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07)',
+  borderRadius:         22,
+  padding:              '2rem',
+}
+
 export default function ForgotPasswordPage() {
+  // ── Business logic (PRESERVED EXACTLY) ───────────────────────────────────
   const { t }                           = useLanguage()
   const [email,     setEmail]           = useState('')
   const [isLoading, setIsLoading]       = useState(false)
   const [sent,      setSent]            = useState(false)
   const [error,     setError]           = useState<string | null>(null)
+  const [focused,   setFocused]         = useState(false)
 
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
@@ -30,28 +54,52 @@ export default function ForgotPasswordPage() {
     setIsLoading(false)
   }
 
-  // ── Muvaffaqiyatli yuborildi ──
+  const inputStyle: React.CSSProperties = {
+    width:        '100%',
+    paddingLeft:  40,
+    paddingRight: 14,
+    paddingTop:   10,
+    paddingBottom: 10,
+    fontSize:     14,
+    background:   focused ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.05)',
+    border:       focused ? '1px solid rgba(91,127,255,0.55)' : '1px solid rgba(255,255,255,0.10)',
+    borderRadius: 12,
+    color:        'rgba(255,255,255,0.85)',
+    outline:      'none',
+    boxShadow:    focused ? '0 0 0 3px rgba(91,127,255,0.13)' : 'none',
+    transition:   'border-color 0.2s, box-shadow 0.2s, background 0.2s',
+  }
+
+  // ── Sent confirmation ─────────────────────────────────────────────────────
   if (sent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-12">
-        <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8 text-center">
-            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={PAGE_BG}>
+        <div className="fixed -top-40 -right-40 w-96 h-96 rounded-full blur-[120px] opacity-12 pointer-events-none"
+          style={{ background: 'radial-gradient(circle,#5B7FFF,transparent)' }} aria-hidden="true" />
+
+        <div className="w-full max-w-sm sm:max-w-[400px]">
+          <div style={CARD} className="text-center">
+            <div
+              className="w-16 h-16 rounded-[18px] flex items-center justify-center mx-auto mb-5"
+              style={{ background: 'rgba(91,127,255,0.14)', border: '1px solid rgba(91,127,255,0.28)' }}
+            >
+              <CheckCircle className="w-8 h-8" style={{ color: '#93BBFF' }} aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2">
-              {t.emailSentTitle}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 leading-relaxed">
-              <span className="font-semibold text-gray-700 dark:text-gray-200">{email}</span>{' '}
+            <h2 className="text-[20px] font-black text-white mb-2">{t.emailSentTitle}</h2>
+            <p className="text-[13px] mb-1.5 leading-relaxed" style={{ color: 'rgba(255,255,255,0.42)' }}>
+              <span className="font-bold" style={{ color: 'rgba(255,255,255,0.72)' }}>{email}</span>{' '}
               {t.emailSentDesc}
             </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
+            <p className="text-[11.5px] mb-6" style={{ color: 'rgba(255,255,255,0.28)' }}>
               {t.spamNote}
             </p>
             <Link
               to={PATHS.LOGIN}
-              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-[13px] rounded-[13px] text-white text-[14px] font-bold transition-all hover:opacity-90"
+              style={{
+                background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)',
+                boxShadow: '0 6px 24px rgba(91,127,255,0.38)',
+              }}
             >
               {t.goToLogin}
             </Link>
@@ -61,67 +109,100 @@ export default function ForgotPasswordPage() {
     )
   }
 
-  // ── Forma ──
+  // ── Form ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 mb-2">{t.forgotPasswordTitle}</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
-            {t.forgotPasswordDesc}
-          </p>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={PAGE_BG}>
+      {/* Ambient orbs */}
+      <div className="fixed -top-40 -left-40 w-96 h-96 rounded-full blur-[120px] opacity-15 pointer-events-none"
+        style={{ background: 'radial-gradient(circle,#5B7FFF,transparent)' }} aria-hidden="true" />
+      <div className="fixed bottom-0 right-0 w-80 h-80 rounded-full blur-[100px] opacity-10 pointer-events-none"
+        style={{ background: 'radial-gradient(circle,#7C3AED,transparent)' }} aria-hidden="true" />
+
+      <div className="relative w-full max-w-sm sm:max-w-[400px]">
+
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2.5 mb-7">
+          <div
+            className="w-9 h-9 rounded-[11px] flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)', boxShadow: '0 0 18px rgba(91,127,255,0.45)' }}
+          >
+            <img src={logoSrc} alt="Y" className="w-6 h-6" />
+          </div>
+          <span className="text-[17px] font-black text-white tracking-tight">YordamchiAI</span>
+        </div>
+
+        {/* Card */}
+        <div style={CARD}>
+          <div className="mb-6">
+            <h2 className="text-[21px] font-black text-white tracking-tight">{t.forgotPasswordTitle}</h2>
+            <p className="text-[13px] mt-1.5 leading-relaxed" style={{ color: 'rgba(255,255,255,0.40)' }}>
+              {t.forgotPasswordDesc}
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              <label htmlFor="reset-email" className="block text-[11.5px] font-bold uppercase tracking-[0.12em] mb-1.5"
+                style={{ color: 'rgba(255,255,255,0.40)' }}>
                 {t.emailLabel}
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                  style={{ color: 'rgba(255,255,255,0.28)' }} aria-hidden="true" />
                 <input
                   id="reset-email"
                   type="email"
                   required
                   value={email}
                   onChange={e => { setEmail(e.target.value); setError(null) }}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
                   autoComplete="email"
                   placeholder="sizning@email.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700
-                             bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
-                             placeholder:text-gray-400 dark:placeholder:text-gray-500
-                             focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                  style={inputStyle}
                 />
               </div>
             </div>
 
             {error && (
-              <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+              <div
+                className="flex items-start gap-2.5 p-3 rounded-[12px]"
+                style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.22)' }}
+              >
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <p className="text-[12.5px] text-red-400">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full flex items-center justify-center gap-2 py-[13px] rounded-[13px] text-white text-[14px] font-bold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                background: 'linear-gradient(135deg,#5B7FFF 0%,#7C3AED 100%)',
+                boxShadow: '0 6px 24px rgba(91,127,255,0.40), inset 0 1px 0 rgba(255,255,255,0.15)',
+              }}
             >
               {isLoading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" aria-hidden="true" />
               ) : (
                 t.sendLink
               )}
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-center">
+          <div className="mt-5 flex justify-center">
             <Link
               to={PATHS.LOGIN}
-              className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
+              className="inline-flex items-center gap-1.5 text-[12.5px] transition-colors"
+              style={{ color: 'rgba(255,255,255,0.35)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.35)')}
             >
+              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
               {t.backToLogin}
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>
