@@ -257,7 +257,7 @@ function getLiveDate() {
   return { greeting: getTimeGreeting(hour), weekday, date: `${dd}.${mm}.${yyyy}` }
 }
 
-// ─── Sprint 4.7 Final Polish: Premium SVG Vector Student Illustration ────────
+// ─── Sprint 4.8 pre: Professional SaaS-grade SVG Student Illustration ────────
 
 function StudentIllustration() {
   return (
@@ -266,290 +266,286 @@ function StudentIllustration() {
       style={{ width: 340, height: 420 }}
       aria-hidden="true"
     >
-      {/* Ambient glow layers */}
+      {/* Deep ambient glow layers */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute rounded-full blur-[110px] opacity-35"
-          style={{ width: 340, height: 340, top: '10%', left: '50%', transform: 'translateX(-50%)',
-            background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 40%, transparent 68%)' }} />
-        <div className="absolute rounded-full blur-[70px] opacity-25"
-          style={{ width: 200, height: 200, top: 0, left: '50%', transform: 'translateX(-50%)',
-            background: 'radial-gradient(circle, #818CF8, transparent 70%)' }} />
-        <div className="absolute rounded-full blur-[50px] opacity-20"
-          style={{ width: 160, height: 160, bottom: '5%', left: '50%', transform: 'translateX(-50%)',
-            background: 'radial-gradient(circle, #3B82F6, transparent 70%)' }} />
+        <div className="absolute rounded-full blur-[110px] opacity-38"
+          style={{ width: 360, height: 360, top: '8%', left: '50%', transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, #4A6FFF 0%, #6B3ABF 42%, transparent 68%)' }} />
+        <div className="absolute rounded-full blur-[65px] opacity-28"
+          style={{ width: 200, height: 200, top: 0, left: '52%', transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, #7B5CE8, transparent 70%)' }} />
+        <div className="absolute rounded-full blur-[50px] opacity-22"
+          style={{ width: 180, height: 180, bottom: '4%', left: '50%', transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, #3B5FFF, transparent 70%)' }} />
       </div>
 
-      {/* ── SVG Vector Illustration (floats up/down) ──────────────────────── */}
+      {/* ── Premium SVG Character ────────────────────────────────────────── */}
       <motion.div
         className="absolute inset-0 z-10"
-        animate={{ y: [0, -16, 0] }}
-        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ y: [0, -14, 0] }}
+        transition={{ duration: 5.8, repeat: Infinity, ease: 'easeInOut' }}
       >
         <svg width="340" height="420" viewBox="0 0 340 420" style={{ overflow: 'visible' }}>
           <defs>
-            <linearGradient id="sG" x1="25%" y1="0%" x2="75%" y2="100%">
-              <stop offset="0%"   stopColor="#FDE3BC" />
-              <stop offset="35%"  stopColor="#F0C4A0" />
-              <stop offset="70%"  stopColor="#E8A87C" />
-              <stop offset="100%" stopColor="#CF7E5A" />
+            {/* Skin — warm, natural peach */}
+            <linearGradient id="p_sk" x1="15%" y1="0%" x2="85%" y2="100%">
+              <stop offset="0%"   stopColor="#FFD4A3" /><stop offset="30%"  stopColor="#F5BB84" />
+              <stop offset="68%"  stopColor="#E8A06A" /><stop offset="100%" stopColor="#D08050" />
             </linearGradient>
-            <linearGradient id="hG" x1="15%" y1="0%" x2="85%" y2="100%">
-              <stop offset="0%"   stopColor="#1E0F52" />
-              <stop offset="45%"  stopColor="#2D1B69" />
-              <stop offset="100%" stopColor="#1A1040" />
+            {/* Hair / hood — deep indigo-purple */}
+            <linearGradient id="p_hr" x1="10%" y1="0%" x2="90%" y2="100%">
+              <stop offset="0%"   stopColor="#1C0B4C" /><stop offset="55%"  stopColor="#26136A" />
+              <stop offset="100%" stopColor="#160838" />
             </linearGradient>
-            <linearGradient id="hdG" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stopColor="#321F7A" />
-              <stop offset="28%"  stopColor="#271870" />
-              <stop offset="60%"  stopColor="#1E1260" />
-              <stop offset="100%" stopColor="#130940" />
+            {/* Hoodie — rich dark indigo with depth */}
+            <linearGradient id="p_hd" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stopColor="#2C1E7A" /><stop offset="30%"  stopColor="#22166C" />
+              <stop offset="62%"  stopColor="#190F56" /><stop offset="100%" stopColor="#100830" />
             </linearGradient>
-            <linearGradient id="hdSG" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stopColor="rgba(255,255,255,0.14)" />
-              <stop offset="50%"  stopColor="rgba(255,255,255,0.04)" />
+            {/* Hoodie top-left specular */}
+            <linearGradient id="p_hs" x1="0%" y1="0%" x2="70%" y2="70%">
+              <stop offset="0%"   stopColor="rgba(255,255,255,0.13)" />
+              <stop offset="50%"  stopColor="rgba(255,255,255,0.03)" />
               <stop offset="100%" stopColor="rgba(255,255,255,0)" />
             </linearGradient>
-            <linearGradient id="yG" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stopColor="#A5C8FF" />
-              <stop offset="40%"  stopColor="#5B7FFF" />
-              <stop offset="100%" stopColor="#B09EFF" />
+            {/* Hoodie right-side rim light (brand blue glow) */}
+            <linearGradient id="p_rl" x1="100%" y1="50%" x2="0%" y2="50%">
+              <stop offset="0%"   stopColor="rgba(91,127,255,0.22)" />
+              <stop offset="60%"  stopColor="rgba(91,127,255,0.05)" />
+              <stop offset="100%" stopColor="rgba(91,127,255,0)" />
             </linearGradient>
-            <linearGradient id="scG" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stopColor="#070D1F" />
-              <stop offset="100%" stopColor="#04080F" />
+            {/* Y brand gradient */}
+            <linearGradient id="p_y" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stopColor="#9BBEFF" /><stop offset="40%"  stopColor="#5B7FFF" />
+              <stop offset="100%" stopColor="#9977FF" />
             </linearGradient>
-            <radialGradient id="scGl" cx="50%" cy="95%" r="60%">
-              <stop offset="0%"   stopColor="rgba(91,127,255,0.30)" />
+            {/* Laptop screen dark */}
+            <linearGradient id="p_sc" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stopColor="#07101E" /><stop offset="100%" stopColor="#040810" />
+            </linearGradient>
+            {/* Screen blue radial glow from bottom */}
+            <radialGradient id="p_sg" cx="50%" cy="100%" r="62%">
+              <stop offset="0%"   stopColor="rgba(91,127,255,0.34)" />
               <stop offset="100%" stopColor="rgba(91,127,255,0)" />
             </radialGradient>
-            <linearGradient id="bsG" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stopColor="#3D4D62" />
-              <stop offset="100%" stopColor="#1F2937" />
+            {/* Laptop base metal */}
+            <linearGradient id="p_lb" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stopColor="#3E4E62" /><stop offset="100%" stopColor="#1E2838" />
             </linearGradient>
-            {/* Body drop-shadow */}
-            <filter id="bSh" x="-22%" y="-8%" width="144%" height="128%">
-              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="rgba(0,0,0,0.6)" />
+            {/* Body & head drop shadow */}
+            <filter id="p_sh" x="-22%" y="-8%" width="144%" height="128%">
+              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="rgba(0,0,0,0.65)" />
             </filter>
-            {/* Y glow */}
-            <filter id="yF" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            {/* Y logo strong glow */}
+            <filter id="p_yf" x="-70%" y="-70%" width="240%" height="240%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
-            {/* Screen blue glow */}
-            <filter id="scF" x="-18%" y="-18%" width="136%" height="136%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+            {/* Screen border blue glow */}
+            <filter id="p_sf" x="-12%" y="-12%" width="124%" height="124%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
               <feColorMatrix in="b" type="matrix"
-                values="0 0 0.9 0 0.05  0 0.1 0.8 0 0.05  0.5 0 0.5 0 0.2  0 0 0 0.85 0" result="c"/>
+                values="0 0 1 0 0.05  0 0.1 0.9 0 0.05  0.4 0.4 0 0 0.18  0 0 0 0.72 0" result="c"/>
               <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
 
-          {/* ── GROUND GLOW ────────────────────────────────────────────────── */}
-          <ellipse cx="170" cy="415" rx="120" ry="11" fill="rgba(91,127,255,0.2)" />
+          {/* ── GROUND ELEMENTS ──────────────────────────────────────────── */}
+          <ellipse cx="170" cy="413" rx="118" ry="11" fill="rgba(91,127,255,0.22)" />
+          <ellipse cx="170" cy="402" rx="106" ry="9"  fill="rgba(0,0,0,0.50)" />
 
-          {/* ── LAPTOP BASE ────────────────────────────────────────────────── */}
-          <ellipse cx="170" cy="400" rx="105" ry="9" fill="rgba(0,0,0,0.45)" />
-          <rect x="60" y="380" width="220" height="22" rx="5" fill="url(#bsG)" />
-          {/* Keyboard rows */}
-          {[0,1,2].map(row => (
-            <g key={row} opacity={0.2 - row * 0.04}>
-              {Array.from({length: 12 - row}).map((_, col) => (
-                <rect key={col} x={68 + col * 16 + row * 6} y={383 + row * 5}
-                  width={12} height={3} rx="1" fill="rgba(255,255,255,1)" />
+          {/* ── LAPTOP BASE ──────────────────────────────────────────────── */}
+          <rect x="58" y="376" width="224" height="24" rx="5" fill="url(#p_lb)" />
+          {/* Keyboard keys — 3 rows */}
+          {[0,1,2].map(r => (
+            <g key={r} opacity={0.18 - r*0.04}>
+              {Array.from({length: 11-r}).map((_,c) => (
+                <rect key={c} x={70+c*18+r*5} y={381+r*6} width={13} height={3.5} rx="1.5"
+                  fill="rgba(255,255,255,1)" />
               ))}
             </g>
           ))}
           {/* Trackpad */}
-          <rect x="128" y="386" width="84" height="13" rx="3"
-            fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+          <rect x="124" y="384" width="92" height="13" rx="4"
+            fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.14)" strokeWidth="0.6" />
           {/* Hinge */}
-          <rect x="66" y="376" width="208" height="5" rx="2" fill="#2D3748" />
+          <rect x="64" y="372" width="212" height="5" rx="2.5" fill="#27374A" />
 
-          {/* ── LAPTOP SCREEN ──────────────────────────────────────────────── */}
-          <rect x="62" y="274" width="216" height="108" rx="10"
-            fill="url(#scG)" filter="url(#scF)" />
-          <rect x="62" y="274" width="216" height="108" rx="10"
-            fill="none" stroke="rgba(91,127,255,0.65)" strokeWidth="1.5" />
-          <rect x="62" y="274" width="216" height="108" rx="10" fill="url(#scGl)" />
-          {/* Chrome bar */}
-          <rect x="62" y="274" width="216" height="18" rx="10" fill="rgba(255,255,255,0.04)" />
-          <rect x="62" y="284" width="216" height="8" fill="rgba(255,255,255,0.03)" />
-          <line x1="62" y1="292" x2="278" y2="292" stroke="rgba(255,255,255,0.07)" strokeWidth="0.5" />
+          {/* ── LAPTOP SCREEN ────────────────────────────────────────────── */}
+          {/* Screen outer glow shell */}
+          <rect x="60" y="266" width="220" height="110" rx="10" fill="url(#p_sc)" filter="url(#p_sf)" />
+          {/* Screen border */}
+          <rect x="60" y="266" width="220" height="110" rx="10"
+            fill="none" stroke="rgba(91,127,255,0.70)" strokeWidth="1.5" />
+          {/* Screen inner blue glow */}
+          <rect x="60" y="266" width="220" height="110" rx="10" fill="url(#p_sg)" />
+
+          {/* Chrome titlebar */}
+          <rect x="60" y="266" width="220" height="20" rx="10" fill="rgba(255,255,255,0.04)" />
+          <rect x="60" y="278" width="220" height="8"  fill="rgba(255,255,255,0.025)" />
+          <line x1="60" y1="286" x2="280" y2="286" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
           {/* Traffic lights */}
-          <circle cx="78"  cy="283" r="4.5" fill="#FF5F57" opacity="0.88" />
-          <circle cx="93"  cy="283" r="4.5" fill="#FEBC2E" opacity="0.88" />
-          <circle cx="108" cy="283" r="4.5" fill="#28C840" opacity="0.88" />
+          <circle cx="77"  cy="276" r="5" fill="#FF5F57" opacity="0.90" />
+          <circle cx="93"  cy="276" r="5" fill="#FEBC2E" opacity="0.90" />
+          <circle cx="109" cy="276" r="5" fill="#28C840" opacity="0.90" />
           {/* Active tab */}
-          <rect x="122" y="276" width="52" height="14" rx="3"
-            fill="rgba(91,127,255,0.22)" stroke="rgba(91,127,255,0.4)" strokeWidth="0.5" />
-          <text x="148" y="286" textAnchor="middle" fontSize="6" fill="rgba(147,187,255,0.65)">main.tsx</text>
-          {/* Code lines (syntax highlighted) */}
-          {[
-            [72,  298, 88,  '#5B7FFF', 0,  0.28],
-            [80,  306, 116, '#A78BFA', 0,  0.25],
-            [88,  314, 66,  '#93BBFF', 0,  0.30],
-            [80,  322, 100, '#22D3EE', 0,  0.24],
-            [72,  330, 76,  '#818CF8', 0,  0.28],
-            [88,  338, 52,  '#A78BFA', 0,  0.22],
-            [72,  346, 84,  '#5B7FFF', 0,  0.26],
-          ].map(([x,y,w,c,_,op], i) => (
-            <rect key={i} x={x as number} y={y as number} width={w as number} height={2.5} rx="1.2"
-              fill={c as string} opacity={op as number} />
+          <rect x="124" y="269" width="56" height="14" rx="3.5"
+            fill="rgba(91,127,255,0.22)" stroke="rgba(91,127,255,0.42)" strokeWidth="0.5" />
+          <text x="152" y="279" textAnchor="middle" fontSize="5.5" fill="rgba(147,187,255,0.72)">App.tsx</text>
+
+          {/* Code lines */}
+          {([
+            [68, 294, 84,  '#5B7FFF', 0.30],
+            [76, 303, 116, '#A78BFA', 0.27],
+            [84, 312, 68,  '#93BBFF', 0.32],
+            [76, 321, 104, '#22D3EE', 0.27],
+            [68, 330, 80,  '#818CF8', 0.30],
+            [84, 339, 56,  '#A78BFA', 0.25],
+            [68, 348, 92,  '#5B7FFF', 0.28],
+          ] as const).map(([x,y,w,c,op], i) => (
+            <rect key={i} x={x} y={y} width={w} height={2.5} rx="1.2" fill={c} opacity={op} />
           ))}
+
           {/* Blinking cursor */}
-          <motion.rect x={72} y={355} width={2} height={10} rx={1} fill="rgba(147,187,255,0.85)"
-            animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }} />
+          <motion.rect x={68} y={357} width={2} height={10} rx={1}
+            fill="rgba(147,187,255,0.88)"
+            animate={{ opacity:[1,0,1] }} transition={{ duration:0.9, repeat:Infinity }} />
+
           {/* Scan line */}
-          <motion.rect x={62} width={216} height={1} rx={0.5}
-            fill="rgba(147,187,255,0.5)"
-            animate={{ y: [274, 382, 274] }}
-            transition={{ duration: 2.6, repeat: Infinity, ease: 'linear' }} />
-          {/* Y logo on screen */}
+          <motion.rect x={60} width={220} height={1.5} rx={0.75}
+            fill="rgba(147,187,255,0.45)"
+            animate={{ y:[266,376,266] }} transition={{ duration:2.8, repeat:Infinity, ease:'linear' }} />
+
+          {/* Y logo on screen — right side */}
           <motion.g
-            animate={{ opacity: [0.72, 1, 0.72], scale: [0.95, 1.05, 0.95] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ transformOrigin: '240px 335px' }}
+            style={{ transformOrigin:'244px 340px' }}
+            animate={{ opacity:[0.75,1,0.75], scale:[0.93,1.07,0.93] }}
+            transition={{ duration:2.5, repeat:Infinity, ease:'easeInOut' }}
           >
-            <text x="240" y="346" textAnchor="middle" fontSize="32" fontWeight="900"
-              fill="url(#yG)" filter="url(#yF)">Y</text>
+            <text x="244" y="350" textAnchor="middle" fontSize="30"
+              fontWeight="900" fill="url(#p_y)" filter="url(#p_yf)">Y</text>
           </motion.g>
 
-          {/* ── HOODIE BODY ────────────────────────────────────────────────── */}
-          <g filter="url(#bSh)">
-            <path
-              d="M 88 200
-                 C 66 206, 44 228, 40 272
-                 L 38 365
-                 Q 38 378, 54 378
-                 L 286 378
-                 Q 302 378, 302 365
-                 L 300 272
-                 C 296 228, 274 206, 252 200 Z"
-              fill="url(#hdG)"
-            />
-            {/* Shine overlay */}
-            <path
-              d="M 88 200
-                 C 66 206, 44 228, 40 272
-                 L 38 365
-                 Q 38 378, 54 378
-                 L 286 378
-                 Q 302 378, 302 365
-                 L 300 272
-                 C 296 228, 274 206, 252 200 Z"
-              fill="url(#hdSG)"
-            />
+          {/* ── HOODIE BODY ──────────────────────────────────────────────── */}
+          <g filter="url(#p_sh)">
+            {/* Base */}
+            <path d="M 90 198 C 68 204,46 226,42 268 L 40 360 Q 40 374,56 374
+                       L 284 374 Q 300 374,300 360 L 298 268 C 294 226,272 204,250 198 Z"
+              fill="url(#p_hd)" />
+            {/* Specular top-left */}
+            <path d="M 90 198 C 68 204,46 226,42 268 L 40 360 Q 40 374,56 374
+                       L 284 374 Q 300 374,300 360 L 298 268 C 294 226,272 204,250 198 Z"
+              fill="url(#p_hs)" />
+            {/* Right-side rim light */}
+            <path d="M 90 198 C 68 204,46 226,42 268 L 40 360 Q 40 374,56 374
+                       L 284 374 Q 300 374,300 360 L 298 268 C 294 226,272 204,250 198 Z"
+              fill="url(#p_rl)" />
           </g>
-          {/* Left sleeve shadow */}
-          <path d="M 40 240 L 38 365 Q 38 378 54 378 L 90 378 L 86 252 Z"
-            fill="rgba(0,0,0,0.10)" />
-          {/* Right sleeve shadow */}
-          <path d="M 300 240 L 302 365 Q 302 378 286 378 L 250 378 L 254 252 Z"
-            fill="rgba(0,0,0,0.10)" />
-          {/* Fabric fold lines */}
-          <path d="M 90 248 Q 124 242 158 252" stroke="rgba(0,0,0,0.07)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          <path d="M 180 262 Q 216 256 246 268" stroke="rgba(0,0,0,0.06)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-          <path d="M 84 305 Q 120 298 156 308" stroke="rgba(0,0,0,0.07)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-          <path d="M 182 322 Q 218 314 248 326" stroke="rgba(0,0,0,0.06)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-          <path d="M 86 352 Q 170 345 254 352" stroke="rgba(0,0,0,0.05)" strokeWidth="1" fill="none" />
-          {/* Center zipper */}
-          <line x1="170" y1="204" x2="170" y2="298" stroke="rgba(0,0,0,0.14)" strokeWidth="2" />
-          <rect x="164" y="204" width="12" height="9" rx="2.5"
-            fill="rgba(255,255,255,0.09)" stroke="rgba(255,255,255,0.14)" strokeWidth="0.5" />
-          {/* Pocket */}
-          <rect x="120" y="320" width="100" height="40" rx="12"
-            fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-          <line x1="133" y1="320" x2="120" y2="360" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-          <line x1="207" y1="320" x2="220" y2="360" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-          {/* Brand Y on hoodie */}
+
+          {/* Sleeve depth shadows */}
+          <path d="M 42 244 L 40 360 Q 40 374 56 374 L 94 374 L 90 256 Z" fill="rgba(0,0,0,0.10)" />
+          <path d="M 298 244 L 300 360 Q 300 374 284 374 L 246 374 L 250 256 Z" fill="rgba(0,0,0,0.10)" />
+
+          {/* Fabric folds */}
+          <path d="M 92 254 Q 128 246 164 256"  stroke="rgba(0,0,0,0.065)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+          <path d="M 178 268 Q 216 260 250 272"  stroke="rgba(0,0,0,0.055)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+          <path d="M 86 312 Q 124 304 160 314"  stroke="rgba(0,0,0,0.060)" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+          <path d="M 182 330 Q 220 321 252 333"  stroke="rgba(0,0,0,0.052)" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+          <path d="M 86 358 Q 170 351 254 358"  stroke="rgba(0,0,0,0.045)" strokeWidth="1.0" fill="none" />
+
+          {/* Zipper */}
+          <line x1="170" y1="202" x2="170" y2="296" stroke="rgba(0,0,0,0.13)" strokeWidth="1.8" />
+          <rect x="163" y="202" width="14" height="10" rx="3"
+            fill="rgba(255,255,255,0.09)" stroke="rgba(255,255,255,0.13)" strokeWidth="0.5" />
+
+          {/* Kangaroo pocket */}
+          <rect x="116" y="316" width="108" height="44" rx="13"
+            fill="rgba(0,0,0,0.17)" stroke="rgba(255,255,255,0.055)" strokeWidth="0.5" />
+          <line x1="130" y1="316" x2="116" y2="360" stroke="rgba(255,255,255,0.038)" strokeWidth="1" />
+          <line x1="210" y1="316" x2="224" y2="360" stroke="rgba(255,255,255,0.038)" strokeWidth="1" />
+
+          {/* Y on hoodie — large, glowing */}
           <motion.g
-            animate={{ opacity: [0.78, 1, 0.78] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ transformOrigin: '170px 292px' }}
+            style={{ transformOrigin:'170px 294px' }}
+            animate={{ opacity:[0.80,1,0.80] }}
+            transition={{ duration:3.0, repeat:Infinity, ease:'easeInOut' }}
           >
-            <text x="170" y="300" textAnchor="middle" fontSize="56" fontWeight="900"
-              fill="url(#yG)" filter="url(#yF)">Y</text>
+            <text x="170" y="305" textAnchor="middle" fontSize="56"
+              fontWeight="900" fill="url(#p_y)" filter="url(#p_yf)">Y</text>
           </motion.g>
 
-          {/* ── HOOD ARCH ──────────────────────────────────────────────────── */}
-          <path
-            d="M 90 196
-               Q 90 134, 170 120
-               Q 250 134, 250 196
-               L 252 200
-               L 88 200 Z"
-            fill="url(#hG)" opacity="0.97"
-          />
-          <path d="M 92 194 Q 92 138 170 124 Q 248 138 248 194"
+          {/* ── HOOD ARCH ────────────────────────────────────────────────── */}
+          <path d="M 92 194 Q 92 132,170 118 Q 248 132,248 194 L 250 198 L 90 198 Z"
+            fill="url(#p_hr)" opacity="0.97" />
+          <path d="M 94 192 Q 94 136 170 122 Q 246 136 246 192"
             fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
 
-          {/* ── HEAD ───────────────────────────────────────────────────────── */}
-          {/* Head shadow at neck */}
-          <ellipse cx="170" cy="192" rx="40" ry="16" fill="rgba(0,0,0,0.30)" />
-          <ellipse cx="170" cy="112" rx="64" ry="76" fill="url(#sG)" filter="url(#bSh)" />
-          {/* Chin shadow */}
-          <ellipse cx="170" cy="180" rx="36" ry="12" fill="rgba(140,80,30,0.13)" />
-          {/* Face ambient light (left side) */}
-          <ellipse cx="140" cy="130" rx="22" ry="32" fill="rgba(255,255,255,0.04)" />
+          {/* ── HEAD ─────────────────────────────────────────────────────── */}
+          <ellipse cx="170" cy="192" rx="40" ry="16" fill="rgba(0,0,0,0.28)" />
+          <ellipse cx="170" cy="108" rx="64" ry="76" fill="url(#p_sk)" filter="url(#p_sh)" />
+          <ellipse cx="170" cy="178" rx="36" ry="12" fill="rgba(130,72,26,0.12)" />
+          {/* Ambient face light left */}
+          <ellipse cx="140" cy="120" rx="26" ry="36" fill="rgba(255,255,255,0.04)" />
 
-          {/* ── HAIR ───────────────────────────────────────────────────────── */}
-          <path
-            d="M 108 92
-               Q 108 44, 170 42
-               Q 232 44, 232 92
-               L 234 110
-               Q 208 100, 170 102
-               Q 132 100, 106 110 Z"
-            fill="url(#hG)"
-          />
-          <ellipse cx="144" cy="64" rx="24" ry="10" fill="rgba(255,255,255,0.12)"
-            transform="rotate(-14 144 64)" />
-          <ellipse cx="158" cy="78" rx="13" ry="5" fill="rgba(255,255,255,0.07)"
-            transform="rotate(-8 158 78)" />
-          <ellipse cx="186" cy="62" rx="11" ry="4" fill="rgba(255,255,255,0.06)"
-            transform="rotate(9 186 62)" />
+          {/* ── HAIR ─────────────────────────────────────────────────────── */}
+          <path d="M 110 92 Q 110 38,170 36 Q 230 38,230 92 L 234 112
+                     Q 206 100,170 102 Q 134 100,106 112 Z" fill="url(#p_hr)" />
+          <ellipse cx="144" cy="62" rx="24" ry="9.5" fill="rgba(255,255,255,0.12)"
+            transform="rotate(-13 144 62)" />
+          <ellipse cx="160" cy="76" rx="13" ry="4.5" fill="rgba(255,255,255,0.07)"
+            transform="rotate(-8 160 76)" />
+          <ellipse cx="188" cy="60" rx="10" ry="4" fill="rgba(255,255,255,0.06)"
+            transform="rotate(9 188 60)" />
 
-          {/* ── FACE ───────────────────────────────────────────────────────── */}
+          {/* ── FACE — clean & balanced ───────────────────────────────────── */}
           {/* Eyebrows */}
-          <path d="M 128 120 Q 144 113 152 118" stroke="#3E2008" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <path d="M 188 118 Q 196 113 210 120" stroke="#3E2008" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d="M 128 118 Q 143 111 151 116" stroke="#3A1A06" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+          <path d="M 189 116 Q 197 111 212 118" stroke="#3A1A06" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+
           {/* Left eye */}
-          <ellipse cx="140" cy="132" rx="14" ry="11" fill="white" />
-          <circle cx="141" cy="132" r="9" fill="#1A1040" />
-          <circle cx="141" cy="132" r="5.5" fill="#2A1060" />
-          <circle cx="143" cy="128" r="4" fill="rgba(255,255,255,0.88)" />
-          <circle cx="138" cy="133" r="1.8" fill="rgba(255,255,255,0.45)" />
-          <path d="M 126 132 Q 140 121 154 132" stroke="#3A1808" strokeWidth="1.5" fill="rgba(0,0,0,0.07)" />
+          <ellipse cx="139" cy="130" rx="14" ry="11" fill="white" />
+          <circle  cx="140" cy="130" r="8.5"  fill="#140C2C" />
+          <circle  cx="140" cy="130" r="5"    fill="#1E1050" />
+          <circle  cx="142" cy="126" r="4"    fill="rgba(255,255,255,0.90)" />
+          <circle  cx="137" cy="131" r="1.6"  fill="rgba(255,255,255,0.42)" />
+          <path d="M 125 130 Q 139 119 153 130" stroke="#280C04" strokeWidth="1.5" fill="rgba(0,0,0,0.06)" />
+
           {/* Right eye */}
-          <ellipse cx="200" cy="132" rx="14" ry="11" fill="white" />
-          <circle cx="199" cy="132" r="9" fill="#1A1040" />
-          <circle cx="199" cy="132" r="5.5" fill="#2A1060" />
-          <circle cx="201" cy="128" r="4" fill="rgba(255,255,255,0.88)" />
-          <circle cx="196" cy="133" r="1.8" fill="rgba(255,255,255,0.45)" />
-          <path d="M 186 132 Q 200 121 214 132" stroke="#3A1808" strokeWidth="1.5" fill="rgba(0,0,0,0.07)" />
-          {/* Nose */}
-          <path d="M 166 142 L 162 162 Q 170 168 178 162 L 174 142"
-            stroke="rgba(165,90,30,0.28)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
-          <ellipse cx="160" cy="161" rx="6.5" ry="4" fill="rgba(155,80,25,0.18)" />
-          <ellipse cx="180" cy="161" rx="6.5" ry="4" fill="rgba(155,80,25,0.18)" />
+          <ellipse cx="201" cy="130" rx="14" ry="11" fill="white" />
+          <circle  cx="200" cy="130" r="8.5"  fill="#140C2C" />
+          <circle  cx="200" cy="130" r="5"    fill="#1E1050" />
+          <circle  cx="202" cy="126" r="4"    fill="rgba(255,255,255,0.90)" />
+          <circle  cx="197" cy="131" r="1.6"  fill="rgba(255,255,255,0.42)" />
+          <path d="M 187 130 Q 201 119 215 130" stroke="#280C04" strokeWidth="1.5" fill="rgba(0,0,0,0.06)" />
+
+          {/* Nose — subtle */}
+          <path d="M 164 142 L 161 158 Q 170 163 179 158 L 176 142"
+            stroke="rgba(160,82,26,0.26)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <ellipse cx="159" cy="158" rx="5.5" ry="3.5" fill="rgba(148,74,22,0.17)" />
+          <ellipse cx="181" cy="158" rx="5.5" ry="3.5" fill="rgba(148,74,22,0.17)" />
+
           {/* Cheeks */}
-          <ellipse cx="122" cy="152" rx="18" ry="11" fill="rgba(218,100,75,0.22)" />
-          <ellipse cx="218" cy="152" rx="18" ry="11" fill="rgba(218,100,75,0.22)" />
+          <ellipse cx="118" cy="148" rx="18" ry="11" fill="rgba(212,98,74,0.20)" />
+          <ellipse cx="222" cy="148" rx="18" ry="11" fill="rgba(212,98,74,0.20)" />
+
           {/* Smile */}
-          <path d="M 148 172 Q 170 184 192 172"
-            stroke="rgba(125,65,25,0.55)" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <path d="M 152 172 Q 170 178 188 172"
-            stroke="rgba(220,155,110,0.18)" strokeWidth="1.5" fill="none" />
+          <path d="M 148 168 Q 170 181 192 168"
+            stroke="rgba(120,62,22,0.52)" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M 152 169 Q 170 176 188 169"
+            stroke="rgba(212,142,98,0.18)" strokeWidth="1.5" fill="none" />
+
           {/* Ears */}
-          <path d="M 106 118 Q 96 130 98 146 Q 102 162 118 156 L 112 120 Z" fill="url(#sG)" />
-          <path d="M 110 130 Q 106 142 110 152" stroke="rgba(160,85,35,0.20)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-          <path d="M 234 120 L 222 156 Q 238 162 242 146 Q 244 130 234 118 Z" fill="url(#sG)" />
-          <path d="M 230 130 Q 234 142 230 152" stroke="rgba(160,85,35,0.20)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <path d="M 106 116 Q 95 129,97 145 Q 101 162,118 155 L 110 118 Z" fill="url(#p_sk)" />
+          <path d="M 110 128 Q 106 141,110 152" stroke="rgba(152,78,28,0.18)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <path d="M 234 118 L 222 155 Q 239 162,243 145 Q 245 129,234 116 Z" fill="url(#p_sk)" />
+          <path d="M 230 128 Q 234 141,230 152" stroke="rgba(152,78,28,0.18)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+
           {/* Neck */}
-          <rect x="150" y="182" width="40" height="22" rx="5" fill="url(#sG)" />
-          <line x1="150" y1="192" x2="190" y2="192" stroke="rgba(155,85,35,0.08)" strokeWidth="1" />
+          <rect x="152" y="180" width="36" height="20" rx="5" fill="url(#p_sk)" />
+          <line x1="152" y1="189" x2="188" y2="189" stroke="rgba(148,76,28,0.08)" strokeWidth="1" />
+
           {/* Forehead shadow */}
-          <path d="M 110 102 Q 170 90 230 102 L 226 120 Q 170 108 114 120 Z"
+          <path d="M 112 100 Q 170 88 228 100 L 224 118 Q 170 106 116 118 Z"
             fill="rgba(0,0,0,0.04)" />
         </svg>
       </motion.div>
