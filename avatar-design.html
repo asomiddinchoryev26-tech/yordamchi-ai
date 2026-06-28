@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Asomiddin Choriyev — AI Avatar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── Export canvas: 1024 × 1024 ─────────────────────────────────────── */
+  html, body {
+    width: 1024px;
+    height: 1024px;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    background: #000;
+  }
+
+  /* ── Root canvas ────────────────────────────────────────────────────── */
+  .canvas {
+    position: relative;
+    width: 1024px;
+    height: 1024px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 25%, #150039 0%, #0a001f 40%, #030010 75%, #000 100%);
+  }
+
+  /* ── Background grid ────────────────────────────────────────────────── */
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+  }
+
+  /* ── Ambient glows ──────────────────────────────────────────────────── */
+  .glow-violet {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(109,40,217,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .glow-blue {
+    position: absolute;
+    bottom: 15%;
+    right: 10%;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .glow-cyan {
+    position: absolute;
+    bottom: 30%;
+    left: 8%;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── Corner brackets ────────────────────────────────────────────────── */
+  .bracket {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+  }
+  .bracket::before,
+  .bracket::after { content: ''; position: absolute; background: rgba(139,92,246,0.45); }
+  .bracket::before { width: 100%; height: 2px; top: 0; }
+  .bracket::after  { width: 2px; height: 100%; top: 0; }
+
+  .br-tl { top: 64px; left: 64px; }
+  .br-tr { top: 64px; right: 64px; transform: scaleX(-1); }
+  .br-bl { bottom: 64px; left: 64px; transform: scaleY(-1); }
+  .br-br { bottom: 64px; right: 64px; transform: scale(-1); }
+
+  /* Bracket dots */
+  .br-dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #7c3aed;
+    box-shadow: 0 0 8px #7c3aed, 0 0 16px rgba(124,58,237,0.5);
+  }
+  .br-tl .br-dot { top: -2px; left: -2px; }
+  .br-tr .br-dot { top: -2px; right: -2px; }
+  .br-bl .br-dot { bottom: -2px; left: -2px; }
+  .br-br .br-dot { bottom: -2px; right: -2px; }
+
+  /* ── Avatar section ─────────────────────────────────────────────────── */
+  .avatar-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 48px;
+  }
+
+  /* Rotating outer glow ring */
+  .glow-ring-outer {
+    position: absolute;
+    inset: -28px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      #7c3aed 0%,
+      #3b82f6 25%,
+      #06b6d4 40%,
+      #8b5cf6 60%,
+      #ec4899 75%,
+      #7c3aed 100%
+    );
+    filter: blur(24px);
+    opacity: 0.55;
+    animation: spin 10s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* Static fallback: no animation for export */
+  /* To disable animation for screenshot, add .no-anim .glow-ring-outer { animation: none; } */
+
+  /* Orbit dot ring */
+  .orbit-ring {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    border: 1px dashed rgba(139,92,246,0.18);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .orbit-dot {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #7c3aed;
+    box-shadow: 0 0 10px #7c3aed, 0 0 20px rgba(124,58,237,0.6);
+    top: 50%;
+    left: 50%;
+  }
+  .orbit-dot-1 { transform: translate(-50%, -50%) rotate(30deg)  translateY(-250px); }
+  .orbit-dot-2 { transform: translate(-50%, -50%) rotate(110deg) translateY(-250px); background:#3b82f6; box-shadow:0 0 10px #3b82f6,0 0 20px rgba(59,130,246,0.6); }
+  .orbit-dot-3 { transform: translate(-50%, -50%) rotate(200deg) translateY(-250px); background:#06b6d4; box-shadow:0 0 10px #06b6d4,0 0 20px rgba(6,182,212,0.6); }
+  .orbit-dot-4 { transform: translate(-50%, -50%) rotate(310deg) translateY(-250px); }
+
+  /* Gradient border ring */
+  .avatar-ring {
+    position: relative;
+    z-index: 2;
+    width: 390px;
+    height: 390px;
+    border-radius: 50%;
+    padding: 4px;
+    background: conic-gradient(
+      from 180deg,
+      #7c3aed 0%,
+      #3b82f6 35%,
+      #06b6d4 55%,
+      #8b5cf6 75%,
+      #7c3aed 100%
+    );
+    box-shadow:
+      0 0 0 1px rgba(124,58,237,0.3),
+      0 0 30px rgba(124,58,237,0.5),
+      0 0 60px rgba(124,58,237,0.3),
+      0 0 100px rgba(59,130,246,0.15),
+      inset 0 0 30px rgba(124,58,237,0.08);
+  }
+
+  /* Inner decorative border — sits above photo */
+  .avatar-ring::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    border: 1px solid rgba(139,92,246,0.25);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Photo area */
+  .avatar-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    /* CSS background as primary — renders before img */
+    background-color: #0d0828;
+    background-image: url('./public/asomiddin.jpg');
+    background-size: cover;
+    background-position: center 20%;
+  }
+
+  /* img as overlay — same source, covers background */
+  .avatar-photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 8%;
+    display: block;
+    z-index: 2;
+    border-radius: 50%;
+  }
+
+  /* Vignette — bottom fade only, above photo but no background */
+  .avatar-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: inset 0 -70px 70px rgba(8,0,18,0.55);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* ── AI Chip ────────────────────────────────────────────────────────── */
+  .ai-chip {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: rgba(0,0,0,0.65);
+    border: 1px solid rgba(139,92,246,0.5);
+    border-radius: 10px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 0 12px rgba(124,58,237,0.4),
+      0 0 24px rgba(124,58,237,0.15),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    z-index: 3;
+  }
+
+  .chip-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #7c3aed;
+    box-shadow: 0 0 6px #7c3aed, 0 0 12px rgba(124,58,237,0.8);
+    flex-shrink: 0;
+  }
+
+  .chip-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #c4b5fd;
+    letter-spacing: 0.12em;
+    font-family: 'Inter', sans-serif;
+    line-height: 1;
+  }
+
+  /* ── Name card — glassmorphism ──────────────────────────────────────── */
+  .name-card {
+    position: relative;
+    text-align: center;
+    padding: 28px 64px 26px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(139,92,246,0.18);
+    border-radius: 24px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 0 40px rgba(124,58,237,0.08),
+      0 0 0 1px rgba(255,255,255,0.03),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -1px 0 rgba(0,0,0,0.2);
+  }
+
+  /* Top shine line */
+  .name-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 55%;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent,
+      rgba(139,92,246,0.7) 30%,
+      rgba(99,102,241,0.9) 50%,
+      rgba(139,92,246,0.7) 70%,
+      transparent
+    );
+  }
+
+  /* Side glow lines */
+  .name-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    box-shadow: 0 0 60px rgba(124,58,237,0.12);
+    pointer-events: none;
+  }
+
+  .name-text {
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg,
+      #ffffff 0%,
+      #e2d9f3 30%,
+      #c4b5fd 55%,
+      #93c5fd 80%,
+      #e0f2fe 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .subtitle-text {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(167,139,250,0.75);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .subtitle-sep {
+    margin: 0 12px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(99,102,241,0.6);
+    box-shadow: 0 0 6px rgba(99,102,241,0.5);
+    flex-shrink: 0;
+  }
+
+  /* ── Bottom scan line ───────────────────────────────────────────────── */
+  .scan-line {
+    position: absolute;
+    bottom: 120px;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent 5%,
+      rgba(124,58,237,0.2) 20%,
+      rgba(59,130,246,0.3) 50%,
+      rgba(124,58,237,0.2) 80%,
+      transparent 95%
+    );
+    pointer-events: none;
+  }
+
+  /* ── Version badge ──────────────────────────────────────────────────── */
+  .version-badge {
+    position: absolute;
+    bottom: 44px;
+    right: 72px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: rgba(139,92,246,0.35);
+    font-family: 'Inter', monospace;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- Background layers -->
+  <div class="bg-grid"></div>
+  <div class="glow-violet"></div>
+  <div class="glow-blue"></div>
+  <div class="glow-cyan"></div>
+
+  <!-- Corner brackets -->
+  <div class="bracket br-tl"><div class="br-dot"></div></div>
+  <div class="bracket br-tr"><div class="br-dot"></div></div>
+  <div class="bracket br-bl"><div class="br-dot"></div></div>
+  <div class="bracket br-br"><div class="br-dot"></div></div>
+
+  <!-- Avatar section -->
+  <div class="avatar-section">
+    <div class="glow-ring-outer"></div>
+    <div class="orbit-ring">
+      <div class="orbit-dot orbit-dot-1"></div>
+      <div class="orbit-dot orbit-dot-2"></div>
+      <div class="orbit-dot orbit-dot-3"></div>
+      <div class="orbit-dot orbit-dot-4"></div>
+    </div>
+
+    <div class="avatar-ring">
+      <div class="avatar-photo">
+        <img src="./public/asomiddin.jpg" alt="Asomiddin Choriyev" />
+      </div>
+    </div>
+
+    <!-- AI chip (30% smaller than standard) -->
+    <div class="ai-chip">
+      <div class="chip-pulse"></div>
+      <span class="chip-label">ASOMIDDIN AI</span>
+    </div>
+  </div>
+
+  <!-- Name card -->
+  <div class="name-card">
+    <div class="name-text">ASOMIDDIN CHORIYEV</div>
+    <div class="subtitle-row">
+      <span class="subtitle-text">AI Developer</span>
+      <div class="subtitle-sep"></div>
+      <span class="subtitle-text">Vibe Coding</span>
+      <div class="subtitle-sep"></div>
+      <span class="subtitle-text">No-Code Specialist</span>
+    </div>
+  </div>
+
+  <!-- Bottom details -->
+  <div class="scan-line"></div>
+  <div class="version-badge">ASOMIDDIN AI · v1.0</div>
+
+</div>
+</body>
+</html>

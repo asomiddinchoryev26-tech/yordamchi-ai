@@ -1,4 +1,4 @@
-/**
+﻿/**
  * pages/student/AIVisionPage.tsx
  * Sprint 4.4 — Premium AI Vision UI/UX Redesign
  *
@@ -22,6 +22,7 @@ import { loadStudentContext } from '@/services/ai-provider.service'
 import { UniversalInput }  from '@/components/vision/UniversalInput'
 import MarkdownContent     from '@/components/chat/MarkdownContent'
 import { AsomiddinAvatar } from '@/components/ai'
+import { IllustrationImage, ILLUS } from '@/components/illustration'
 import type { VisionHistoryEntry } from '@/ai-brain/vision/types'
 import type { Language }   from '@/ai-brain/core/types'
 import type { UniversalMessage } from '@/hooks/useUniversalAI'
@@ -148,82 +149,6 @@ const VISION_ACTIONS: ReadonlyArray<{
   },
 ]
 
-// ─── AI Illustration (CSS art, no external assets) ────────────────────────────
-
-function AiOrb() {
-  return (
-    <div className="relative flex items-center justify-center w-48 h-48 flex-shrink-0">
-      {/* Outer pulse ring */}
-      <motion.div
-        className="absolute w-44 h-44 rounded-full"
-        style={{ border: '1px solid rgba(99,102,241,0.3)' }}
-        animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.2, 0.5] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-        aria-hidden="true"
-      />
-      {/* Middle ring */}
-      <motion.div
-        className="absolute w-32 h-32 rounded-full"
-        style={{ border: '1.5px solid rgba(139,92,246,0.5)' }}
-        animate={{ scale: [1, 1.12, 1], opacity: [0.6, 0.2, 0.6] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-        aria-hidden="true"
-      />
-      {/* Floating mini orbs */}
-      {[
-        { angle: 0,   size: 10, delay: 0,   color: '#6366F1' },
-        { angle: 72,  size: 7,  delay: 0.5, color: '#8B5CF6' },
-        { angle: 144, size: 8,  delay: 1.0, color: '#818CF8' },
-        { angle: 216, size: 6,  delay: 1.5, color: '#7C3AED' },
-        { angle: 288, size: 9,  delay: 2.0, color: '#6366F1' },
-      ].map((orb, i) => {
-        const rad = (orb.angle * Math.PI) / 180
-        const r   = 60
-        return (
-          <motion.div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: orb.size, height: orb.size,
-              background: orb.color,
-              boxShadow: `0 0 ${orb.size * 2}px ${orb.color}`,
-              left: `calc(50% + ${Math.cos(rad) * r}px - ${orb.size / 2}px)`,
-              top:  `calc(50% + ${Math.sin(rad) * r}px - ${orb.size / 2}px)`,
-            }}
-            animate={{ scale: [0.7, 1.2, 0.7], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 2 + orb.delay * 0.4, repeat: Infinity, ease: 'easeInOut', delay: orb.delay }}
-            aria-hidden="true"
-          />
-        )
-      })}
-      {/* Core orb */}
-      <motion.div
-        className="relative w-24 h-24 rounded-full flex items-center justify-center"
-        style={{
-          background: 'linear-gradient(135deg, #4338CA 0%, #6366F1 40%, #7C3AED 80%, #6D28D9 100%)',
-          boxShadow: '0 0 40px rgba(99,102,241,0.5), 0 0 80px rgba(99,102,241,0.25)',
-        }}
-        animate={{ rotate: [0, 360] }}
-        transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
-        aria-hidden="true"
-      >
-        {/* Inner scan line */}
-        <motion.div
-          className="absolute inset-0 rounded-full overflow-hidden"
-          aria-hidden="true"
-        >
-          <motion.div
-            className="absolute inset-x-0 h-[2px]"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)' }}
-            animate={{ top: ['-2px', '100%'] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
-          />
-        </motion.div>
-        <Sparkles className="w-10 h-10 text-white relative z-10" aria-hidden="true" />
-      </motion.div>
-    </div>
-  )
-}
 
 // ─── Premium typing indicator ─────────────────────────────────────────────────
 
@@ -464,14 +389,20 @@ function IdleHero({ language, onPrompt }: { language: Language; onPrompt: (text:
             </p>
           </motion.div>
 
-          {/* Right: AI illustration */}
+          {/* Right: AI Vision illustration — PNG from /public/illustrations/ */}
           <motion.div
             className="hidden sm:flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.85 }}
+            initial={{ opacity: 0, scale: 0.88 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5, ease: EASE }}
+            transition={{ delay: 0.2, duration: 0.55, ease: EASE }}
           >
-            <AiOrb />
+            <IllustrationImage
+              src={ILLUS.AI_CHAT}
+              alt="AI Vision — sun'iy intellekt ko'rish imkoniyati"
+              width={220}
+              height={220}
+              glow="0 0 50px rgba(99,102,241,0.55)"
+            />
           </motion.div>
         </div>
       </div>

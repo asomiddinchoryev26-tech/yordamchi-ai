@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YordamchiAI — Rasmiy Texnik Hujjatlar</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:11pt;line-height:1.6;color:#1a1a2e;background:#fff}
+.cover{page-break-after:always;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;text-align:center;padding:60px 40px}
+.cover-logo{width:80px;height:80px;background:linear-gradient(135deg,#7c3aed,#3b82f6);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 30px;font-size:36px;font-weight:900;color:#fff;box-shadow:0 0 40px rgba(124,58,237,.6)}
+.cover h1{font-size:36pt;font-weight:900;letter-spacing:-1px;margin-bottom:8px;background:linear-gradient(90deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cover h2{font-size:16pt;font-weight:400;opacity:.8;margin-bottom:40px}
+.cover-meta{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:20px 40px;margin-top:20px}
+.cover-meta p{opacity:.9;margin:4px 0;font-size:11pt}
+.cover-badge{display:inline-block;background:rgba(124,58,237,.4);border:1px solid #7c3aed;border-radius:20px;padding:4px 16px;font-size:10pt;margin-top:16px;letter-spacing:1px}
+.doc-section{page-break-before:always;padding:40px 60px}
+.doc-section:first-of-type{page-break-before:avoid}
+h1.doc-title{font-size:22pt;font-weight:900;color:#1e1b4b;border-bottom:3px solid #7c3aed;padding-bottom:12px;margin-bottom:24px}
+h2{font-size:15pt;font-weight:700;color:#312e81;margin:28px 0 12px;padding-left:12px;border-left:4px solid #7c3aed}
+h3{font-size:12pt;font-weight:700;color:#4c1d95;margin:20px 0 8px}
+h4{font-size:11pt;font-weight:700;color:#5b21b6;margin:14px 0 6px}
+p{margin-bottom:10px;color:#374151}
+ul,ol{padding-left:24px;margin-bottom:12px}
+li{margin-bottom:4px;color:#374151}
+.callout{border-radius:8px;padding:14px 18px;margin:14px 0;font-size:10.5pt}
+.callout.red{background:#fef2f2;border-left:4px solid #ef4444;color:#991b1b}
+.callout.orange{background:#fff7ed;border-left:4px solid #f97316;color:#9a3412}
+.callout.yellow{background:#fefce8;border-left:4px solid #eab308;color:#854d0e}
+.callout.green{background:#f0fdf4;border-left:4px solid #22c55e;color:#166534}
+.callout.blue{background:#eff6ff;border-left:4px solid #3b82f6;color:#1d4ed8}
+.callout.purple{background:#f5f3ff;border-left:4px solid #8b5cf6;color:#5b21b6}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:10pt}
+th{background:#312e81;color:#fff;padding:10px 14px;text-align:left;font-weight:700}
+td{padding:9px 14px;border-bottom:1px solid #e5e7eb;color:#374151}
+tr:nth-child(even) td{background:#f9fafb}
+tr:hover td{background:#f0f9ff}
+.badge{display:inline-block;border-radius:20px;padding:2px 10px;font-size:9pt;font-weight:700;margin:1px}
+.badge.red{background:#fecaca;color:#991b1b}
+.badge.orange{background:#fed7aa;color:#9a3412}
+.badge.yellow{background:#fef08a;color:#854d0e}
+.badge.green{background:#bbf7d0;color:#166534}
+.badge.blue{background:#bfdbfe;color:#1d4ed8}
+.badge.purple{background:#ddd6fe;color:#5b21b6}
+.badge.gray{background:#e5e7eb;color:#374151}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.score-card{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:12px;padding:20px;text-align:center;color:#fff}
+.score-card .num{font-size:28pt;font-weight:900;color:#a78bfa}
+.score-card .label{font-size:9pt;opacity:.8;margin-top:4px}
+.toc-item{display:flex;align-items:center;padding:6px 0;border-bottom:1px dotted #e5e7eb;font-size:10.5pt}
+.toc-item .num{width:32px;font-weight:700;color:#7c3aed}
+.toc-item .title{flex:1}
+.toc-item .page{color:#9ca3af;font-size:10pt}
+.roadmap-phase{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px 24px;margin:14px 0}
+.roadmap-phase h3{color:#1e40af;margin-bottom:12px}
+.phase-badge{display:inline-block;padding:3px 12px;border-radius:20px;font-size:9.5pt;font-weight:700;margin-bottom:12px}
+.phase-critical{background:#fee2e2;color:#dc2626}
+.phase-high{background:#fef3c7;color:#d97706}
+.phase-medium{background:#e0f2fe;color:#0369a1}
+.phase-low{background:#f0fdf4;color:#15803d}
+code{background:#f1f5f9;padding:2px 6px;border-radius:4px;font-family:'Courier New',monospace;font-size:9.5pt;color:#7c3aed}
+pre{background:#0f172a;color:#e2e8f0;padding:16px 20px;border-radius:10px;font-family:'Courier New',monospace;font-size:9pt;line-height:1.7;overflow-x:auto;margin:14px 0;white-space:pre-wrap;word-break:break-all}
+.chart-bar{display:flex;align-items:center;margin:6px 0;gap:12px}
+.chart-bar .cat{width:160px;font-size:10pt;color:#374151;text-align:right}
+.chart-bar .bar-wrap{flex:1;background:#e5e7eb;border-radius:20px;height:14px;overflow:hidden}
+.chart-bar .bar{height:100%;border-radius:20px;background:linear-gradient(90deg,#7c3aed,#3b82f6)}
+.chart-bar .val{width:40px;font-weight:700;color:#5b21b6;font-size:10pt}
+.priority-list{counter-reset:pri-counter}
+.priority-item{counter-increment:pri-counter;display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6;align-items:flex-start}
+.priority-item::before{content:counter(pri-counter);min-width:28px;height:28px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:50%;color:#fff;font-weight:900;font-size:10pt;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.priority-item .content .title{font-weight:700;color:#1e1b4b;font-size:11pt}
+.priority-item .content .desc{font-size:10pt;color:#6b7280;margin-top:2px}
+footer{text-align:center;padding:30px;color:#9ca3af;font-size:9.5pt;border-top:1px solid #e5e7eb;margin-top:40px}
+@media print{
+  .doc-section{page-break-inside:avoid}
+  .cover{min-height:auto;padding:40px}
+  body{font-size:10pt}
+}
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-logo">Y</div>
+  <h1>YordamchiAI</h1>
+  <h2>Rasmiy Texnik Hujjatlar To'plami</h2>
+  <div class="cover-meta">
+    <p><strong>Hujjat:</strong> MASTER PLATFORM AUDIT + ARCHITECTURE + ROADMAP</p>
+    <p><strong>Versiya:</strong> v1.0.0 | <strong>Sana:</strong> 2026-06-25</p>
+    <p><strong>Muallif:</strong> CTO Office — Arxitektura va Mahsulot Bo'limi</p>
+    <p><strong>Holat:</strong> Konfidensial — Faqat Texnik Jamoa</p>
+    <p><strong>Til:</strong> O'zbek (Latin) + Inglizcha texnik atamalar</p>
+  </div>
+  <span class="cover-badge">AI-POWERED LEARNING PLATFORM</span>
+</div>
+
+<!-- MUNDARIJA -->
+<div class="doc-section">
+<h1 class="doc-title">MUNDARIJA</h1>
+<div class="toc-item"><span class="num">1.</span><span class="title">Executive Summary</span><span class="page">3</span></div>
+<div class="toc-item"><span class="num">2.</span><span class="title">Texnologiya Stack Auditi</span><span class="page">4</span></div>
+<div class="toc-item"><span class="num">3.</span><span class="title">Papka Tuzilmasi Auditi</span><span class="page">5</span></div>
+<div class="toc-item"><span class="num">4.</span><span class="title">Sahifalar Auditi</span><span class="page">6</span></div>
+<div class="toc-item"><span class="num">5.</span><span class="title">Komponentlar Auditi</span><span class="page">8</span></div>
+<div class="toc-item"><span class="num">6.</span><span class="title">Database Auditi</span><span class="page">10</span></div>
+<div class="toc-item"><span class="num">7.</span><span class="title">Autentifikatsiya Auditi</span><span class="page">13</span></div>
+<div class="toc-item"><span class="num">8.</span><span class="title">Foydalanuvchi Profil Auditi</span><span class="page">14</span></div>
+<div class="toc-item"><span class="num">9.</span><span class="title">AI Tizim Auditi</span><span class="page">15</span></div>
+<div class="toc-item"><span class="num">10.</span><span class="title">Xavfsizlik Auditi</span><span class="page">17</span></div>
+<div class="toc-item"><span class="num">11.</span><span class="title">Performance Auditi</span><span class="page">18</span></div>
+<div class="toc-item"><span class="num">12.</span><span class="title">UI/UX Auditi</span><span class="page">19</span></div>
+<div class="toc-item"><span class="num">13.</span><span class="title">Texnik Qarz</span><span class="page">20</span></div>
+<div class="toc-item"><span class="num">14.</span><span class="title">Kelajak Arxitekturasi</span><span class="page">22</span></div>
+<div class="toc-item"><span class="num">15.</span><span class="title">Rivojlanish Roadmap</span><span class="page">24</span></div>
+<div class="toc-item"><span class="num">16.</span><span class="title">Xavf Tahlili</span><span class="page">26</span></div>
+<div class="toc-item"><span class="num">17.</span><span class="title">TOP 100 Yaxshilanishlar</span><span class="page">27</span></div>
+<div class="toc-item"><span class="num">18.</span><span class="title">Yakuniy Baho</span><span class="page">30</span></div>
+</div>
+
+<!-- 1. EXECUTIVE SUMMARY -->
+<div class="doc-section">
+<h1 class="doc-title">1. EXECUTIVE SUMMARY</h1>
+
+<div class="callout purple">
+<strong>Platforma:</strong> YordamchiAI — AI-powered ta'lim platformasi (LMS)<br>
+<strong>Stack:</strong> React 19 + TypeScript 6 + Supabase + Google Gemini 2.5 Flash<br>
+<strong>Bosqich:</strong> MVP (Minimum Viable Product)<br>
+<strong>Umumiy baho: 5.3 / 10</strong>
+</div>
+
+<p>YordamchiAI hozirda faol rivojlanish bosqichida bo'lgan AI-powered ta'lim platformasi. Platforma React 19 + Supabase stack'i asosida qurilgan bo'lib, asosiy AI engine sifatida Google Gemini 2.5 Flash ishlatiladi.</p>
+
+<h2>Kuchli Tomonlar</h2>
+<ul>
+<li><strong>Supabase</strong> — ajoyib Full-Stack BaaS tanlovi (Auth + DB + Storage + Edge Functions bitta joyda)</li>
+<li><strong>Row Level Security (RLS)</strong> — barcha jadvallarda mavjud, yaxshi xavfsizlik asosi</li>
+<li><strong>AI Provider Abstraction</strong> — model almashtirish uchun interface mavjud</li>
+<li><strong>AsomiddinAvatar Design System</strong> — premium dizayn, production sifatida</li>
+<li><strong>TypeScript 6</strong> — kuchli typing butun platformada</li>
+<li><strong>i18n</strong> — uz/ru/en til qo'llab-quvvatlashi mavjud</li>
+</ul>
+
+<h2>Kritik Muammolar</h2>
+<div class="callout red">
+<strong>🔴 ZUDLIK BILAN HAL QILINISHI KERAK:</strong><br>
+• Hech qanday test yo'q (Playwright o'rnatilgan, ammo ishlatilmaydi)<br>
+• Error boundary yo'q — bitta xato butun ilovani to'xtatadi<br>
+• Streaming haqiqiy emas — bu simulyatsiya<br>
+• Rate limiting yo'q — AI Edge Function himoyasiz<br>
+• Role selection xavfsizlik zaifligi (foydalanuvchi o'zi admin bo'la oladi)<br>
+• Code splitting yo'q — 1.37MB bitta bundle<br>
+• Accessibility deyarli nol (2/10)<br>
+• ProfileContext qurilgan, lekin hech qayerda ishlatilmaydi
+</div>
+
+<div class="score-grid">
+<div class="score-card"><div class="num">6/10</div><div class="label">Arxitektura</div></div>
+<div class="score-card"><div class="num">7/10</div><div class="label">Database</div></div>
+<div class="score-card"><div class="num">7/10</div><div class="label">UI Sifati</div></div>
+<div class="score-card"><div class="num">5/10</div><div class="label">UX Sifati</div></div>
+<div class="score-card"><div class="num">4/10</div><div class="label">Performance</div></div>
+<div class="score-card"><div class="num">5/10</div><div class="label">Skalabillik</div></div>
+<div class="score-card"><div class="num">5/10</div><div class="label">Maintainability</div></div>
+<div class="score-card"><div class="num">6/10</div><div class="label">Xavfsizlik</div></div>
+<div class="score-card"><div class="num">7/10</div><div class="label">AI Tayyorligi</div></div>
+</div>
+</div>
+
+<!-- 2. TEXNOLOGIYA STACK -->
+<div class="doc-section">
+<h1 class="doc-title">2. TEXNOLOGIYA STACK AUDITI</h1>
+
+<h2>Frontend Stack</h2>
+<table>
+<tr><th>Texnologiya</th><th>Versiya</th><th>Holat</th><th>Baho</th><th>Izoh</th></tr>
+<tr><td>React</td><td>19.2.7</td><td><span class="badge green">🟢 Ready</span></td><td>9/10</td><td>Eng so'nggi versiya, concurrent features</td></tr>
+<tr><td>TypeScript</td><td>~6.0.2</td><td><span class="badge green">🟢 Ready</span></td><td>8/10</td><td>Kuchli typing butun platformada</td></tr>
+<tr><td>Vite</td><td>8.0.12</td><td><span class="badge green">🟢 Ready</span></td><td>9/10</td><td>Juda tez build, HMR</td></tr>
+<tr><td>Tailwind CSS</td><td>4.3.1</td><td><span class="badge yellow">🟡 Improve</span></td><td>7/10</td><td>v4 yangi — plugin ekotizimi cheklangan</td></tr>
+<tr><td>React Router</td><td>7.18.0</td><td><span class="badge green">🟢 Ready</span></td><td>8/10</td><td>Yaxshi routing</td></tr>
+<tr><td>Lucide React</td><td>1.20.0</td><td><span class="badge green">🟢 Ready</span></td><td>8/10</td><td>Ko'p ikonkalar</td></tr>
+<tr><td>jsPDF</td><td>4.2.1</td><td><span class="badge yellow">🟡 Improve</span></td><td>5/10</td><td>Cheklangan, DB integration yo'q</td></tr>
+<tr><td>Playwright</td><td>1.61.0</td><td><span class="badge red">🔴 Missing</span></td><td>1/10</td><td>O'rnatilgan, LEKIN 0 ta test yozilmagan</td></tr>
+<tr><td>Zustand / Redux</td><td>—</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>State management — kerak bo'ladi</td></tr>
+<tr><td>TanStack Query</td><td>—</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>Server state caching — kerak bo'ladi</td></tr>
+</table>
+
+<h2>Backend Stack (Supabase)</h2>
+<table>
+<tr><th>Texnologiya</th><th>Holat</th><th>Baho</th><th>Izoh</th></tr>
+<tr><td>PostgreSQL (Supabase)</td><td><span class="badge green">🟢 Ready</span></td><td>9/10</td><td>Ishonchli RDBMS</td></tr>
+<tr><td>Supabase Auth</td><td><span class="badge green">🟢 Ready</span></td><td>8/10</td><td>JWT, session management</td></tr>
+<tr><td>Supabase Storage</td><td><span class="badge yellow">🟡 Improve</span></td><td>6/10</td><td>avatars bucket YO'Q — kritik</td></tr>
+<tr><td>Edge Functions (Deno)</td><td><span class="badge green">🟢 Ready</span></td><td>8/10</td><td>2 ta function: ai-chat, admin-users</td></tr>
+<tr><td>Row Level Security</td><td><span class="badge green">🟢 Ready</span></td><td>8/10</td><td>Barcha jadvallarda mavjud</td></tr>
+<tr><td>Supabase Realtime</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>Haqiqiy streaming uchun kerak</td></tr>
+<tr><td>pgvector</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>AI memory uchun kerak</td></tr>
+</table>
+
+<h2>AI Stack</h2>
+<table>
+<tr><th>Texnologiya</th><th>Holat</th><th>Baho</th><th>Izoh</th></tr>
+<tr><td>Google Gemini 2.5 Flash</td><td><span class="badge green">🟢 Ready</span></td><td>9/10</td><td>Eng yangi model, tez</td></tr>
+<tr><td>Edge Function (ai-chat)</td><td><span class="badge yellow">🟡 Improve</span></td><td>7/10</td><td>Rate limiting yo'q</td></tr>
+<tr><td>True Streaming</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>Hozir setTimeout simulyatsiya</td></tr>
+<tr><td>AI Memory / Embeddings</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>pgvector kerak</td></tr>
+<tr><td>Context Management</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>Sliding window kerak</td></tr>
+<tr><td>Token Tracking</td><td><span class="badge red">🔴 Missing</span></td><td>—</td><td>Xarajat hisobi yo'q</td></tr>
+</table>
+</div>
+
+<!-- 3. MAVJUD XUSUSIYATLAR -->
+<div class="doc-section">
+<h1 class="doc-title">3. MAVJUD XUSUSIYATLAR AUDITI</h1>
+
+<h2>Autentifikatsiya Moduli</h2>
+<table>
+<tr><th>Xususiyat</th><th>Holat</th></tr>
+<tr><td>Email + Parol Login</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Ro'yxatdan o'tish</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Parol tiklash</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Remember Me</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Role-based routing</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Email tekshiruvi</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>OAuth (Google/GitHub)</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>2FA / MFA</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>CAPTCHA</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+</table>
+
+<h2>AI Chat Moduli</h2>
+<table>
+<tr><th>Xususiyat</th><th>Holat</th></tr>
+<tr><td>Chat conversation</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Message persistence (Supabase)</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Gemini 2.5 Flash integration</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Student context injection</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Haqiqiy streaming</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>Simulyatsiya streaming</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Thinking indicator</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Markdown rendering</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Code blocks</td><td><span class="badge green">✅ To'liq</span></td></tr>
+<tr><td>Fayl yuklash</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>Voice input</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+</table>
+
+<h2>Talaba Paneli</h2>
+<table>
+<tr><th>Xususiyat</th><th>Tayyor</th><th>Holat</th></tr>
+<tr><td>Dashboard</td><td>45%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Darslar ro'yxati</td><td>55%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Davomat ko'rish</td><td>50%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Testlar</td><td>55%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Yutuqlar</td><td>60%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>AI Assistant</td><td>80%</td><td><span class="badge green">✅ Yaxshi</span></td></tr>
+<tr><td>Profil sahifasi</td><td>35%</td><td><span class="badge red">🔴 Kritik</span></td></tr>
+<tr><td>Uy vazifasi</td><td>0%</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>Leaderboard</td><td>0%</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+</table>
+
+<h2>O'qituvchi Paneli</h2>
+<table>
+<tr><th>Xususiyat</th><th>Tayyor</th><th>Holat</th></tr>
+<tr><td>Kurslar boshqaruvi</td><td>40%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Guruh boshqaruvi</td><td>40%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Davomat belgilash</td><td>45%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Test yaratish</td><td>45%</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td>Talaba progressi</td><td>0%</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>Uy vazifasi berish</td><td>0%</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+<tr><td>E'lonlar</td><td>0%</td><td><span class="badge red">❌ Yo'q</span></td></tr>
+</table>
+</div>
+
+<!-- 4. DATABASE -->
+<div class="doc-section">
+<h1 class="doc-title">4. DATABASE AUDITI</h1>
+
+<h2>Mavjud Jadvallar (12 ta)</h2>
+<table>
+<tr><th>Jadval</th><th>Maqsad</th><th>RLS</th><th>Holat</th></tr>
+<tr><td><code>profiles</code></td><td>Foydalanuvchi identifikatsiyasi</td><td>✅</td><td><span class="badge yellow">🟡 Yetishmaydi</span></td></tr>
+<tr><td><code>subjects</code></td><td>Fanlar / kurslar</td><td>✅</td><td><span class="badge green">✅ Yaxshi</span></td></tr>
+<tr><td><code>groups</code></td><td>Sinf guruhlari</td><td>✅</td><td><span class="badge yellow">🟡 Soft delete yo'q</span></td></tr>
+<tr><td><code>student_groups</code></td><td>Talaba-guruh M:N</td><td>✅</td><td><span class="badge green">✅ Yaxshi</span></td></tr>
+<tr><td><code>teacher_subjects</code></td><td>O'qituvchi-fan M:N</td><td>✅</td><td><span class="badge yellow">🟡 Kam ishlatiladi</span></td></tr>
+<tr><td><code>lessons</code></td><td>Dars kontenti</td><td>✅</td><td><span class="badge yellow">🟡 Order index yo'q</span></td></tr>
+<tr><td><code>lesson_attachments</code></td><td>Dars fayllari</td><td>✅</td><td><span class="badge green">✅ Yaxshi</span></td></tr>
+<tr><td><code>attendance</code></td><td>Davomat yozuvlari</td><td>✅</td><td><span class="badge green">✅ Yaxshi</span></td></tr>
+<tr><td><code>tests</code></td><td>Test ta'riflari (JSONB)</td><td>✅</td><td><span class="badge yellow">🟡 JSONB tekshiruv yo'q</span></td></tr>
+<tr><td><code>test_results</code></td><td>Test natijalari</td><td>✅</td><td><span class="badge yellow">🟡 JSONB tekshiruv yo'q</span></td></tr>
+<tr><td><code>achievement_definitions</code></td><td>Yutuq shablonlari</td><td>✅</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td><code>user_achievements</code></td><td>Qo'lga kiritilgan yutuqlar</td><td>✅</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td><code>user_score_snapshots</code></td><td>Ball tarixi</td><td>✅</td><td><span class="badge yellow">🟡 Qisman</span></td></tr>
+<tr><td><code>settings</code></td><td>Global sozlamalar</td><td>✅</td><td><span class="badge red">🔴 Ishlatilmaydi</span></td></tr>
+<tr><td><code>ai_conversations</code></td><td>AI chat sessiyalari</td><td>✅</td><td><span class="badge green">✅ Yaxshi</span></td></tr>
+<tr><td><code>ai_messages</code></td><td>AI xabarlari</td><td>✅</td><td><span class="badge yellow">🟡 Token count yo'q</span></td></tr>
+</table>
+
+<h2>Munosabatlar Diagrammasi</h2>
+<pre>
+profiles (id)
+│
+├──[1:N]── student_groups (student_id → groups.id)
+│               └── groups (id)
+│                    ├── subjects (subject_id)
+│                    └── profiles (teacher_id) [O'qituvchi]
+│
+├──[M:N]── teacher_subjects (teacher_id → subjects.id)
+│
+├──[1:N]── attendance (student_id)
+│           ├── groups (group_id)
+│           └── profiles (teacher_id)
+│
+├──[1:N]── test_results (student_id)
+│           └── tests (test_id)
+│               ├── groups (group_id, nullable)
+│               └── subjects (subject_id, nullable)
+│
+├──[1:N]── user_achievements (profile_id)
+│           └── achievement_definitions (achievement_id)
+│
+├──[1:N]── user_score_snapshots (user_id)
+│
+└──[1:N]── ai_conversations (student_id)
+            └──[1:N]── ai_messages (conversation_id)
+
+[GLOBAL] settings (key-value)
+
+lessons (group_id → groups.id)
+  └──[1:N]── lesson_attachments (lesson_id)
+</pre>
+
+<h2>Yetishmayotgan Kritik Jadvallar</h2>
+<div class="callout red">
+<strong>Zudlik bilan kerak bo'ladiganlar:</strong><br>
+• <code>homework</code> — Uy vazifalari<br>
+• <code>homework_submissions</code> — Uy vazifasi topshiriqlari<br>
+• <code>certificates</code> — Sertifikatlar (hozir faqat client-side PDF)<br>
+• <code>notifications</code> — Xabarnomalar<br>
+• <code>announcements</code> — E'lonlar<br>
+• <code>audit_logs</code> — Kim nima qilganini tracking
+</div>
+<div class="callout orange">
+<strong>Kelajakda kerak bo'ladiganlar:</strong><br>
+• <code>payments</code>, <code>subscriptions</code> — To'lov tizimi<br>
+• <code>comments</code> — Darslar uchun izohlar<br>
+• <code>leaderboard_snapshots</code> — Reyting tarixи<br>
+• <code>marketplace_items</code> — Marketplace<br>
+• <code>profiles.updated_at</code> — Hozir bu ustun YO'Q (kritik)
+</div>
+
+<h2>Storage Buckets</h2>
+<table>
+<tr><th>Bucket</th><th>Holat</th><th>Foydalanish</th></tr>
+<tr><td>lesson-attachments</td><td><span class="badge green">✅ Mavjud</span></td><td>Dars fayllari</td></tr>
+<tr><td>avatars</td><td><span class="badge red">❌ YO'Q — KRITIK</span></td><td>Avatar yuklash butunlay ishlamaydi</td></tr>
+</table>
+</div>
+
+<!-- 5. AI TIZIM -->
+<div class="doc-section">
+<h1 class="doc-title">5. AI TIZIM AUDITI</h1>
+
+<h2>Arxitektura</h2>
+<pre>
+AIAssistantPage.tsx
+    │
+    ├── EdgeFunctionProvider.complete()
+    │       └── supabase.functions.invoke('ai-chat')
+    │               ├── buildSystemPrompt(studentContext)
+    │               ├── Gemini 2.5 Flash API call
+    │               └── { response: text }
+    │
+    ├── aiChatService.addMessage() → ai_messages (DB)
+    └── StreamingMessage (SIMULYATSIYA — haqiqiy emas)
+</pre>
+
+<h2>Kuchli Tomonlar</h2>
+<ul>
+<li><strong>AIProvider interface</strong> — model almashtirish uchun abstraction mavjud (arxitektura jihatidan to'g'ri)</li>
+<li><strong>Student context injection</strong> — guruhlar, darslar, testlar, davomat AI'ga yuboriladi</li>
+<li><strong>Thinking parts filtering</strong> — Gemini 2.5 Flash "thinking" partlari filtrlanadi (kritik bug tuzatildi)</li>
+<li><strong>thinkingBudget: 0</strong> — keraksiz token sarfi oldini oladi</li>
+<li><strong>Message persistence</strong> — Supabase DB'da saqlanadi</li>
+<li><strong>Brand identity</strong> — AsomiddinAvatar premium dizayn</li>
+</ul>
+
+<h2>Kritik Zaif Tomonlar</h2>
+<table>
+<tr><th>Muammo</th><th>Jiddiylik</th><th>Ta'sir</th></tr>
+<tr><td>Haqiqiy streaming yo'q (setTimeout simulyatsiya)</td><td><span class="badge orange">🟠 Yuqori</span></td><td>UX va texnik to'g'rilik</td></tr>
+<tr><td>Rate limiting yo'q</td><td><span class="badge red">🔴 Kritik</span></td><td>API kvota tez tugaydi</td></tr>
+<tr><td>Token tracking yo'q</td><td><span class="badge red">🔴 Kritik</span></td><td>Xarajatni nazorat qilib bo'lmaydi</td></tr>
+<tr><td>Context window boshqarilmaydi</td><td><span class="badge orange">🟠 Yuqori</span></td><td>Token limit, yuqori xarajat</td></tr>
+<tr><td>MockAIProvider bundleda</td><td><span class="badge yellow">🟡 O'rta</span></td><td>Dead code, chalkashlik</td></tr>
+<tr><td>AIAssistantPage.tsx 700+ qator</td><td><span class="badge orange">🟠 Yuqori</span></td><td>Maintainability</td></tr>
+<tr><td>AI Prompt Injection himoyasi yo'q</td><td><span class="badge yellow">🟡 O'rta</span></td><td>System prompt bypass mumkin</td></tr>
+</table>
+
+<h2>AI Kelajak Yo'nalishi</h2>
+<table>
+<tr><th>Xususiyat</th><th>Muhimlik</th><th>Qiyinlik</th></tr>
+<tr><td>Haqiqiy Gemini streaming (ReadableStream)</td><td><span class="badge red">🔴 Kritik</span></td><td>Yuqori</td></tr>
+<tr><td>Rate limiting (per user/day)</td><td><span class="badge red">🔴 Kritik</span></td><td>O'rta</td></tr>
+<tr><td>Token usage tracking</td><td><span class="badge red">🔴 Kritik</span></td><td>Past</td></tr>
+<tr><td>Context window (sliding window)</td><td><span class="badge orange">🟠 Yuqori</span></td><td>O'rta</td></tr>
+<tr><td>AI memory (pgvector embeddings)</td><td><span class="badge orange">🟠 Yuqori</span></td><td>Yuqori</td></tr>
+<tr><td>File attachments (PDF, DOCX)</td><td><span class="badge yellow">🟡 O'rta</span></td><td>O'rta</td></tr>
+<tr><td>Voice input (Whisper API)</td><td><span class="badge yellow">🟡 O'rta</span></td><td>Yuqori</td></tr>
+<tr><td>Image analysis (Gemini Vision)</td><td><span class="badge yellow">🟡 O'rta</span></td><td>O'rta</td></tr>
+<tr><td>AI course recommendations</td><td><span class="badge yellow">🟡 O'rta</span></td><td>Yuqori</td></tr>
+</table>
+</div>
+
+<!-- 6. XAVFSIZLIK -->
+<div class="doc-section">
+<h1 class="doc-title">6. XAVFSIZLIK AUDITI</h1>
+
+<h2>Xavfsizlik Bahosi</h2>
+
+<div class="chart-bar"><span class="cat">RLS qamrovi</span><div class="bar-wrap"><div class="bar" style="width:80%"></div></div><span class="val">8/10</span></div>
+<div class="chart-bar"><span class="cat">JWT Auth</span><div class="bar-wrap"><div class="bar" style="width:80%"></div></div><span class="val">8/10</span></div>
+<div class="chart-bar"><span class="cat">API Key xavfsizligi</span><div class="bar-wrap"><div class="bar" style="width:90%"></div></div><span class="val">9/10</span></div>
+<div class="chart-bar"><span class="cat">Edge Function</span><div class="bar-wrap"><div class="bar" style="width:60%"></div></div><span class="val">6/10</span></div>
+<div class="chart-bar"><span class="cat">Role authorization</span><div class="bar-wrap"><div class="bar" style="width:40%"></div></div><span class="val">4/10</span></div>
+<div class="chart-bar"><span class="cat">XSS prevention</span><div class="bar-wrap"><div class="bar" style="width:90%"></div></div><span class="val">9/10</span></div>
+<div class="chart-bar"><span class="cat">Prompt injection</span><div class="bar-wrap"><div class="bar" style="width:30%"></div></div><span class="val">3/10</span></div>
+
+<h2>Kritik Xavfsizlik Muammolari</h2>
+
+<div class="callout red">
+<h4>🔴 1. Role Self-Selection — KRITIK</h4>
+<p>Foydalanuvchi ro'yxatdan o'tishda <code>role: 'teacher'</code> yoki <code>role: 'admin'</code> yuborishi mumkin. Backend bu qiymatni tekshirmaydi. Bu katta xavfsizlik zaifligi.</p>
+<p><strong>Yechim:</strong> Public registration'da faqat Student roli. Teacher va admin — faqat admin tomonidan yaratiladi.</p>
+</div>
+
+<div class="callout orange">
+<h4>🟠 2. Email Tekshiruvi Yo'q</h4>
+<p>Tasdiqlashsiz hisob yaratish mumkin. Spam va abuse xavfi.</p>
+<p><strong>Yechim:</strong> Supabase Dashboard'dan email verification yoqish (1 daqiqa).</p>
+</div>
+
+<div class="callout orange">
+<h4>🟠 3. Rate Limiting Yo'q (AI Edge Function)</h4>
+<p>Bir foydalanuvchi cheklovsiz AI so'rov yuborishi mumkin. Butun Gemini API kvotasi tugaydi.</p>
+</div>
+
+<div class="callout yellow">
+<h4>🟡 4. AI Prompt Injection</h4>
+<p>Foydalanuvchi maxsus so'rovlar bilan system prompt'ni bypass qilishi mumkin.</p>
+</div>
+
+<div class="callout yellow">
+<h4>🟡 5. Faqat Client-Side Fayl Tekshiruvi</h4>
+<p>Avatar yuklash faqat browser'da tekshiriladi. Server-side validation yo'q.</p>
+</div>
+</div>
+
+<!-- 7. UI/UX -->
+<div class="doc-section">
+<h1 class="doc-title">7. UI/UX AUDITI</h1>
+
+<h2>Kategoriyalar Bo'yicha Baho</h2>
+<div class="chart-bar"><span class="cat">AI Chat UX</span><div class="bar-wrap"><div class="bar" style="width:90%"></div></div><span class="val">9/10</span></div>
+<div class="chart-bar"><span class="cat">Animatsiyalar</span><div class="bar-wrap"><div class="bar" style="width:80%"></div></div><span class="val">8/10</span></div>
+<div class="chart-bar"><span class="cat">Ranglar</span><div class="bar-wrap"><div class="bar" style="width:70%"></div></div><span class="val">7/10</span></div>
+<div class="chart-bar"><span class="cat">Responsive dizayn</span><div class="bar-wrap"><div class="bar" style="width:70%"></div></div><span class="val">7/10</span></div>
+<div class="chart-bar"><span class="cat">Typography</span><div class="bar-wrap"><div class="bar" style="width:60%"></div></div><span class="val">6/10</span></div>
+<div class="chart-bar"><span class="cat">Izchillik</span><div class="bar-wrap"><div class="bar" style="width:60%"></div></div><span class="val">6/10</span></div>
+<div class="chart-bar"><span class="cat">Loading states</span><div class="bar-wrap"><div class="bar" style="width:50%"></div></div><span class="val">5/10</span></div>
+<div class="chart-bar"><span class="cat">Error states</span><div class="bar-wrap"><div class="bar" style="width:30%"></div></div><span class="val">3/10</span></div>
+<div class="chart-bar"><span class="cat">Accessibility</span><div class="bar-wrap"><div class="bar" style="width:20%"></div></div><span class="val">2/10</span></div>
+
+<div class="callout red">
+<h4>🔴 Accessibility — Kritik Muvaffaqiyatsizlik (2/10)</h4>
+<p>• Icon-only buttonlarda ARIA label yo'q<br>
+• Keyboard navigation testlanmagan<br>
+• Screen reader support yo'q<br>
+• Color contrast auditlanmagan<br>
+• Modal'larda focus trap yo'q<br>
+• Skip navigation yo'q<br><br>
+<strong>Ko'plab yurisdiksiyalarda ta'lim platformalari uchun accessibility qonuniy talab!</strong></p>
+</div>
+
+<div class="callout orange">
+<h4>🟠 Brand Izchilsizligi</h4>
+<p>Platforma ikki nom bilan yuritilmoqda:<br>
+• Sidebar/Navbar: <strong>"YordamchiAI"</strong><br>
+• AI Chat: <strong>"Asomiddin AI"</strong><br><br>
+Bu foydalanuvchida chalkashlik yaratadi. Kelajak White Label uchun brand konfiguratsiyadan kelishi kerak.</p>
+</div>
+</div>
+
+<!-- 8. KELAJAK ARXITEKTURASI -->
+<div class="doc-section">
+<h1 class="doc-title">8. KELAJAK ARXITEKTURASI</h1>
+
+<h2>Tavsiya Etiladigan Papka Tuzilmasi</h2>
+<pre>
+src/
+├── app/          ← Router, Providers
+├── config/       ← brand.ts, env.ts, routes.ts, feature-flags.ts
+├── features/     ← ASOSIY O'ZGARISH: Feature modules
+│   ├── auth/
+│   ├── identity/
+│   ├── ai-assistant/
+│   │   ├── components/  ← ChatInput, ChatMessages, MessageBubble...
+│   │   ├── context/     ← ChatContext
+│   │   ├── hooks/       ← useChat, useStreaming
+│   │   ├── pages/       ← thin shell (&lt;100 qator)
+│   │   └── services/    ← ai-chat.service
+│   ├── lessons/
+│   ├── attendance/
+│   ├── tests/
+│   ├── achievements/
+│   ├── homework/       ← Kelajak
+│   ├── notifications/  ← Kelajak
+│   └── payments/       ← Kelajak
+│
+├── shared/       ← Cross-feature reusable
+│   ├── components/ui/   ← Button, Input, Modal, Toast, DataTable...
+│   ├── hooks/           ← useDebounce, useLocalStorage...
+│   └── utils/           ← date.ts, string.ts, format.ts
+│
+├── lib/          ← supabase.ts, utils.ts
+└── styles/       ← globals.css, design-tokens.css
+</pre>
+
+<h2>Brand Konfiguratsiyasi (White Label)</h2>
+<pre>
+// src/config/brand.ts
+export const BRAND = {
+  platform: {
+    name:    process.env.VITE_PLATFORM_NAME    ?? 'YordamchiAI',
+    tagline: process.env.VITE_PLATFORM_TAGLINE ?? 'AI-powered Learning',
+    logo:    process.env.VITE_PLATFORM_LOGO    ?? '/logo.svg',
+  },
+  ai: {
+    name:       process.env.VITE_AI_NAME   ?? 'AI Yordamchi',
+    tagline:    process.env.VITE_AI_TAGLINE ?? 'Powered by Gemini 2.5 Flash',
+    avatarPath: process.env.VITE_AI_AVATAR ?? '/ai-avatar.jpg',
+    model:      process.env.VITE_AI_MODEL  ?? 'gemini-2.5-flash',
+    maxTokens:  parseInt(process.env.VITE_AI_MAX_TOKENS ?? '1500'),
+  },
+  colors: {
+    primary:   process.env.VITE_COLOR_PRIMARY   ?? '#7c3aed',
+    secondary: process.env.VITE_COLOR_SECONDARY ?? '#4f46e5',
+  },
+} as const
+</pre>
+
+<p>Bu tuzilma har bir mijoz uchun alohida <code>.env</code> fayli orqali to'liq White Label qilish imkonini beradi.</p>
+
+<h2>State Management</h2>
+<table>
+<tr><th>Bosqich</th><th>Texnologiya</th><th>Sabab</th></tr>
+<tr><td>Hozir (1-bosqich)</td><td>React Context</td><td>Maqbul, o'zgarish kerak emas</td></tr>
+<tr><td>3 oy (2-bosqich)</td><td>+ Zustand</td><td>Chat state + identity state uchun</td></tr>
+<tr><td>6 oy (3-bosqich)</td><td>+ TanStack Query</td><td>Server state caching</td></tr>
+</table>
+</div>
+
+<!-- 9. ROADMAP -->
+<div class="doc-section">
+<h1 class="doc-title">9. RIVOJLANISH ROADMAP</h1>
+
+<div class="roadmap-phase">
+<span class="phase-badge phase-critical">🔴 BOSQICH 1 — Barqarorlashtirish (1–3 hafta)</span>
+<h3>Maqsad: Mavjud xususiyatlarni production-ready qilish. Yangi xususiyatlar emas.</h3>
+<table>
+<tr><th>Vazifa</th><th>Muhimlik</th><th>Qiyinlik</th></tr>
+<tr><td>Role self-selection'ni olib tashlash</td><td><span class="badge red">🔴 Kritik</span></td><td>Kichik</td></tr>
+<tr><td>avatars storage bucket yaratish</td><td><span class="badge red">🔴 Kritik</span></td><td>Juda kichik</td></tr>
+<tr><td>ErrorBoundary barcha layoutlarga</td><td><span class="badge red">🔴 Kritik</span></td><td>Kichik</td></tr>
+<tr><td>ProfileContext → barcha sahifalar</td><td><span class="badge red">🔴 Kritik</span></td><td>O'rta</td></tr>
+<tr><td>Email verification yoqish</td><td><span class="badge red">🔴 Kritik</span></td><td>Juda kichik</td></tr>
+<tr><td>Kod splitting (React.lazy)</td><td><span class="badge red">🔴 Kritik</span></td><td>O'rta</td></tr>
+<tr><td>AI Rate limiting</td><td><span class="badge red">🔴 Kritik</span></td><td>O'rta</td></tr>
+<tr><td>profiles.updated_at migration</td><td><span class="badge red">🔴 Kritik</span></td><td>Juda kichik</td></tr>
+<tr><td>brand.ts config yaratish</td><td><span class="badge orange">🟠 Yuqori</span></td><td>O'rta</td></tr>
+<tr><td>Toast notification system</td><td><span class="badge orange">🟠 Yuqori</span></td><td>O'rta</td></tr>
+</table>
+</div>
+
+<div class="roadmap-phase">
+<span class="phase-badge phase-high">🟠 BOSQICH 2 — Asosiy Xususiyatlar (4–8 hafta)</span>
+<h3>Maqsad: Mavjud modullarni yakunlash. Haqiqiy streaming. Homework.</h3>
+<table>
+<tr><th>Vazifa</th><th>Hafta</th></tr>
+<tr><td>Haqiqiy Gemini streaming (ReadableStream)</td><td>4</td></tr>
+<tr><td>Token usage tracking</td><td>4</td></tr>
+<tr><td>AIAssistantPage → feature module</td><td>4–5</td></tr>
+<tr><td>Homework moduli (DB + UI)</td><td>5–6</td></tr>
+<tr><td>Notifications tizimi</td><td>5–6</td></tr>
+<tr><td>Certificate DB jadvali + verification</td><td>6</td></tr>
+<tr><td>Leaderboard sahifasi</td><td>6</td></tr>
+<tr><td>Student Dashboard real data</td><td>5</td></tr>
+<tr><td>Playwright test suite</td><td>7–8</td></tr>
+<tr><td>Accessibility birinchi pass</td><td>8</td></tr>
+</table>
+</div>
+
+<div class="roadmap-phase">
+<span class="phase-badge phase-medium">🟡 BOSQICH 3 — Skalabillik (9–14 hafta)</span>
+<h3>Maqsad: Feature module arxitekturasi. Zustand. Analytics.</h3>
+<ul>
+<li>Feature-based papka tuzilmasiga migratsiya</li>
+<li>Zustand (chat + identity state)</li>
+<li>Analytics dashboard (Admin)</li>
+<li>AI conversation memory (pgvector)</li>
+<li>Fayl attachments AI chat'da</li>
+<li>Design token system (CSS custom properties)</li>
+<li>DataTable shared component</li>
+</ul>
+</div>
+
+<div class="roadmap-phase">
+<span class="phase-badge phase-medium">🟡 BOSQICH 4 — Monetizatsiya (15–20 hafta)</span>
+<h3>Maqsad: To'lov infratuzilmasi. Marketplace. Subscriptions.</h3>
+<ul>
+<li>Payments (Stripe/Payme/Click integratsiya)</li>
+<li>Subscription planlar</li>
+<li>Course marketplace</li>
+<li>Teacher revenue sharing</li>
+<li>White label configuration UI</li>
+</ul>
+</div>
+
+<div class="roadmap-phase">
+<span class="phase-badge phase-low">🟢 BOSQICH 5 — Mobile va API (6–12 oy)</span>
+<h3>Maqsad: React Native app. Public API. Enterprise integrations.</h3>
+<ul>
+<li>React Native app (Expo)</li>
+<li>Public REST API</li>
+<li>AI Voice input (Whisper)</li>
+<li>AI Image analysis (Gemini Vision)</li>
+<li>Multi-tenant support</li>
+<li>SSO integratsiya</li>
+</ul>
+</div>
+</div>
+
+<!-- 10. TOP IMPROVEMENTS -->
+<div class="doc-section">
+<h1 class="doc-title">10. TOP 20 ENG MUHIM YAXSHILANISHLAR</h1>
+
+<div class="priority-list">
+<div class="priority-item"><div class="content"><div class="title">Role self-selection'ni olib tashlash</div><div class="desc">🔴 Kritik xavfsizlik zaifligi — foydalanuvchi o'zi admin bo'la oladi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">avatars Storage bucket yaratish</div><div class="desc">🔴 Hozir avatar upload 404 qaytaradi — to'liq ishlamaydi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">ErrorBoundary barcha layoutlarga</div><div class="desc">🔴 Bitta JavaScript xatosi butun ilovani to'xtatadi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">ProfileContext barcha sahifalarda</div><div class="desc">🔴 Qurilgan lekin hech qayerda ishlatilmaydi — isrof</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Email verification yoqish</div><div class="desc">🔴 Tasdiqlashsiz hisob — spam va abuse xavfi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Kod splitting (React.lazy)</div><div class="desc">🔴 1.37MB bitta bundle — hamma narsani yuklab oladi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">AI Edge Function rate limiting</div><div class="desc">🔴 Bir user butun Gemini kvotasini tugata oladi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Token usage tracking</div><div class="desc">🔴 AI xarajatini nazorat qilib bo'lmaydi — moliyaviy xavf</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">/reset-password route yaratish</div><div class="desc">🔴 Parol tiklash oqimi to'liq emas</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">UserAvatar imgOk re-render bug</div><div class="desc">🔴 Infinite flicker loop xavfi — avatar yuklanmasa</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Haqiqiy Gemini streaming</div><div class="desc">🟠 Hozir setTimeout simulyatsiya — texnik qarz</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">AIAssistantPage feature module'ga bo'lish</div><div class="desc">🟠 700+ qatorlik fayl — SRP buzilishi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Toast notification system</div><div class="desc">🟠 Global feedback yo'q — UX muammosi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Soft delete barcha jadvallarda</div><div class="desc">🟠 Ma'lumot yo'qolish xavfi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">profiles.updated_at column</div><div class="desc">🟠 Profil o'zgarish tarixi yo'q</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Homework moduli</div><div class="desc">🟠 Ta'lim platformasi uchun zarur — DB ham yo'q</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Certificate DB jadvali</div><div class="desc">🟠 Hozir faqat client-side PDF — tekshirib bo'lmaydi</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Notifications tizimi</div><div class="desc">🟠 Asosiy kommunikatsiya kanali yo'q</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">brand.ts config White Label uchun</div><div class="desc">🟠 Har nom hardcoded — White Label imkonsiz</div></div></div>
+<div class="priority-item"><div class="content"><div class="title">Accessibility birinchi pass</div><div class="desc">🟠 ARIA labels, keyboard nav — qonuniy talab</div></div></div>
+</div>
+</div>
+
+<!-- FINAL SCORE -->
+<div class="doc-section">
+<h1 class="doc-title">11. YAKUNIY BAHO</h1>
+
+<div class="score-grid">
+<div class="score-card"><div class="num">6/10</div><div class="label">Arxitektura</div></div>
+<div class="score-card"><div class="num">7/10</div><div class="label">Database</div></div>
+<div class="score-card"><div class="num">7/10</div><div class="label">UI Sifati</div></div>
+<div class="score-card"><div class="num">5/10</div><div class="label">UX Sifati</div></div>
+<div class="score-card"><div class="num">4/10</div><div class="label">Performance</div></div>
+<div class="score-card"><div class="num">5/10</div><div class="label">Skalabillik</div></div>
+<div class="score-card"><div class="num">5/10</div><div class="label">Maintainability</div></div>
+<div class="score-card"><div class="num">6/10</div><div class="label">Xavfsizlik</div></div>
+<div class="score-card"><div class="num">7/10</div><div class="label">AI Tayyorligi</div></div>
+</div>
+
+<div class="callout purple" style="margin-top:24px;text-align:center;padding:30px">
+<h2 style="font-size:48pt;color:#7c3aed;margin-bottom:8px">5.3 / 10</h2>
+<h3 style="color:#312e81">UMUMIY BAHO</h3>
+<p style="margin-top:12px">Platform MVP bosqichida. Production-ready emas, lekin kuchli poydevorga ega.<br>
+Yuqoridagi 1–10 raqamli kritik muammolarni hal qilish — production'ga tayyorlikning 80%'ini beradi.</p>
+</div>
+
+<footer>
+<p><strong>YordamchiAI — MASTER PLATFORM AUDIT v1.0</strong></p>
+<p>Sana: 2026-06-25 | Konfidensial | CTO Office</p>
+<p>© 2026 YordamchiAI. Barcha huquqlar himoyalangan.</p>
+</footer>
+</div>
+
+</body>
+</html>

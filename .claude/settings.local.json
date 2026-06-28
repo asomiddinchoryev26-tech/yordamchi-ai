@@ -24,7 +24,12 @@
       "Bash(Select-Object FullName)",
       "Bash(python -c \"import sys,json; p=json.load\\(sys.stdin\\); print\\(p.get\\('scripts',{}\\)\\)\")",
       "Bash(npx vite *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5199/)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5199/)",
+      "PowerShell(supabase --version 2>&1)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(where npx *)"
     ]
   }
 }
