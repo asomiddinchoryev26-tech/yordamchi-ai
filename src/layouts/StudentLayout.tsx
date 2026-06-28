@@ -116,24 +116,25 @@ export default function StudentLayout() {
     navigate(PATHS.LOGIN, { replace: true })
   }
 
-  const statsDesc = stats.attTotal > 0
+  // statsDesc preserved for future use (currently displayed via stats mini-card)
+  void (stats.attTotal > 0
     ? t.attRecordsFmt.replace('{n}', String(stats.attTotal))
     : stats.groups > 0
       ? t.coursesJoinedFmt.replace('{n}', String(stats.groups))
-      : t.noGroupStudent
+      : t.noGroupStudent)
 
   // ── Premium plan section (visual-only) ───────────────────────────────────
   const premiumSection = (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Stats mini card */}
       <div
-        className="rounded-[16px] p-3 text-white"
-        style={{ background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.20)' }}
+        className="rounded-[14px] p-3"
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
       >
-        <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.15em] mb-2">
+        <p className="text-[8.5px] font-black text-white/22 uppercase tracking-[0.18em] mb-2">
           {t.myResultsStudent}
         </p>
-        <div className="grid grid-cols-3 gap-1.5 mb-2.5">
+        <div className="grid grid-cols-3 gap-1.5 mb-2">
           {[
             { value: stats.groups > 0 ? String(stats.groups) : '—', label: t.courseLabel,    color: '#818CF8' },
             { value: stats.passed > 0 ? String(stats.passed) : '—', label: t.completedTests, color: '#34D399' },
@@ -141,49 +142,51 @@ export default function StudentLayout() {
           ].map(s => (
             <div
               key={s.label}
-              className="rounded-xl p-1.5 text-center"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.07)' }}
+              className="rounded-[10px] p-1.5 text-center"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.065)' }}
             >
               <p className="text-[13px] font-black leading-tight" style={{ color: s.color }}>{s.value}</p>
-              <p className="text-[7.5px] text-white/30 mt-0.5 leading-tight">{s.label}</p>
+              <p className="text-[7px] text-white/28 mt-0.5 leading-tight">{s.label}</p>
             </div>
           ))}
         </div>
         {stats.attPct !== null && (
-          <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+          <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
             <div
               className={cn('h-full rounded-full transition-all', stats.attPct >= 80 ? 'bg-emerald-400' : stats.attPct >= 60 ? 'bg-amber-400' : 'bg-red-400')}
               style={{ width: `${stats.attPct}%` }}
             />
           </div>
         )}
-        <p className="text-[8.5px] text-white/25 mt-1">{statsDesc}</p>
       </div>
 
       {/* Premium plan CTA */}
       <div
-        className="rounded-[16px] p-3.5 relative overflow-hidden"
+        className="rounded-[14px] p-3.5 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(124,58,237,0.20) 0%, rgba(99,102,241,0.12) 100%)',
-          border: '1px solid rgba(124,58,237,0.30)',
+          background: 'linear-gradient(135deg, rgba(91,127,255,0.14) 0%, rgba(124,58,237,0.10) 100%)',
+          border: '1px solid rgba(91,127,255,0.20)',
         }}
       >
-        <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-40"
+        <div className="absolute -top-8 -right-8 w-20 h-20 rounded-full blur-3xl opacity-30"
           style={{ background: '#7C3AED' }} aria-hidden="true" />
         <div className="flex items-center gap-2 mb-2 relative z-10">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#F59E0B,#EF4444)' }}>
-            <span className="text-[11px]" aria-hidden="true">👑</span>
+          <div className="w-[22px] h-[22px] rounded-[7px] flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg,#F59E0B,#EF4444)', boxShadow: '0 0 10px rgba(245,158,11,0.4)' }}>
+            <span className="text-[10px]" aria-hidden="true">👑</span>
           </div>
-          <p className="text-[12px] font-bold text-white/80">Premium reja</p>
+          <p className="text-[12px] font-bold text-white/75">Premium reja</p>
         </div>
-        <p className="text-[10px] text-white/40 leading-snug mb-3 relative z-10">
+        <p className="text-[10px] text-white/38 leading-snug mb-3 relative z-10">
           Ko&apos;proq imkoniyatlar va cheksiz AI yordam!
         </p>
         <button
           type="button"
-          className="w-full py-2 rounded-xl text-[11px] font-bold text-white flex items-center justify-center gap-1.5 relative z-10 transition-opacity hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg,#7C3AED,#5B5CF6)', boxShadow: '0 4px 12px rgba(124,58,237,0.4)' }}
+          className="w-full py-[8px] rounded-[10px] text-[11.5px] font-bold text-white flex items-center justify-center gap-1.5 relative z-10 transition-all hover:opacity-88 active:scale-98"
+          style={{
+            background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)',
+            boxShadow: '0 4px 14px rgba(91,127,255,0.38), inset 0 1px 0 rgba(255,255,255,0.15)',
+          }}
         >
           <Zap className="w-3 h-3" aria-hidden="true" />
           Rejani yangilash

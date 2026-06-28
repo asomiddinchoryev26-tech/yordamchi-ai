@@ -1,10 +1,9 @@
 /**
  * components/layout/Navbar.tsx
- * Sprint 4.7 Phase 1 — Premium Dark Glassmorphism Topbar
+ * Sprint 4.7 Final Polish — Premium topbar (Linear + Arc aesthetic)
  *
  * ⚠️  ALL BUSINESS LOGIC PRESERVED ⚠️
- * Props, theme toggle, language switcher, dropdown logic — unchanged.
- * Only visual styling updated to dark-only premium design.
+ * Props, theme toggle, language switcher, DropdownPortal — unchanged.
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
@@ -32,7 +31,7 @@ const LANG_OPTIONS: { code: Language; label: string; flag: string; short: string
   { code: 'en', label: 'English', flag: '🇬🇧', short: 'EN' },
 ]
 
-// ─── Portal Dropdown (PRESERVED EXACTLY — only glass style updated) ───────────
+// ─── Portal Dropdown (PRESERVED EXACTLY) ─────────────────────────────────────
 
 interface DropdownPortalProps {
   anchorRef:  React.RefObject<HTMLButtonElement | null>
@@ -49,7 +48,7 @@ function DropdownPortal({ anchorRef, open, onClose, children }: DropdownPortalPr
   useEffect(() => {
     if (!open || !anchorRef.current) return
     const r = anchorRef.current.getBoundingClientRect()
-    setPos({ top: r.bottom + 6, right: window.innerWidth - r.right })
+    setPos({ top: r.bottom + 8, right: window.innerWidth - r.right })
     const id = requestAnimationFrame(() => setVisible(true))
     return () => cancelAnimationFrame(id)
   }, [open, anchorRef])
@@ -75,23 +74,19 @@ function DropdownPortal({ anchorRef, open, onClose, children }: DropdownPortalPr
     <div
       ref={portalRef}
       style={{
-        position:        'fixed',
-        top:             pos.top,
-        right:           pos.right,
-        zIndex:          99999,
-        width:           '200px',
-        opacity:         visible ? 1 : 0,
-        transform:       visible ? 'scale(1) translateY(0)' : 'scale(0.94) translateY(-6px)',
+        position: 'fixed', top: pos.top, right: pos.right, zIndex: 99999, width: 210,
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'scale(1) translateY(0)' : 'scale(0.93) translateY(-8px)',
         transformOrigin: 'top right',
-        transition:      'opacity 200ms cubic-bezier(.22,1,.36,1), transform 200ms cubic-bezier(.22,1,.36,1)',
-        pointerEvents:   visible ? 'auto' : 'none',
-        background:      'rgba(10,14,27,0.96)',
-        backdropFilter:  'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        border:          '1px solid rgba(255,255,255,0.10)',
-        borderRadius:    '16px',
-        overflow:        'hidden',
-        boxShadow:       '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)',
+        transition: 'opacity 180ms cubic-bezier(.22,1,.36,1), transform 180ms cubic-bezier(.22,1,.36,1)',
+        pointerEvents: visible ? 'auto' : 'none',
+        background: 'rgba(8,12,24,0.97)',
+        backdropFilter: 'blur(40px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+        border: '1px solid rgba(255,255,255,0.09)',
+        borderRadius: 16,
+        overflow: 'hidden',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
       }}
     >
       {children}
@@ -100,7 +95,7 @@ function DropdownPortal({ anchorRef, open, onClose, children }: DropdownPortalPr
   )
 }
 
-// ─── Navbar (PRESERVED EXACTLY — only visual styling updated) ─────────────────
+// ─── Navbar ───────────────────────────────────────────────────────────────────
 
 export function Navbar({
   onMenuClick,
@@ -111,11 +106,10 @@ export function Navbar({
   searchPlaceholder,
   avatarNode,
 }: NavbarProps) {
-  // All business logic preserved:
-  const { theme, setTheme }            = useTheme()
-  const { language, setLanguage, t }   = useLanguage()
-  const [langOpen, setLangOpen]        = useState(false)
-  const langBtnRef                     = useRef<HTMLButtonElement>(null)
+  const { theme, setTheme }          = useTheme()
+  const { language, setLanguage, t } = useLanguage()
+  const [langOpen, setLangOpen]      = useState(false)
+  const langBtnRef                   = useRef<HTMLButtonElement>(null)
 
   const placeholder = searchPlaceholder ?? t.searchPlaceholder
   const currentLang = LANG_OPTIONS.find(l => l.code === language)
@@ -124,104 +118,112 @@ export function Navbar({
   function toggleTheme() { setTheme(theme === 'dark' ? 'light' : 'dark') }
   function handleLangSelect(code: Language) { setLanguage(code); setLangOpen(false) }
 
-  const glassBtn = [
-    'w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl',
-    'text-white/40 hover:text-white/80 transition-all duration-150 flex-shrink-0',
-  ].join(' ')
+  // ── Shared glass button style ─────────────────────────────────────────────
+  const glassBtn = 'flex items-center justify-center rounded-[10px] text-white/38 hover:text-white/75 hover:bg-white/[0.055] transition-all duration-150 flex-shrink-0'
 
   return (
     <header
-      className="sticky top-0 z-30 h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 flex-shrink-0"
+      className="sticky top-0 z-30 h-[56px] flex items-center gap-2 sm:gap-3 px-3 sm:px-5 lg:px-6 flex-shrink-0"
       style={{
-        background: 'rgba(7,11,20,0.88)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-        boxShadow: '0 1px 0 rgba(255,255,255,0.04)',
+        background: 'rgba(6,9,18,0.92)',
+        backdropFilter: 'blur(40px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+        borderBottom: '1px solid rgba(255,255,255,0.055)',
+        boxShadow: '0 1px 0 rgba(255,255,255,0.035)',
       }}
     >
       {/* Mobile hamburger */}
       <button
         type="button"
         onClick={onMenuClick}
-        className={cn(glassBtn, 'lg:hidden')}
+        className={cn(glassBtn, 'lg:hidden w-8 h-8 sm:w-9 sm:h-9')}
         aria-label={t.openMenu}
       >
-        <Menu className="w-5 h-5" />
+        <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
-      {/* Premium search bar */}
-      <div className="flex-1 max-w-sm hidden sm:block">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" aria-hidden="true" />
+      {/* ── Premium Search Bar (Linear × Arc style) ─────────────────────────── */}
+      <div className="flex-1 max-w-[400px] hidden sm:block">
+        <label className="relative flex items-center group">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-[15px] h-[15px] pointer-events-none transition-colors duration-200"
+            style={{ color: 'rgba(255,255,255,0.28)' }}
+            aria-hidden="true"
+          />
           <input
             type="text"
             placeholder={placeholder}
-            className="w-full pl-9 pr-16 py-2 text-sm rounded-xl text-white/70 placeholder:text-white/25 outline-none transition-all"
+            className="w-full pl-[34px] pr-[72px] py-[7px] text-[13px] font-medium outline-none transition-all duration-200"
             style={{
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 10,
+              color: 'rgba(255,255,255,0.72)',
             }}
             onFocus={e => {
-              e.currentTarget.style.border = '1px solid rgba(91,92,246,0.45)'
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(91,92,246,0.12), 0 4px 12px rgba(0,0,0,0.2)'
+              e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
+              e.currentTarget.style.border = '1px solid rgba(91,127,255,0.50)'
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(91,127,255,0.13), 0 4px 16px rgba(0,0,0,0.25)'
             }}
             onBlur={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
               e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'
               e.currentTarget.style.boxShadow = 'none'
             }}
             aria-label={placeholder}
           />
-          {/* Keyboard shortcut hint */}
+          {/* ⌘K badge */}
           <div
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md"
-            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-[3px] px-1.5 py-[3px] rounded-[6px] pointer-events-none"
+            style={{ background: 'rgba(255,255,255,0.055)', border: '1px solid rgba(255,255,255,0.09)' }}
             aria-hidden="true"
           >
-            <Command className="w-2.5 h-2.5 text-white/25" />
-            <span className="text-[10px] font-bold text-white/25">K</span>
+            <Command className="w-[9px] h-[9px]" style={{ color: 'rgba(255,255,255,0.28)' }} />
+            <span className="text-[9.5px] font-bold" style={{ color: 'rgba(255,255,255,0.28)' }}>K</span>
           </div>
-        </div>
+        </label>
       </div>
 
-      {/* Right controls */}
-      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+      {/* ── Right controls ────────────────────────────────────────────────────── */}
+      <div className="ml-auto flex items-center gap-1.5">
+
+        {/* AI glow button */}
+        <button
+          type="button"
+          className="hidden sm:flex items-center justify-center gap-1.5 h-8 px-3 rounded-[10px] text-white text-[12px] font-bold flex-shrink-0 transition-all duration-150 hover:opacity-88 active:scale-95"
+          style={{
+            background: 'linear-gradient(135deg, #5B7FFF 0%, #7C3AED 100%)',
+            boxShadow: '0 0 18px rgba(91,127,255,0.48), 0 4px 10px rgba(91,127,255,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
+          }}
+          aria-label="AI Yordamchi"
+        >
+          <Zap className="w-[13px] h-[13px]" aria-hidden="true" />
+          <span className="hidden md:inline">AI</span>
+        </button>
+
+        {/* Divider */}
+        <div className="hidden sm:block w-px h-5 mx-0.5" style={{ background: 'rgba(255,255,255,0.07)' }} aria-hidden="true" />
 
         {/* Theme toggle */}
         <button
           type="button"
           onClick={toggleTheme}
-          className={glassBtn}
+          className={cn(glassBtn, 'w-8 h-8 sm:w-9 sm:h-9')}
           aria-label={theme === 'dark' ? t.lightMode : t.darkMode}
           title={theme === 'dark' ? t.lightMode : t.darkMode}
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
           {theme === 'dark'
-            ? <Sun  className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+            ? <Sun  className="w-[15px] h-[15px]" />
+            : <Moon className="w-[15px] h-[15px]" />}
         </button>
 
-        {/* AI glow button */}
+        {/* Chat */}
         <button
           type="button"
-          className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl text-white font-bold text-[11px] flex-shrink-0 transition-all hover:opacity-90"
-          style={{
-            background: 'linear-gradient(135deg, #5B7FFF, #7C3AED)',
-            boxShadow: '0 0 14px rgba(91,127,255,0.55), 0 4px 12px rgba(91,127,255,0.3)',
-          }}
-          aria-label="AI Yordamchi"
-        >
-          <Zap className="w-4 h-4" aria-hidden="true" />
-        </button>
-
-        {/* Chat icon */}
-        <button
-          type="button"
-          className={glassBtn}
+          className={cn(glassBtn, 'w-8 h-8 sm:w-9 sm:h-9')}
           aria-label="Xabarlar"
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
-          <MessageSquare className="w-4 h-4" aria-hidden="true" />
+          <MessageSquare className="w-[15px] h-[15px]" aria-hidden="true" />
         </button>
 
         {/* Language switcher */}
@@ -231,26 +233,26 @@ export function Navbar({
             type="button"
             onClick={() => setLangOpen(v => !v)}
             className={cn(
-              'h-8 sm:h-9 px-2 sm:px-2.5 flex items-center gap-1 rounded-xl',
-              'text-white/50 text-xs font-bold hover:text-white/80 transition-colors',
+              'h-8 sm:h-9 px-2 sm:px-2.5 flex items-center gap-1 rounded-[10px]',
+              'text-white/45 text-[11.5px] font-bold hover:text-white/75 transition-all duration-150',
             )}
             style={{
-              background: langOpen ? 'rgba(91,92,246,0.15)' : 'rgba(255,255,255,0.05)',
-              border: langOpen ? '1px solid rgba(91,92,246,0.3)' : '1px solid rgba(255,255,255,0.08)',
+              background: langOpen ? 'rgba(91,127,255,0.14)' : 'rgba(255,255,255,0.05)',
+              border: langOpen ? '1px solid rgba(91,127,255,0.32)' : '1px solid rgba(255,255,255,0.08)',
             }}
             aria-label={t.language}
             aria-expanded={langOpen}
             aria-haspopup="listbox"
           >
-            <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
+            <Globe className="w-[12px] h-[12px] sm:w-[13px] sm:h-[13px]" aria-hidden="true" />
             <span>{currentLang?.short ?? 'UZ'}</span>
-            <ChevronDown className={cn('w-3 h-3 transition-transform duration-200', langOpen && 'rotate-180')} aria-hidden="true" />
+            <ChevronDown className={cn('w-[10px] h-[10px] transition-transform duration-200', langOpen && 'rotate-180')} aria-hidden="true" />
           </button>
 
           <DropdownPortal anchorRef={langBtnRef} open={langOpen} onClose={closeLang}>
-            <div className="py-1.5" role="listbox" aria-label={t.language}>
-              <div className="px-3 pt-1 pb-2">
-                <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.12em]">{t.language}</p>
+            <div className="py-2" role="listbox" aria-label={t.language}>
+              <div className="px-3 pt-0.5 pb-2">
+                <p className="text-[9.5px] font-black text-white/22 uppercase tracking-[0.15em]">{t.language}</p>
               </div>
               {LANG_OPTIONS.map(lang => {
                 const active = language === lang.code
@@ -263,16 +265,14 @@ export function Navbar({
                     onMouseDown={e => e.preventDefault()}
                     onClick={() => handleLangSelect(lang.code)}
                     className={cn(
-                      'w-full px-3 py-2.5 flex items-center gap-3 text-left text-sm transition-colors duration-100',
-                      active
-                        ? 'text-brand-light'
-                        : 'text-white/55 hover:text-white/80 hover:bg-white/[0.05]',
+                      'w-full px-3 py-2.5 flex items-center gap-3 text-left text-[13px] transition-colors duration-100',
+                      active ? 'text-[#93BBFF]' : 'text-white/52 hover:text-white/78 hover:bg-white/[0.05]',
                     )}
-                    style={active ? { background: 'rgba(91,92,246,0.12)' } : {}}
+                    style={active ? { background: 'rgba(91,127,255,0.12)' } : {}}
                   >
-                    <span className="text-base leading-none flex-shrink-0">{lang.flag}</span>
+                    <span className="text-[15px] leading-none flex-shrink-0">{lang.flag}</span>
                     <span className="flex-1 font-medium">{lang.label}</span>
-                    {active && <Check className="w-3.5 h-3.5 text-brand-light flex-shrink-0" aria-hidden="true" />}
+                    {active && <Check className="w-3.5 h-3.5 text-[#93BBFF] flex-shrink-0" aria-hidden="true" />}
                   </button>
                 )
               })}
@@ -283,16 +283,15 @@ export function Navbar({
         {/* Notifications */}
         <button
           type="button"
-          className={cn(glassBtn, 'relative')}
+          className={cn(glassBtn, 'w-8 h-8 sm:w-9 sm:h-9 relative')}
           aria-label={t.notifications}
-          style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
         >
-          <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" aria-hidden="true" />
+          <Bell className="w-[15px] h-[15px]" aria-hidden="true" />
           {notificationCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-[17px] h-[17px] bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center leading-none">
+            <span
+              className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-white text-[9px] font-black flex items-center justify-center leading-none"
+              style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: '0 0 8px rgba(239,68,68,0.5)' }}
+            >
               {notificationCount > 9 ? '9+' : notificationCount}
             </span>
           )}
@@ -302,12 +301,12 @@ export function Navbar({
         {avatarNode ?? (
           <div
             className={cn(
-              'w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm cursor-pointer flex-shrink-0',
+              'w-8 h-8 sm:w-9 sm:h-9 rounded-[10px] flex items-center justify-center text-white font-black text-sm cursor-pointer flex-shrink-0 transition-all hover:opacity-85',
               avatarGradient,
             )}
             title={userName}
             aria-label={userName}
-            style={{ boxShadow: '0 0 12px rgba(91,92,246,0.35)' }}
+            style={{ boxShadow: '0 0 14px rgba(91,127,255,0.35)' }}
           >
             {userInitial}
           </div>

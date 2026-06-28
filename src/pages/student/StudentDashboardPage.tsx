@@ -139,13 +139,29 @@ const STAGGER_FAST = {
 
 // ─── Premium design tokens ────────────────────────────────────────────────────
 
+// Card glass — consistent across ALL sections
 const GLASS_ELEVATED = {
-  background:            'rgba(255,255,255,0.055)',
-  backdropFilter:        'blur(24px) saturate(200%)',
-  WebkitBackdropFilter:  'blur(24px) saturate(200%)',
-  border:                '1px solid rgba(255,255,255,0.10)',
-  boxShadow:             '0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.08)',
+  background:            'rgba(11,15,28,0.82)',
+  backdropFilter:        'blur(28px) saturate(200%)',
+  WebkitBackdropFilter:  'blur(28px) saturate(200%)',
+  border:                '1px solid rgba(255,255,255,0.08)',
+  boxShadow:             '0 4px 28px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.03) inset, inset 0 1px 0 rgba(255,255,255,0.07)',
 } as const
+
+// Rounded card radius — unified
+const CARD_RADIUS = '22px'
+
+// Section icon container — unified premium header style
+function SectionIcon({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <div
+      className="w-7 h-7 rounded-[9px] flex items-center justify-center flex-shrink-0"
+      style={{ background: `${color}15`, border: `1px solid ${color}25`, boxShadow: `0 0 10px ${color}12` }}
+    >
+      {children}
+    </div>
+  )
+}
 
 // ─── Animated number counter (IntersectionObserver, no deps) ─────────────────
 
@@ -1058,7 +1074,7 @@ function StatsSection() {
           whileHover={{ y: -5, scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 260, damping: 20 }}
           className="rounded-[22px] p-5 cursor-default relative overflow-hidden group"
-          style={{ ...GLASS_ELEVATED, borderColor: `${s.color}18` }}
+          style={{ ...GLASS_ELEVATED, borderColor: `${s.color}18`, borderRadius: CARD_RADIUS }}
         >
           {/* Hover glow */}
           <div
@@ -1104,15 +1120,13 @@ function WeakTopicsCard({ avgPct, loading }: { avgPct: number; loading: boolean 
 
   return (
     <div
-      className="rounded-[24px] p-5 border h-full"
-      style={{
-        ...GLASS_ELEVATED, borderColor: undefined,
-      }}
+      className="p-5 h-full"
+      style={{ ...GLASS_ELEVATED, borderRadius: CARD_RADIUS }}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+      <div className="flex items-center gap-2.5 mb-5">
+        <SectionIcon color="#F59E0B">
           <TrendingUp className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-        </div>
+        </SectionIcon>
         <h3 className="text-[13px] font-bold text-white/80">Zaif tomonlar</h3>
       </div>
 
@@ -1177,22 +1191,20 @@ function CoursesCard({
 
   return (
     <div
-      className="rounded-[24px] p-5 border h-full"
-      style={{
-        ...GLASS_ELEVATED, borderColor: undefined,
-      }}
+      className="p-5 h-full"
+      style={{ ...GLASS_ELEVATED, borderRadius: CARD_RADIUS }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-brand/15 border border-brand/20 flex items-center justify-center">
-            <BookOpen className="w-3.5 h-3.5 text-brand-light" aria-hidden="true" />
-          </div>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2.5">
+          <SectionIcon color="#5B7FFF">
+            <BookOpen className="w-3.5 h-3.5" style={{ color: '#5B7FFF' }} aria-hidden="true" />
+          </SectionIcon>
           <h3 className="text-[13px] font-bold text-white/80">Faol kurslar</h3>
         </div>
         <button
           type="button"
           onClick={() => navigate(PATHS.STUDENT.LESSONS)}
-          className="text-[11px] font-semibold text-brand-light/70 hover:text-brand-light transition-colors flex items-center gap-0.5"
+          className="text-[11px] font-semibold text-white/35 hover:text-white/65 transition-colors flex items-center gap-0.5"
         >
           Barchasi <ChevronRight className="w-3 h-3" aria-hidden="true" />
         </button>
@@ -1252,15 +1264,13 @@ function RecentActivityCard({ tests, loading }: { tests: SDTest[]; loading: bool
 
   return (
     <div
-      className="rounded-[24px] border overflow-hidden"
-      style={{
-        ...GLASS_ELEVATED, borderColor: undefined,
-      }}
+      className="overflow-hidden"
+      style={{ ...GLASS_ELEVATED, borderRadius: CARD_RADIUS }}
     >
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-white/[0.06]">
-        <div className="w-7 h-7 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center">
+      <div className="flex items-center gap-2.5 px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <SectionIcon color="#A78BFA">
           <Clock className="w-3.5 h-3.5 text-violet-400" aria-hidden="true" />
-        </div>
+        </SectionIcon>
         <h3 className="text-[13px] font-bold text-white/80">So&apos;nggi faollik</h3>
       </div>
 
@@ -1315,7 +1325,7 @@ function RecentActivityCard({ tests, loading }: { tests: SDTest[]; loading: bool
 
 function ScoreCard({ snapshot, loading, attPct }: { snapshot: ScoreSnapshot | null; loading: boolean; attPct: number | null }) {
   if (loading) return (
-    <div className="rounded-[24px] h-full p-5 border border-white/[0.07]"
+    <div className="rounded-[22px] h-full p-5 border border-white/[0.07]"
          style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
       <div className="h-4 w-24 bg-white/[0.06] rounded-lg animate-pulse mb-4" />
       <div className="flex items-center justify-center py-4">
@@ -1331,35 +1341,33 @@ function ScoreCard({ snapshot, loading, attPct }: { snapshot: ScoreSnapshot | nu
 
   return (
     <div
-      className="rounded-[24px] p-5 border h-full"
-      style={{
-        ...GLASS_ELEVATED, borderColor: undefined,
-      }}
+      className="p-5 h-full"
+      style={{ ...GLASS_ELEVATED, borderRadius: CARD_RADIUS }}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-lg bg-brand/15 border border-brand/20 flex items-center justify-center">
-          <Star className="w-3.5 h-3.5 text-brand-light" aria-hidden="true" />
-        </div>
+      <div className="flex items-center gap-2.5 mb-5">
+        <SectionIcon color="#5B7FFF">
+          <Star className="w-3.5 h-3.5" style={{ color: '#5B7FFF' }} aria-hidden="true" />
+        </SectionIcon>
         <h3 className="text-[13px] font-bold text-white/80">O&apos;zlashtirish</h3>
       </div>
 
       <div className="flex items-center gap-4">
-        <ProgressRing value={mastery} size={72} strokeWidth={6} color={masteryColor} animDelay={0.4} />
+        <ProgressRing value={mastery} size={72} strokeWidth={5} color={masteryColor} animDelay={0.4} />
         <div className="space-y-2 flex-1">
           {[
-            { label: 'Davomat',  value: attPct ?? 0,               color: '#22C55E' },
-            { label: 'Testlar',  value: snapshot?.test_score ?? 0,  color: '#6366F1' },
+            { label: 'Davomat',  value: attPct ?? 0,                  color: '#22C55E' },
+            { label: 'Testlar',  value: snapshot?.test_score ?? 0,    color: '#5B7FFF' },
             { label: 'Faollik',  value: snapshot?.activity_score ?? 0, color: '#F59E0B' },
           ].map(s => (
             <div key={s.label}>
               <div className="flex justify-between mb-1">
-                <span className="text-[11px] text-white/45">{s.label}</span>
+                <span className="text-[11px] text-white/40">{s.label}</span>
                 <span className="text-[11px] font-bold" style={{ color: s.color }}>{s.value}%</span>
               </div>
-              <div className="h-1 bg-white/[0.08] rounded-full overflow-hidden">
+              <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
                 <motion.div
                   className="h-full rounded-full"
-                  style={{ background: s.color }}
+                  style={{ background: `linear-gradient(90deg, ${s.color}, ${s.color}CC)` }}
                   initial={{ width: 0 }}
                   whileInView={{ width: `${s.value}%` }}
                   viewport={{ once: true }}
@@ -1385,15 +1393,13 @@ const COMING_SOON = [
 function ComingSoonCard() {
   return (
     <div
-      className="rounded-[24px] p-5 border h-full"
-      style={{
-        ...GLASS_ELEVATED, borderColor: undefined,
-      }}
+      className="p-5 h-full"
+      style={{ ...GLASS_ELEVATED, borderRadius: CARD_RADIUS }}
     >
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+      <div className="flex items-center gap-2.5 mb-5">
+        <SectionIcon color="#F59E0B">
           <Lock className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-        </div>
+        </SectionIcon>
         <h3 className="text-[13px] font-bold text-white/80">Yaqinda qo&apos;shiladi</h3>
       </div>
 
@@ -1619,7 +1625,7 @@ function ContinueLearningCard({
   const course = groups.find(g => g.status === 'active')
 
   if (loading) return (
-    <div className="rounded-[24px] p-5 border border-white/[0.07] animate-pulse"
+    <div className="rounded-[22px] p-5 border border-white/[0.07] animate-pulse"
       style={{ background: 'rgba(255,255,255,0.03)' }}>
       <div className="h-5 w-36 bg-white/[0.06] rounded-lg mb-4" />
       <div className="h-16 bg-white/[0.04] rounded-2xl" />
@@ -1737,9 +1743,9 @@ function AchievementsShowcase({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.45, ease: EASE }}
-      className="rounded-[24px] p-5 border"
+      className="rounded-[22px] p-5 border"
       style={{
-        ...GLASS_ELEVATED, borderColor: undefined,
+        ...GLASS_ELEVATED,
       }}
     >
       {/* Header */}
