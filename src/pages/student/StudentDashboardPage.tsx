@@ -257,325 +257,315 @@ function getLiveDate() {
   return { greeting: getTimeGreeting(hour), weekday, date: `${dd}.${mm}.${yyyy}` }
 }
 
-// ─── Sprint 4.7 Final: Premium Student Illustration (25% larger, richer) ─────
+// ─── Sprint 4.7 Final Polish: Premium SVG Vector Student Illustration ────────
 
 function StudentIllustration() {
-  // All dimensions 25% larger than Phase 1.5
   return (
     <div
-      className="relative select-none flex items-end justify-center"
-      style={{ width: 280, height: 340 }}
+      className="relative select-none"
+      style={{ width: 340, height: 420 }}
       aria-hidden="true"
     >
-      {/* Deep multi-layer ambient glow */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="absolute rounded-full blur-[100px] opacity-30"
-          style={{ width: 280, height: 280, background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 40%, transparent 68%)' }} />
-        <div className="absolute rounded-full blur-[60px] opacity-20 -translate-y-8"
-          style={{ width: 180, height: 180, background: 'radial-gradient(circle, #818CF8, transparent 70%)' }} />
-        <div className="absolute rounded-full blur-[40px] opacity-15 translate-y-12"
-          style={{ width: 140, height: 140, background: 'radial-gradient(circle, #3B82F6, transparent 70%)' }} />
+      {/* Ambient glow layers */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute rounded-full blur-[110px] opacity-35"
+          style={{ width: 340, height: 340, top: '10%', left: '50%', transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 40%, transparent 68%)' }} />
+        <div className="absolute rounded-full blur-[70px] opacity-25"
+          style={{ width: 200, height: 200, top: 0, left: '50%', transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, #818CF8, transparent 70%)' }} />
+        <div className="absolute rounded-full blur-[50px] opacity-20"
+          style={{ width: 160, height: 160, bottom: '5%', left: '50%', transform: 'translateX(-50%)',
+            background: 'radial-gradient(circle, #3B82F6, transparent 70%)' }} />
       </div>
 
-      {/* Main floating group */}
+      {/* ── SVG Vector Illustration (floats up/down) ──────────────────────── */}
       <motion.div
-        className="relative z-10 flex flex-col items-center"
-        animate={{ y: [0, -14, 0] }}
+        className="absolute inset-0 z-10"
+        animate={{ y: [0, -16, 0] }}
         transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
       >
-        {/* ── HEAD — improved facial proportions ─────────────────────────── */}
-        <div
-          style={{
-            width: 76, height: 88,
-            borderRadius: '38px 38px 30px 30px', // slightly pointed chin
-            background: 'linear-gradient(160deg, #FDDBB4 0%, #F0C4A0 35%, #E8A87C 65%, #D4926A 90%, #C88252 100%)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.22), inset 0 -4px 8px rgba(180,100,40,0.1)',
-            position: 'relative', flexShrink: 0,
-          }}
-        >
-          {/* Hair + hood */}
-          <div style={{
-            position: 'absolute', top: -1, left: -1, right: -1, height: 48,
-            background: 'linear-gradient(160deg, #1A0D4A 0%, #2D1B69 45%, #231660 70%, #1E1B4B 100%)',
-            borderRadius: '39px 39px 12px 12px', overflow: 'hidden',
-          }}>
-            {/* Hair specular highlights */}
-            <div style={{ position: 'absolute', top: 5, left: 14, width: 30, height: 8,
-              background: 'rgba(255,255,255,0.13)', borderRadius: '50%', transform: 'rotate(-10deg)' }} />
-            <div style={{ position: 'absolute', top: 14, left: 24, width: 18, height: 4,
-              background: 'rgba(255,255,255,0.07)', borderRadius: '50%' }} />
-          </div>
-          {/* Forehead shadow */}
-          <div style={{ position: 'absolute', top: 40, left: 0, right: 0, height: 10,
-            background: 'linear-gradient(180deg, rgba(180,100,40,0.12), transparent)' }} />
-          {/* Eyes with eyelids */}
-          <div style={{ position: 'absolute', top: '49%', left: '50%', transform: 'translateX(-50%)',
-            display: 'flex', gap: 12 }}>
-            {/* Left eye */}
-            <div style={{ position: 'relative', width: 12, height: 10 }}>
-              <div style={{ width: 12, height: 10, background: 'white', borderRadius: '50%', position: 'absolute' }} />
-              <div style={{ width: 8, height: 8, background: '#1A1040', borderRadius: '50%',
-                position: 'absolute', top: 1, left: 2 }} />
-              <div style={{ width: 3, height: 3, background: 'rgba(255,255,255,0.7)',
-                borderRadius: '50%', position: 'absolute', top: 1.5, left: 5 }} />
-            </div>
-            {/* Right eye */}
-            <div style={{ position: 'relative', width: 12, height: 10 }}>
-              <div style={{ width: 12, height: 10, background: 'white', borderRadius: '50%', position: 'absolute' }} />
-              <div style={{ width: 8, height: 8, background: '#1A1040', borderRadius: '50%',
-                position: 'absolute', top: 1, left: 2 }} />
-              <div style={{ width: 3, height: 3, background: 'rgba(255,255,255,0.7)',
-                borderRadius: '50%', position: 'absolute', top: 1.5, left: 5 }} />
-            </div>
-          </div>
-          {/* Nose bridge */}
-          <div style={{ position: 'absolute', top: '62%', left: '50%', transform: 'translateX(-50%)',
-            width: 4, height: 6, borderBottom: '1.5px solid rgba(180,100,40,0.3)',
-            borderLeft: '1px solid rgba(180,100,40,0.15)', borderRight: '1px solid rgba(180,100,40,0.15)',
-            borderRadius: '0 0 4px 4px' }} />
-          {/* Smile */}
-          <div style={{ position: 'absolute', bottom: '18%', left: '50%',
-            transform: 'translateX(-50%)', width: 18, height: 6,
-            borderBottom: '2.5px solid rgba(140,75,35,0.5)',
-            borderLeft: '1.5px solid rgba(140,75,35,0.2)', borderRight: '1.5px solid rgba(140,75,35,0.2)',
-            borderRadius: '0 0 14px 14px' }} />
-          {/* Cheek glow */}
-          <div style={{ position: 'absolute', top: '52%', left: 6, width: 12, height: 8,
-            background: 'rgba(220,120,80,0.2)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', top: '52%', right: 6, width: 12, height: 8,
-            background: 'rgba(220,120,80,0.2)', borderRadius: '50%' }} />
-          {/* Ears */}
-          <div style={{ position: 'absolute', top: '43%', left: -8, width: 14, height: 18,
-            background: 'linear-gradient(90deg,#E8A87C,#D4926A)',
-            borderRadius: '4px 50% 50% 4px', boxShadow: 'inset -2px 0 4px rgba(0,0,0,0.1)' }} />
-          <div style={{ position: 'absolute', top: '43%', right: -8, width: 14, height: 18,
-            background: 'linear-gradient(270deg,#E8A87C,#D4926A)',
-            borderRadius: '50% 4px 4px 50%', boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.1)' }} />
-        </div>
+        <svg width="340" height="420" viewBox="0 0 340 420" style={{ overflow: 'visible' }}>
+          <defs>
+            <linearGradient id="sG" x1="25%" y1="0%" x2="75%" y2="100%">
+              <stop offset="0%"   stopColor="#FDE3BC" />
+              <stop offset="35%"  stopColor="#F0C4A0" />
+              <stop offset="70%"  stopColor="#E8A87C" />
+              <stop offset="100%" stopColor="#CF7E5A" />
+            </linearGradient>
+            <linearGradient id="hG" x1="15%" y1="0%" x2="85%" y2="100%">
+              <stop offset="0%"   stopColor="#1E0F52" />
+              <stop offset="45%"  stopColor="#2D1B69" />
+              <stop offset="100%" stopColor="#1A1040" />
+            </linearGradient>
+            <linearGradient id="hdG" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stopColor="#321F7A" />
+              <stop offset="28%"  stopColor="#271870" />
+              <stop offset="60%"  stopColor="#1E1260" />
+              <stop offset="100%" stopColor="#130940" />
+            </linearGradient>
+            <linearGradient id="hdSG" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stopColor="rgba(255,255,255,0.14)" />
+              <stop offset="50%"  stopColor="rgba(255,255,255,0.04)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+            <linearGradient id="yG" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stopColor="#A5C8FF" />
+              <stop offset="40%"  stopColor="#5B7FFF" />
+              <stop offset="100%" stopColor="#B09EFF" />
+            </linearGradient>
+            <linearGradient id="scG" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stopColor="#070D1F" />
+              <stop offset="100%" stopColor="#04080F" />
+            </linearGradient>
+            <radialGradient id="scGl" cx="50%" cy="95%" r="60%">
+              <stop offset="0%"   stopColor="rgba(91,127,255,0.30)" />
+              <stop offset="100%" stopColor="rgba(91,127,255,0)" />
+            </radialGradient>
+            <linearGradient id="bsG" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stopColor="#3D4D62" />
+              <stop offset="100%" stopColor="#1F2937" />
+            </linearGradient>
+            {/* Body drop-shadow */}
+            <filter id="bSh" x="-22%" y="-8%" width="144%" height="128%">
+              <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="rgba(0,0,0,0.6)" />
+            </filter>
+            {/* Y glow */}
+            <filter id="yF" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            {/* Screen blue glow */}
+            <filter id="scF" x="-18%" y="-18%" width="136%" height="136%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+              <feColorMatrix in="b" type="matrix"
+                values="0 0 0.9 0 0.05  0 0.1 0.8 0 0.05  0.5 0 0.5 0 0.2  0 0 0 0.85 0" result="c"/>
+              <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
 
-        {/* Neck */}
-        <div style={{ width: 22, height: 12, flexShrink: 0, marginTop: -1,
-          background: 'linear-gradient(180deg,#D4926A,#C07E58)' }} />
+          {/* ── GROUND GLOW ────────────────────────────────────────────────── */}
+          <ellipse cx="170" cy="415" rx="120" ry="11" fill="rgba(91,127,255,0.2)" />
 
-        {/* ── HOODIE BODY ───────────────────────────────────────────────────── */}
-        <div
-          style={{
-            position: 'relative', width: 150, height: 148,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-            borderRadius: '36px 36px 28px 28px',
-            background: 'linear-gradient(160deg, #1C1050 0%, #2E1C6E 25%, #251868 55%, #1A1040 85%, #150D35 100%)',
-            boxShadow: '0 12px 44px rgba(91,127,255,0.32), 0 4px 12px rgba(0,0,0,0.45), inset 0 2px 0 rgba(255,255,255,0.10)',
-          }}
-        >
-          {/* Hood arch */}
-          <div style={{
-            position: 'absolute', top: -18, left: '50%', transform: 'translateX(-50%)',
-            width: 96, height: 34,
-            background: 'linear-gradient(180deg,#2D1B69 0%,#1C1050 100%)',
-            borderRadius: '50% 50% 0 0',
-          }} />
-          {/* Hoodie specular shine */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 30%, transparent 55%)',
-            borderRadius: 'inherit',
-          }} />
-          {/* Side shadow for 3D depth */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(90deg, rgba(0,0,0,0.15) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.12) 100%)',
-            borderRadius: 'inherit',
-          }} />
-          {/* Kangaroo pocket */}
-          <div style={{
-            position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
-            width: 68, height: 26,
-            background: 'rgba(0,0,0,0.22)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 12,
-          }} />
-          {/* Hoodie fold lines — fabric texture */}
-          {[
-            { top: '25%', left: '18%', w: 38, r: 11, o: 0.07 },
-            { top: '44%', left: '58%', w: 26, r: -8, o: 0.05 },
-            { top: '62%', left: '22%', w: 52, r: 5, o: 0.06 },
-            { top: '76%', left: '50%', w: 32, r: -12, o: 0.05 },
-          ].map((f, i) => (
-            <div key={i} style={{
-              position: 'absolute', top: f.top, left: f.left,
-              width: f.w, height: 1.5, borderRadius: 2,
-              background: 'rgba(0,0,0,1)', opacity: f.o,
-              transform: `rotate(${f.r}deg)`,
-            }} />
+          {/* ── LAPTOP BASE ────────────────────────────────────────────────── */}
+          <ellipse cx="170" cy="400" rx="105" ry="9" fill="rgba(0,0,0,0.45)" />
+          <rect x="60" y="380" width="220" height="22" rx="5" fill="url(#bsG)" />
+          {/* Keyboard rows */}
+          {[0,1,2].map(row => (
+            <g key={row} opacity={0.2 - row * 0.04}>
+              {Array.from({length: 12 - row}).map((_, col) => (
+                <rect key={col} x={68 + col * 16 + row * 6} y={383 + row * 5}
+                  width={12} height={3} rx="1" fill="rgba(255,255,255,1)" />
+              ))}
+            </g>
           ))}
-          {/* Brand Y — glowing */}
-          <motion.span
-            style={{
-              fontSize: 40, fontWeight: 900, lineHeight: 1,
-              position: 'relative', zIndex: 10,
-              background: 'linear-gradient(135deg, #93BBFF 0%, #5B7FFF 40%, #A78BFA 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              userSelect: 'none',
-            }}
-            animate={{
-              filter: [
-                'drop-shadow(0 0 10px rgba(91,127,255,0.55))',
-                'drop-shadow(0 0 24px rgba(91,127,255,1)) drop-shadow(0 0 48px rgba(91,127,255,0.4))',
-                'drop-shadow(0 0 10px rgba(91,127,255,0.55))',
-              ],
-            }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-          >Y</motion.span>
-          {/* Left arm */}
-          <div style={{
-            position: 'absolute', top: 8, left: -22, width: 22, height: 72,
-            background: 'linear-gradient(180deg,#2E1C6E 0%,#1A1040 100%)',
-            borderRadius: 20, transform: 'rotate(-9deg)', transformOrigin: 'top center',
-            boxShadow: '-3px 4px 12px rgba(0,0,0,0.3)',
-          }} />
-          {/* Right arm */}
-          <div style={{
-            position: 'absolute', top: 8, right: -22, width: 22, height: 72,
-            background: 'linear-gradient(180deg,#2E1C6E 0%,#1A1040 100%)',
-            borderRadius: 20, transform: 'rotate(9deg)', transformOrigin: 'top center',
-            boxShadow: '3px 4px 12px rgba(0,0,0,0.3)',
-          }} />
-          {/* Hands */}
-          <div style={{
-            position: 'absolute', bottom: -14, left: -8, width: 26, height: 26,
-            background: 'radial-gradient(circle at 35% 30%, #FDDBB4, #D4926A)',
-            borderRadius: '50%', boxShadow: '0 3px 8px rgba(0,0,0,0.25)',
-          }} />
-          <div style={{
-            position: 'absolute', bottom: -14, right: -8, width: 26, height: 26,
-            background: 'radial-gradient(circle at 65% 30%, #FDDBB4, #D4926A)',
-            borderRadius: '50%', boxShadow: '0 3px 8px rgba(0,0,0,0.25)',
-          }} />
-        </div>
-
-        {/* ── LAPTOP ──────────────────────────────────────────────────────────── */}
-        <div style={{ position: 'relative', flexShrink: 0, marginTop: 2 }}>
-          {/* Screen lid */}
-          <div style={{
-            width: 145, height: 86,
-            borderRadius: '12px 12px 3px 3px',
-            background: 'linear-gradient(160deg,#060B1A 0%,#080E22 100%)',
-            border: '1.5px solid rgba(91,127,255,0.6)',
-            boxShadow: '0 0 32px rgba(91,127,255,0.4), 0 0 12px rgba(91,127,255,0.25), inset 0 0 30px rgba(91,127,255,0.08)',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            {/* Screen ambient glow */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'radial-gradient(ellipse at 50% 120%, rgba(91,127,255,0.28), transparent 55%)',
-            }} />
-            {/* Window chrome (editor titlebar) */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 14,
-              background: 'rgba(255,255,255,0.04)',
-              borderBottom: '0.5px solid rgba(255,255,255,0.07)',
-              display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 7,
-            }}>
-              {/* Traffic lights */}
-              {['#FF5F57','#FEBC2E','#28C840'].map((c, i) => (
-                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: c, opacity: 0.75 }} />
-              ))}
-              {/* Tab bar */}
-              <div style={{ marginLeft: 8, width: 40, height: 8, background: 'rgba(91,127,255,0.2)',
-                borderRadius: '3px 3px 0 0', border: '0.5px solid rgba(91,127,255,0.3)' }} />
-            </div>
-            {/* Screen bezel highlight */}
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(147,187,255,0.5), transparent)',
-            }} />
-            {/* Scan line */}
-            <motion.div
-              style={{
-                position: 'absolute', left: 0, right: 0, height: 1,
-                background: 'linear-gradient(90deg, transparent 0%, rgba(147,187,255,0.6) 50%, transparent 100%)',
-                opacity: 0.5,
-              }}
-              animate={{ top: ['14px', '100%'] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
-            />
-            {/* Syntax-colored code lines */}
-            <div style={{ position: 'absolute', top: 20, left: 10 }}>
-              {[
-                ['#5B7FFF', 0,  72, 0   ],
-                ['#A78BFA', 12, 96, 0.08],
-                ['#93BBFF', 20, 52, 0.18],
-                ['#22D3EE', 10, 84, 0   ],
-                ['#818CF8', 0,  60, 0   ],
-                ['#A78BFA', 8,  40, 0.08],
-              ].map(([c, indent, w, extraOp], i) => (
-                <div key={i} style={{
-                  width: w as number, height: 2,
-                  background: c as string,
-                  opacity: 0.2 + (extraOp as number),
-                  borderRadius: 2,
-                  marginTop: i === 0 ? 0 : 5,
-                  marginLeft: indent as number,
-                }} />
-              ))}
-            </div>
-            {/* Y logo — right side, glowing */}
-            <motion.span
-              style={{
-                position: 'absolute', top: '55%', right: 12,
-                transform: 'translateY(-50%)',
-                fontSize: 24, fontWeight: 900,
-                background: 'linear-gradient(135deg,#93BBFF,#5B7FFF)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              }}
-              animate={{
-                filter: [
-                  'drop-shadow(0 0 6px rgba(91,127,255,0.7))',
-                  'drop-shadow(0 0 20px rgba(91,127,255,1)) drop-shadow(0 0 36px rgba(91,127,255,0.55))',
-                  'drop-shadow(0 0 6px rgba(91,127,255,0.7))',
-                ],
-                scale: [0.9, 1.1, 0.9],
-              }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-            >Y</motion.span>
-          </div>
+          {/* Trackpad */}
+          <rect x="128" y="386" width="84" height="13" rx="3"
+            fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
           {/* Hinge */}
-          <div style={{ height: 3, background: 'linear-gradient(90deg,#111827,#374151,#111827)' }} />
-          {/* Base */}
-          <div style={{
-            width: 160, height: 8, marginLeft: -7.5,
-            background: 'linear-gradient(180deg,#2D3748,#1F2937)',
-            borderRadius: '0 0 8px 8px',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.55)',
-          }} />
-          {/* Keyboard row */}
-          <div style={{
-            position: 'absolute', bottom: 2, left: 10, right: 10, height: 4,
-            background: 'linear-gradient(180deg,rgba(255,255,255,0.05),transparent)',
-            borderRadius: 2,
-          }} />
-          {/* Cast shadow */}
-          <div style={{
-            width: 120, height: 8, margin: '6px auto 0',
-            borderRadius: '50%',
-            background: 'rgba(91,127,255,0.35)',
-            filter: 'blur(10px)',
-            opacity: 0.45,
-          }} />
-        </div>
+          <rect x="66" y="376" width="208" height="5" rx="2" fill="#2D3748" />
+
+          {/* ── LAPTOP SCREEN ──────────────────────────────────────────────── */}
+          <rect x="62" y="274" width="216" height="108" rx="10"
+            fill="url(#scG)" filter="url(#scF)" />
+          <rect x="62" y="274" width="216" height="108" rx="10"
+            fill="none" stroke="rgba(91,127,255,0.65)" strokeWidth="1.5" />
+          <rect x="62" y="274" width="216" height="108" rx="10" fill="url(#scGl)" />
+          {/* Chrome bar */}
+          <rect x="62" y="274" width="216" height="18" rx="10" fill="rgba(255,255,255,0.04)" />
+          <rect x="62" y="284" width="216" height="8" fill="rgba(255,255,255,0.03)" />
+          <line x1="62" y1="292" x2="278" y2="292" stroke="rgba(255,255,255,0.07)" strokeWidth="0.5" />
+          {/* Traffic lights */}
+          <circle cx="78"  cy="283" r="4.5" fill="#FF5F57" opacity="0.88" />
+          <circle cx="93"  cy="283" r="4.5" fill="#FEBC2E" opacity="0.88" />
+          <circle cx="108" cy="283" r="4.5" fill="#28C840" opacity="0.88" />
+          {/* Active tab */}
+          <rect x="122" y="276" width="52" height="14" rx="3"
+            fill="rgba(91,127,255,0.22)" stroke="rgba(91,127,255,0.4)" strokeWidth="0.5" />
+          <text x="148" y="286" textAnchor="middle" fontSize="6" fill="rgba(147,187,255,0.65)">main.tsx</text>
+          {/* Code lines (syntax highlighted) */}
+          {[
+            [72,  298, 88,  '#5B7FFF', 0,  0.28],
+            [80,  306, 116, '#A78BFA', 0,  0.25],
+            [88,  314, 66,  '#93BBFF', 0,  0.30],
+            [80,  322, 100, '#22D3EE', 0,  0.24],
+            [72,  330, 76,  '#818CF8', 0,  0.28],
+            [88,  338, 52,  '#A78BFA', 0,  0.22],
+            [72,  346, 84,  '#5B7FFF', 0,  0.26],
+          ].map(([x,y,w,c,_,op], i) => (
+            <rect key={i} x={x as number} y={y as number} width={w as number} height={2.5} rx="1.2"
+              fill={c as string} opacity={op as number} />
+          ))}
+          {/* Blinking cursor */}
+          <motion.rect x={72} y={355} width={2} height={10} rx={1} fill="rgba(147,187,255,0.85)"
+            animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }} />
+          {/* Scan line */}
+          <motion.rect x={62} width={216} height={1} rx={0.5}
+            fill="rgba(147,187,255,0.5)"
+            animate={{ y: [274, 382, 274] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: 'linear' }} />
+          {/* Y logo on screen */}
+          <motion.g
+            animate={{ opacity: [0.72, 1, 0.72], scale: [0.95, 1.05, 0.95] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ transformOrigin: '240px 335px' }}
+          >
+            <text x="240" y="346" textAnchor="middle" fontSize="32" fontWeight="900"
+              fill="url(#yG)" filter="url(#yF)">Y</text>
+          </motion.g>
+
+          {/* ── HOODIE BODY ────────────────────────────────────────────────── */}
+          <g filter="url(#bSh)">
+            <path
+              d="M 88 200
+                 C 66 206, 44 228, 40 272
+                 L 38 365
+                 Q 38 378, 54 378
+                 L 286 378
+                 Q 302 378, 302 365
+                 L 300 272
+                 C 296 228, 274 206, 252 200 Z"
+              fill="url(#hdG)"
+            />
+            {/* Shine overlay */}
+            <path
+              d="M 88 200
+                 C 66 206, 44 228, 40 272
+                 L 38 365
+                 Q 38 378, 54 378
+                 L 286 378
+                 Q 302 378, 302 365
+                 L 300 272
+                 C 296 228, 274 206, 252 200 Z"
+              fill="url(#hdSG)"
+            />
+          </g>
+          {/* Left sleeve shadow */}
+          <path d="M 40 240 L 38 365 Q 38 378 54 378 L 90 378 L 86 252 Z"
+            fill="rgba(0,0,0,0.10)" />
+          {/* Right sleeve shadow */}
+          <path d="M 300 240 L 302 365 Q 302 378 286 378 L 250 378 L 254 252 Z"
+            fill="rgba(0,0,0,0.10)" />
+          {/* Fabric fold lines */}
+          <path d="M 90 248 Q 124 242 158 252" stroke="rgba(0,0,0,0.07)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <path d="M 180 262 Q 216 256 246 268" stroke="rgba(0,0,0,0.06)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+          <path d="M 84 305 Q 120 298 156 308" stroke="rgba(0,0,0,0.07)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <path d="M 182 322 Q 218 314 248 326" stroke="rgba(0,0,0,0.06)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <path d="M 86 352 Q 170 345 254 352" stroke="rgba(0,0,0,0.05)" strokeWidth="1" fill="none" />
+          {/* Center zipper */}
+          <line x1="170" y1="204" x2="170" y2="298" stroke="rgba(0,0,0,0.14)" strokeWidth="2" />
+          <rect x="164" y="204" width="12" height="9" rx="2.5"
+            fill="rgba(255,255,255,0.09)" stroke="rgba(255,255,255,0.14)" strokeWidth="0.5" />
+          {/* Pocket */}
+          <rect x="120" y="320" width="100" height="40" rx="12"
+            fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+          <line x1="133" y1="320" x2="120" y2="360" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+          <line x1="207" y1="320" x2="220" y2="360" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+          {/* Brand Y on hoodie */}
+          <motion.g
+            animate={{ opacity: [0.78, 1, 0.78] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ transformOrigin: '170px 292px' }}
+          >
+            <text x="170" y="300" textAnchor="middle" fontSize="56" fontWeight="900"
+              fill="url(#yG)" filter="url(#yF)">Y</text>
+          </motion.g>
+
+          {/* ── HOOD ARCH ──────────────────────────────────────────────────── */}
+          <path
+            d="M 90 196
+               Q 90 134, 170 120
+               Q 250 134, 250 196
+               L 252 200
+               L 88 200 Z"
+            fill="url(#hG)" opacity="0.97"
+          />
+          <path d="M 92 194 Q 92 138 170 124 Q 248 138 248 194"
+            fill="none" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
+
+          {/* ── HEAD ───────────────────────────────────────────────────────── */}
+          {/* Head shadow at neck */}
+          <ellipse cx="170" cy="192" rx="40" ry="16" fill="rgba(0,0,0,0.30)" />
+          <ellipse cx="170" cy="112" rx="64" ry="76" fill="url(#sG)" filter="url(#bSh)" />
+          {/* Chin shadow */}
+          <ellipse cx="170" cy="180" rx="36" ry="12" fill="rgba(140,80,30,0.13)" />
+          {/* Face ambient light (left side) */}
+          <ellipse cx="140" cy="130" rx="22" ry="32" fill="rgba(255,255,255,0.04)" />
+
+          {/* ── HAIR ───────────────────────────────────────────────────────── */}
+          <path
+            d="M 108 92
+               Q 108 44, 170 42
+               Q 232 44, 232 92
+               L 234 110
+               Q 208 100, 170 102
+               Q 132 100, 106 110 Z"
+            fill="url(#hG)"
+          />
+          <ellipse cx="144" cy="64" rx="24" ry="10" fill="rgba(255,255,255,0.12)"
+            transform="rotate(-14 144 64)" />
+          <ellipse cx="158" cy="78" rx="13" ry="5" fill="rgba(255,255,255,0.07)"
+            transform="rotate(-8 158 78)" />
+          <ellipse cx="186" cy="62" rx="11" ry="4" fill="rgba(255,255,255,0.06)"
+            transform="rotate(9 186 62)" />
+
+          {/* ── FACE ───────────────────────────────────────────────────────── */}
+          {/* Eyebrows */}
+          <path d="M 128 120 Q 144 113 152 118" stroke="#3E2008" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <path d="M 188 118 Q 196 113 210 120" stroke="#3E2008" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          {/* Left eye */}
+          <ellipse cx="140" cy="132" rx="14" ry="11" fill="white" />
+          <circle cx="141" cy="132" r="9" fill="#1A1040" />
+          <circle cx="141" cy="132" r="5.5" fill="#2A1060" />
+          <circle cx="143" cy="128" r="4" fill="rgba(255,255,255,0.88)" />
+          <circle cx="138" cy="133" r="1.8" fill="rgba(255,255,255,0.45)" />
+          <path d="M 126 132 Q 140 121 154 132" stroke="#3A1808" strokeWidth="1.5" fill="rgba(0,0,0,0.07)" />
+          {/* Right eye */}
+          <ellipse cx="200" cy="132" rx="14" ry="11" fill="white" />
+          <circle cx="199" cy="132" r="9" fill="#1A1040" />
+          <circle cx="199" cy="132" r="5.5" fill="#2A1060" />
+          <circle cx="201" cy="128" r="4" fill="rgba(255,255,255,0.88)" />
+          <circle cx="196" cy="133" r="1.8" fill="rgba(255,255,255,0.45)" />
+          <path d="M 186 132 Q 200 121 214 132" stroke="#3A1808" strokeWidth="1.5" fill="rgba(0,0,0,0.07)" />
+          {/* Nose */}
+          <path d="M 166 142 L 162 162 Q 170 168 178 162 L 174 142"
+            stroke="rgba(165,90,30,0.28)" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+          <ellipse cx="160" cy="161" rx="6.5" ry="4" fill="rgba(155,80,25,0.18)" />
+          <ellipse cx="180" cy="161" rx="6.5" ry="4" fill="rgba(155,80,25,0.18)" />
+          {/* Cheeks */}
+          <ellipse cx="122" cy="152" rx="18" ry="11" fill="rgba(218,100,75,0.22)" />
+          <ellipse cx="218" cy="152" rx="18" ry="11" fill="rgba(218,100,75,0.22)" />
+          {/* Smile */}
+          <path d="M 148 172 Q 170 184 192 172"
+            stroke="rgba(125,65,25,0.55)" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M 152 172 Q 170 178 188 172"
+            stroke="rgba(220,155,110,0.18)" strokeWidth="1.5" fill="none" />
+          {/* Ears */}
+          <path d="M 106 118 Q 96 130 98 146 Q 102 162 118 156 L 112 120 Z" fill="url(#sG)" />
+          <path d="M 110 130 Q 106 142 110 152" stroke="rgba(160,85,35,0.20)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <path d="M 234 120 L 222 156 Q 238 162 242 146 Q 244 130 234 118 Z" fill="url(#sG)" />
+          <path d="M 230 130 Q 234 142 230 152" stroke="rgba(160,85,35,0.20)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          {/* Neck */}
+          <rect x="150" y="182" width="40" height="22" rx="5" fill="url(#sG)" />
+          <line x1="150" y1="192" x2="190" y2="192" stroke="rgba(155,85,35,0.08)" strokeWidth="1" />
+          {/* Forehead shadow */}
+          <path d="M 110 102 Q 170 90 230 102 L 226 120 Q 170 108 114 120 Z"
+            fill="rgba(0,0,0,0.04)" />
+        </svg>
       </motion.div>
 
-      {/* Orbiting dot particles */}
+      {/* Orbiting dot particles (CSS, around the SVG) */}
       {[
-        { top: '8%',  left: '8%',  s: 5, c: '#818CF8', d: 0   },
-        { top: '22%', right: '4%', s: 4, c: '#A78BFA', d: 0.8 },
-        { top: '58%', left: '3%',  s: 4, c: '#6366F1', d: 1.5 },
-        { top: '76%', right: '5%', s: 6, c: '#7C3AED', d: 2.2 },
-        { top: '5%',  right: '16%',s: 4, c: '#93BBFF', d: 0.4 },
-        { top: '90%', left: '25%', s: 3, c: '#C4B5FD', d: 1.8 },
-        { top: '42%', left: '2%',  s: 3, c: '#5B7FFF', d: 1.2 },
-        { top: '68%', right: '18%',s: 3, c: '#818CF8', d: 3.0 },
+        { top: '7%',  left: '7%',   s: 5, c: '#818CF8', d: 0   },
+        { top: '20%', right: '3%',  s: 4, c: '#A78BFA', d: 0.8 },
+        { top: '56%', left: '2%',   s: 4, c: '#6366F1', d: 1.5 },
+        { top: '74%', right: '4%',  s: 6, c: '#7C3AED', d: 2.2 },
+        { top: '4%',  right: '14%', s: 4, c: '#93BBFF', d: 0.4 },
+        { top: '88%', left: '22%',  s: 3, c: '#C4B5FD', d: 1.8 },
+        { top: '40%', left: '1%',   s: 3, c: '#5B7FFF', d: 1.2 },
+        { top: '65%', right: '16%', s: 4, c: '#818CF8', d: 3.0 },
+        { top: '30%', left: '5%',   s: 3, c: '#A78BFA', d: 2.6 },
+        { top: '12%', right: '8%',  s: 3, c: '#5B7FFF', d: 1.9 },
       ].map((p, i) => (
         <motion.div
           key={i}
@@ -584,17 +574,17 @@ function StudentIllustration() {
             top: p.top,
             left: (p as Record<string,unknown>).left as string | undefined,
             right: (p as Record<string,unknown>).right as string | undefined,
-            width: p.s, height: p.s, background: p.c,
+            width: p.s, height: p.s,
+            background: p.c,
             boxShadow: `0 0 ${p.s * 3}px ${p.c}`,
           }}
-          animate={{ y: [-6, 6, -6], opacity: [0.25, 0.9, 0.25], scale: [0.7, 1.4, 0.7] }}
-          transition={{ duration: 3 + p.d * 0.4, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
+          animate={{ y: [-7, 7, -7], opacity: [0.25, 0.95, 0.25], scale: [0.7, 1.5, 0.7] }}
+          transition={{ duration: 3.2 + p.d * 0.35, repeat: Infinity, ease: 'easeInOut', delay: p.d }}
         />
       ))}
     </div>
   )
 }
-
 
 // ─── Quick Prompt Chips ───────────────────────────────────────────────────────
 
