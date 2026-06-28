@@ -18,6 +18,7 @@ import {
   Sparkles, Target, X,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { IllustrationImage, ILLUS } from '@/components/illustration'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { testService } from '@/services/test.service'
@@ -565,6 +566,17 @@ export default function StudentTestsPage() {
             style={{ background: `radial-gradient(circle at 50% 60%, ${scoreColor}18 0%, transparent 65%)` }}
             aria-hidden="true"
           />
+
+          {/* Illustration — success or achievement based on pass/fail */}
+          <div className="flex justify-center mb-4">
+            <IllustrationImage
+              src={passed ? ILLUS.SUCCESS : ILLUS.EMPTY_STATE}
+              alt={passed ? 'Muvaffaqiyat!' : 'Qayta urinib ko\'ring'}
+              width={100}
+              height={100}
+              glow={passed ? '0 0 30px rgba(34,197,94,0.4)' : '0 0 30px rgba(245,158,11,0.3)'}
+            />
+          </div>
 
           {/* Score ring */}
           <div className="relative inline-flex items-center justify-center mb-5">

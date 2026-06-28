@@ -15,6 +15,7 @@ import {
   Mic, SidebarClose, SidebarOpen,
   Camera, ImageIcon, FileText as FileIcon, X as XIcon,
 } from 'lucide-react'
+import { IllustrationImage, ILLUS } from '@/components/illustration'
 import { AITeacherPanel }   from '@/components/ai-teacher'
 import { useVoiceInput }    from '@/hooks/useVoiceInput'
 import { supabase }                   from '@/lib/supabase'
@@ -149,19 +150,26 @@ function EmptyState({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.45 }}
     >
-      {/* Glow + Avatar */}
+      {/* AI Chat illustration — PNG when available, avatar fallback */}
       <motion.div
-        className="relative mb-7"
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+        className="relative mb-6"
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
       >
         <div
-          className="absolute -inset-8 rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.35) 0%, transparent 65%)' }}
+          className="absolute -inset-12 rounded-full blur-3xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(91,127,255,0.32) 0%, transparent 65%)' }}
           aria-hidden="true"
         />
         <div className="relative z-10">
-          <AsomiddinAvatar size="xl" showStatus />
+          <IllustrationImage
+            src={ILLUS.AI_CHAT}
+            alt="Yordamchi AI — Sun'iy intellekt yordamchisi"
+            width={200}
+            height={220}
+            glow="0 0 40px rgba(91,127,255,0.45)"
+            fallback={<AsomiddinAvatar size="xl" showStatus />}
+          />
         </div>
       </motion.div>
 

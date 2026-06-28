@@ -309,7 +309,11 @@ function getLiveDate() {
   return { greeting: getTimeGreeting(hour), weekday, date: `${dd}.${mm}.${yyyy}` }
 }
 
-// ─── Sprint 4.8 pre: Professional SaaS-grade SVG Student Illustration ────────
+// ─── Illustration imports ─────────────────────────────────────────────────────
+
+import { IllustrationImage, ILLUS } from '@/components/illustration'
+
+// ─── SVG fallback illustration (used when PNG is not yet available) ────────────
 
 function StudentIllustration() {
   return (
@@ -673,7 +677,7 @@ function HomeAIInput({ onSubmit }: { onSubmit: (text: string) => void }) {
           value={text}
           onChange={e => { setText(e.target.value); e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,120)+'px' }}
           onKeyDown={handleKeyDown}
-          placeholder="Savolingizni yozing yoki rasm/PDF yuklang…"
+          placeholder="Savolingizni yozing yoki rasm / PDF yuklang…"
           rows={1}
           className="flex-1 bg-transparent text-[14px] text-white/90 placeholder:text-white/30 resize-none outline-none leading-[1.6] max-h-28 py-0.5 font-medium"
           aria-label="AI ga savol yozing"
@@ -833,7 +837,7 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
 
             {/* Subtitle */}
             <p className="text-[15px] text-white/45 max-w-sm leading-relaxed mt-1">
-              Imtihondan qo&apos;rqmang — bugun qaysi mavzuni o&apos;rganamiz?
+              AI yordamida darslaringizni osonroq va samaraliroq o&apos;rganing.
             </p>
           </motion.div>
 
@@ -870,7 +874,7 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
                 aria-hidden="true"
               />
               <Zap className="w-4 h-4 relative z-10" aria-hidden="true" />
-              <span className="relative z-10">AI bilan suhbatni boshlash</span>
+              <span className="relative z-10">AI Yordamchini boshlash</span>
             </motion.button>
 
             {/* Secondary */}
@@ -1015,7 +1019,16 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
               }}
               aria-hidden="true"
             />
-            <StudentIllustration />
+            {/* Hero illustration — PNG overrides SVG when available */}
+            <IllustrationImage
+              src={ILLUS.HERO}
+              alt="YordamchiAI — sun'iy intellekt talabasi"
+              width={340}
+              height={400}
+              glow="0 0 60px rgba(91,127,255,0.45)"
+              style={{ borderRadius: 0 }}
+              fallback={<StudentIllustration />}
+            />
           </div>
           </div>{/* end scale wrapper */}
         </motion.div>
@@ -1041,7 +1054,14 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               aria-hidden="true"
             />
-            <StudentIllustration />
+            <IllustrationImage
+              src={ILLUS.HERO}
+              alt="YordamchiAI — sun'iy intellekt talabasi"
+              width={280}
+              height={330}
+              glow="0 0 40px rgba(91,127,255,0.40)"
+              fallback={<StudentIllustration />}
+            />
           </div>
         </div>
       </motion.div>

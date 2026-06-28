@@ -1,21 +1,18 @@
 /**
  * ThinkingCard — premium AI thinking state.
- * ONE outer AsomiddinAvatar (md=40px) + text-only AssistantHeader inside card.
- * No duplicate avatar rendering.
+ * Uses the approved loading illustration when available, avatar fallback.
  */
 
 import { useState, useEffect } from 'react'
-import { Zap } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { AsomiddinAvatar } from './AsomiddinAvatar'
-import { AIMessageCard }   from './AIMessageCard'
-import { AssistantHeader } from './AssistantHeader'
+import { IllustrationImage, ILLUS } from '@/components/illustration'
 
 const SUBTITLES: Record<string, string> = {
-  uz: 'Asomiddin AI javob tayyorlamoqda…',
-  ru: 'Asomiddin AI готовит ответ…',
-  en: 'Asomiddin AI is thinking…',
+  uz: 'AI o\'ylamoqda…',
+  ru: 'AI думает…',
+  en: 'AI is thinking…',
 }
 
 export function ThinkingCard() {
@@ -35,46 +32,59 @@ export function ThinkingCard() {
 
   return (
     <div
-      className="flex items-start"
+      className="flex items-start gap-2.5"
       style={{
-        gap:        '10px',    /* avatar → bubble */
         opacity:    show ? 1 : 0,
-        transform:  show ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.98)',
-        transition: 'opacity 250ms cubic-bezier(.22,1,.36,1), transform 250ms cubic-bezier(.22,1,.36,1)',
-        willChange: 'opacity, transform',
+        transform:  show ? 'translateY(0)' : 'translateY(10px)',
+        transition: 'opacity 280ms cubic-bezier(.22,1,.36,1), transform 280ms cubic-bezier(.22,1,.36,1)',
       }}
     >
-      {/* ONE avatar — 40px, never repeated inside card */}
-      <AsomiddinAvatar size="md" showStatus />
+      {/* Loading illustration (small) or avatar fallback */}
+      <IllustrationImage
+        src={ILLUS.LOADING}
+        alt="AI o'ylamoqda"
+        width={36}
+        height={36}
+        style={{ borderRadius: '50%', flexShrink: 0 }}
+        fallback={<AsomiddinAvatar size="md" showStatus />}
+      />
 
-      <div className="flex-1 min-w-0">
-        <AIMessageCard>
-          {/* Text-only header — no duplicate photo */}
-          <AssistantHeader />
+      <div
+        className="px-4 py-3.5 rounded-[4px_18px_18px_18px]"
+        style={{
+          background: 'rgba(255,255,255,0.06)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.09)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+        }}
+      >
+        <p className="text-[10.5px] font-bold text-brand-light/70 mb-2 uppercase tracking-widest leading-none">
+          ASOMIDDIN AI
+        </p>
 
-          {/* Status */}
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400 flex-shrink-0" />
-            <span className="text-[13px] text-gray-600 dark:text-gray-400 font-medium">
-              {SUBTITLES[language] ?? SUBTITLES.uz}
-            </span>
-          </div>
+        {/* Status row */}
+        <div className="flex items-center gap-2 mb-3">
+          <Loader2 className="w-3.5 h-3.5 text-brand-light/60 animate-spin flex-shrink-0" aria-hidden="true" />
+          <span className="text-[13px] text-white/50 font-medium">
+            {SUBTITLES[language] ?? SUBTITLES.uz}
+          </span>
+        </div>
 
-          {/* Animated segmented progress */}
-          <div className="flex gap-1.5">
-            {[0,1,2,3,4].map(i => (
-              <div
-                key={i}
-                className={cn(
-                  'h-1 flex-1 rounded-full transition-colors duration-300',
-                  i <= step
-                    ? 'bg-gradient-to-r from-violet-500 to-indigo-500'
-                    : 'bg-gray-200 dark:bg-gray-700',
-                )}
-              />
-            ))}
-          </div>
-        </AIMessageCard>
+        {/* Animated progress dots */}
+        <div className="flex gap-1.5">
+          {[0,1,2,3,4].map(i => (
+            <div
+              key={i}
+              className="h-1 flex-1 rounded-full transition-all duration-300"
+              style={{
+                background: i <= step
+                  ? 'linear-gradient(90deg, #5B7FFF, #7C3AED)'
+                  : 'rgba(255,255,255,0.08)',
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )

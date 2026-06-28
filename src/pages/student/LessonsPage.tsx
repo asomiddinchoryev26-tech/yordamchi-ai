@@ -17,6 +17,7 @@ import {
   ChevronRight, Star, Brain, Globe, ListChecks,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { IllustrationImage, ILLUS } from '@/components/illustration'
 import { useAuth } from '@/hooks/useAuth'
 import { lessonService } from '@/services/lesson.service'
 import {
@@ -473,13 +474,24 @@ export default function StudentLessonsPage() {
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
         >
           <motion.div
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-16 h-16 rounded-3xl mx-auto mb-4 flex items-center justify-center"
-            style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' }}
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="mx-auto mb-4 flex items-center justify-center"
             aria-hidden="true"
           >
-            <BookOpen className="w-7 h-7 text-brand-light/50" />
+            <IllustrationImage
+              src={ILLUS.EMPTY_STATE}
+              alt="Darslar yo'q"
+              width={120}
+              height={120}
+              glow="0 0 24px rgba(99,102,241,0.3)"
+              fallback={
+                <div className="w-16 h-16 rounded-3xl flex items-center justify-center"
+                  style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                  <BookOpen className="w-7 h-7 text-brand-light/50" />
+                </div>
+              }
+            />
           </motion.div>
           <p className="text-sm font-semibold text-white/40 mb-1">Darslar yo&apos;q</p>
           <p className="text-xs text-white/20">O&apos;qituvchi dars qo&apos;shgach bu yerda ko&apos;rinadi</p>
