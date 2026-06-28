@@ -5,7 +5,7 @@ export { IllustrationImage, IllustrationShimmer } from './IllustrationImage'
  * Drop the PNG files there and they activate automatically.
  */
 export const ILLUS = {
-  HERO:          '/illustrations/hero-student.png',
+  HERO:          '/illustrations/hero-student.svg',
   AI_CHAT:       '/illustrations/ai-chat.png',
   LOADING:       '/illustrations/loading.png',
   EMPTY_STATE:   '/illustrations/empty-state.png',
