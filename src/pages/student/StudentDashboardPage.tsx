@@ -283,44 +283,74 @@ function StudentIllustration() {
         animate={{ y: [0, -14, 0] }}
         transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
       >
-        {/* ── HEAD ──────────────────────────────────────────────────────────── */}
+        {/* ── HEAD — improved facial proportions ─────────────────────────── */}
         <div
           style={{
-            width: 75, height: 78,
-            borderRadius: '50%',
-            background: 'linear-gradient(160deg, #FDDBB4 0%, #F0C4A0 40%, #E8A87C 70%, #D4926A 100%)',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2)',
+            width: 76, height: 88,
+            borderRadius: '38px 38px 30px 30px', // slightly pointed chin
+            background: 'linear-gradient(160deg, #FDDBB4 0%, #F0C4A0 35%, #E8A87C 65%, #D4926A 90%, #C88252 100%)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.38), 0 2px 8px rgba(0,0,0,0.22), inset 0 -4px 8px rgba(180,100,40,0.1)',
             position: 'relative', flexShrink: 0,
           }}
         >
-          {/* Hair */}
+          {/* Hair + hood */}
           <div style={{
-            position: 'absolute', top: -1, left: 0, right: 0, height: 42,
-            background: 'linear-gradient(160deg, #1A0D4A 0%, #2D1B69 50%, #1E1B4B 100%)',
-            borderRadius: '50% 50% 0 0', overflow: 'hidden',
+            position: 'absolute', top: -1, left: -1, right: -1, height: 48,
+            background: 'linear-gradient(160deg, #1A0D4A 0%, #2D1B69 45%, #231660 70%, #1E1B4B 100%)',
+            borderRadius: '39px 39px 12px 12px', overflow: 'hidden',
           }}>
-            {/* Hair specular */}
-            <div style={{ position: 'absolute', top: 4, left: 12, width: 28, height: 8,
-              background: 'rgba(255,255,255,0.12)', borderRadius: '50%' }} />
+            {/* Hair specular highlights */}
+            <div style={{ position: 'absolute', top: 5, left: 14, width: 30, height: 8,
+              background: 'rgba(255,255,255,0.13)', borderRadius: '50%', transform: 'rotate(-10deg)' }} />
+            <div style={{ position: 'absolute', top: 14, left: 24, width: 18, height: 4,
+              background: 'rgba(255,255,255,0.07)', borderRadius: '50%' }} />
           </div>
-          {/* Eyes */}
-          <div style={{ position: 'absolute', top: '47%', left: '50%', transform: 'translateX(-50%)',
-            display: 'flex', gap: 11 }}>
-            <div style={{ width: 11, height: 9, background: '#1A1040', borderRadius: '50%',
-              boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
-            <div style={{ width: 11, height: 9, background: '#1A1040', borderRadius: '50%',
-              boxShadow: '0 0 0 2px rgba(255,255,255,0.2)' }} />
+          {/* Forehead shadow */}
+          <div style={{ position: 'absolute', top: 40, left: 0, right: 0, height: 10,
+            background: 'linear-gradient(180deg, rgba(180,100,40,0.12), transparent)' }} />
+          {/* Eyes with eyelids */}
+          <div style={{ position: 'absolute', top: '49%', left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', gap: 12 }}>
+            {/* Left eye */}
+            <div style={{ position: 'relative', width: 12, height: 10 }}>
+              <div style={{ width: 12, height: 10, background: 'white', borderRadius: '50%', position: 'absolute' }} />
+              <div style={{ width: 8, height: 8, background: '#1A1040', borderRadius: '50%',
+                position: 'absolute', top: 1, left: 2 }} />
+              <div style={{ width: 3, height: 3, background: 'rgba(255,255,255,0.7)',
+                borderRadius: '50%', position: 'absolute', top: 1.5, left: 5 }} />
+            </div>
+            {/* Right eye */}
+            <div style={{ position: 'relative', width: 12, height: 10 }}>
+              <div style={{ width: 12, height: 10, background: 'white', borderRadius: '50%', position: 'absolute' }} />
+              <div style={{ width: 8, height: 8, background: '#1A1040', borderRadius: '50%',
+                position: 'absolute', top: 1, left: 2 }} />
+              <div style={{ width: 3, height: 3, background: 'rgba(255,255,255,0.7)',
+                borderRadius: '50%', position: 'absolute', top: 1.5, left: 5 }} />
+            </div>
           </div>
+          {/* Nose bridge */}
+          <div style={{ position: 'absolute', top: '62%', left: '50%', transform: 'translateX(-50%)',
+            width: 4, height: 6, borderBottom: '1.5px solid rgba(180,100,40,0.3)',
+            borderLeft: '1px solid rgba(180,100,40,0.15)', borderRight: '1px solid rgba(180,100,40,0.15)',
+            borderRadius: '0 0 4px 4px' }} />
           {/* Smile */}
-          <div style={{ position: 'absolute', bottom: '20%', left: '50%',
-            transform: 'translateX(-50%)', width: 16, height: 5,
-            borderBottom: '2.5px solid rgba(140,80,40,0.55)',
-            borderRadius: '0 0 12px 12px' }} />
+          <div style={{ position: 'absolute', bottom: '18%', left: '50%',
+            transform: 'translateX(-50%)', width: 18, height: 6,
+            borderBottom: '2.5px solid rgba(140,75,35,0.5)',
+            borderLeft: '1.5px solid rgba(140,75,35,0.2)', borderRight: '1.5px solid rgba(140,75,35,0.2)',
+            borderRadius: '0 0 14px 14px' }} />
+          {/* Cheek glow */}
+          <div style={{ position: 'absolute', top: '52%', left: 6, width: 12, height: 8,
+            background: 'rgba(220,120,80,0.2)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', top: '52%', right: 6, width: 12, height: 8,
+            background: 'rgba(220,120,80,0.2)', borderRadius: '50%' }} />
           {/* Ears */}
-          <div style={{ position: 'absolute', top: '42%', left: -7, width: 13, height: 16,
-            background: 'linear-gradient(90deg,#E8A87C,#D4926A)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', top: '42%', right: -7, width: 13, height: 16,
-            background: 'linear-gradient(270deg,#E8A87C,#D4926A)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', top: '43%', left: -8, width: 14, height: 18,
+            background: 'linear-gradient(90deg,#E8A87C,#D4926A)',
+            borderRadius: '4px 50% 50% 4px', boxShadow: 'inset -2px 0 4px rgba(0,0,0,0.1)' }} />
+          <div style={{ position: 'absolute', top: '43%', right: -8, width: 14, height: 18,
+            background: 'linear-gradient(270deg,#E8A87C,#D4926A)',
+            borderRadius: '50% 4px 4px 50%', boxShadow: 'inset 2px 0 4px rgba(0,0,0,0.1)' }} />
         </div>
 
         {/* Neck */}
@@ -365,6 +395,20 @@ function StudentIllustration() {
             border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: 12,
           }} />
+          {/* Hoodie fold lines — fabric texture */}
+          {[
+            { top: '25%', left: '18%', w: 38, r: 11, o: 0.07 },
+            { top: '44%', left: '58%', w: 26, r: -8, o: 0.05 },
+            { top: '62%', left: '22%', w: 52, r: 5, o: 0.06 },
+            { top: '76%', left: '50%', w: 32, r: -12, o: 0.05 },
+          ].map((f, i) => (
+            <div key={i} style={{
+              position: 'absolute', top: f.top, left: f.left,
+              width: f.w, height: 1.5, borderRadius: 2,
+              background: 'rgba(0,0,0,1)', opacity: f.o,
+              transform: `rotate(${f.r}deg)`,
+            }} />
+          ))}
           {/* Brand Y — glowing */}
           <motion.span
             style={{
@@ -424,51 +468,74 @@ function StudentIllustration() {
             {/* Screen ambient glow */}
             <div style={{
               position: 'absolute', inset: 0,
-              background: 'radial-gradient(ellipse at 50% 120%, rgba(91,127,255,0.25), transparent 58%)',
+              background: 'radial-gradient(ellipse at 50% 120%, rgba(91,127,255,0.28), transparent 55%)',
             }} />
+            {/* Window chrome (editor titlebar) */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 14,
+              background: 'rgba(255,255,255,0.04)',
+              borderBottom: '0.5px solid rgba(255,255,255,0.07)',
+              display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 7,
+            }}>
+              {/* Traffic lights */}
+              {['#FF5F57','#FEBC2E','#28C840'].map((c, i) => (
+                <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: c, opacity: 0.75 }} />
+              ))}
+              {/* Tab bar */}
+              <div style={{ marginLeft: 8, width: 40, height: 8, background: 'rgba(91,127,255,0.2)',
+                borderRadius: '3px 3px 0 0', border: '0.5px solid rgba(91,127,255,0.3)' }} />
+            </div>
             {/* Screen bezel highlight */}
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-              background: 'linear-gradient(90deg, transparent, rgba(147,187,255,0.4), transparent)',
+              background: 'linear-gradient(90deg, transparent, rgba(147,187,255,0.5), transparent)',
             }} />
             {/* Scan line */}
             <motion.div
               style={{
                 position: 'absolute', left: 0, right: 0, height: 1,
-                background: 'linear-gradient(90deg, transparent 0%, rgba(147,187,255,0.7) 50%, transparent 100%)',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(147,187,255,0.6) 50%, transparent 100%)',
+                opacity: 0.5,
               }}
-              animate={{ top: ['0%', '100%'] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: 'linear' }}
+              animate={{ top: ['14px', '100%'] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
             />
-            {/* Code lines (editor style) */}
-            <div style={{ position: 'absolute', top: 10, left: 10 }}>
-              {[['#5B7FFF', 72], ['#A78BFA', 96], ['#93BBFF', 52], ['#5B7FFF', 84], ['#818CF8', 64]].map(([c, w], i) => (
+            {/* Syntax-colored code lines */}
+            <div style={{ position: 'absolute', top: 20, left: 10 }}>
+              {[
+                ['#5B7FFF', 0,  72, 0   ],
+                ['#A78BFA', 12, 96, 0.08],
+                ['#93BBFF', 20, 52, 0.18],
+                ['#22D3EE', 10, 84, 0   ],
+                ['#818CF8', 0,  60, 0   ],
+                ['#A78BFA', 8,  40, 0.08],
+              ].map(([c, indent, w, extraOp], i) => (
                 <div key={i} style={{
                   width: w as number, height: 2,
                   background: c as string,
-                  opacity: 0.22 + (i % 2) * 0.08,
+                  opacity: 0.2 + (extraOp as number),
                   borderRadius: 2,
-                  marginTop: i === 0 ? 0 : 6,
-                  paddingLeft: i > 0 && i < 4 ? 10 : 0,
+                  marginTop: i === 0 ? 0 : 5,
+                  marginLeft: indent as number,
                 }} />
               ))}
             </div>
-            {/* Y logo - glowing on screen */}
+            {/* Y logo — right side, glowing */}
             <motion.span
               style={{
-                position: 'absolute', top: '50%', right: 16,
+                position: 'absolute', top: '55%', right: 12,
                 transform: 'translateY(-50%)',
-                fontSize: 22, fontWeight: 900,
+                fontSize: 24, fontWeight: 900,
                 background: 'linear-gradient(135deg,#93BBFF,#5B7FFF)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               }}
               animate={{
                 filter: [
                   'drop-shadow(0 0 6px rgba(91,127,255,0.7))',
-                  'drop-shadow(0 0 18px rgba(91,127,255,1)) drop-shadow(0 0 32px rgba(91,127,255,0.5))',
+                  'drop-shadow(0 0 20px rgba(91,127,255,1)) drop-shadow(0 0 36px rgba(91,127,255,0.55))',
                   'drop-shadow(0 0 6px rgba(91,127,255,0.7))',
                 ],
-                scale: [0.92, 1.08, 0.92],
+                scale: [0.9, 1.1, 0.9],
               }}
               transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
             >Y</motion.span>
@@ -630,7 +697,7 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
 
   return (
     <div
-      className="relative overflow-hidden rounded-[28px] px-6 py-10 sm:px-10 sm:py-12"
+      className="relative overflow-hidden rounded-[28px] px-6 py-8 sm:px-10 sm:py-10"
       style={{
         background: 'linear-gradient(145deg, #070B18 0%, #0C1235 30%, #130D30 60%, #090C20 100%)',
         boxShadow: '0 1px 0 rgba(255,255,255,0.07) inset, 0 32px 80px rgba(0,0,0,0.5)',
@@ -661,10 +728,10 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
       <HeroParticles />
       <FloatingAIIcons />
 
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 items-center">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-[1fr_300px] lg:grid-cols-[1fr_400px] gap-4 md:gap-6 lg:gap-8 items-center">
 
         {/* ── LEFT: Greeting + Content ──────────────────────────────────────── */}
-        <motion.div variants={STAGGER} initial="hidden" animate="show" className="space-y-6">
+        <motion.div variants={STAGGER} initial="hidden" animate="show" className="space-y-4 sm:space-y-5">
 
           {/* Greeting block */}
           <motion.div variants={FADE_UP} className="space-y-2">
@@ -839,14 +906,16 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
         </motion.div>
 
         {/* ── RIGHT: Premium Student Illustration ──────────────────────────── */}
-        {/* visible on all screens — below text on mobile, right column on lg */}
+        {/* hidden on mobile, visible in right column on md+ */}
         <motion.div
-          className="flex items-center justify-center lg:justify-end"
+          className="hidden md:flex items-center justify-center lg:justify-end"
           initial={{ opacity: 0, x: 24, scale: 0.88 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 0.75, delay: 0.25, ease: EASE }}
         >
-          {/* Neon ring system — 3 rings + strong core glow */}
+          {/* Tablet: scale 78%, desktop: 100% — stays inside column */}
+          <div className="scale-[0.72] md:scale-[0.78] lg:scale-100 origin-center transition-transform duration-300">
+          {/* Neon ring system — 4 rings + ground reflection */}
           <div className="relative flex items-center justify-center">
             {/* Outermost slow pulse ring */}
             <motion.div
@@ -901,9 +970,34 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
             />
             <StudentIllustration />
           </div>
+          </div>{/* end scale wrapper */}
         </motion.div>
 
       </div>
+
+      {/* Mobile: illustration below text (only on <md) */}
+      <motion.div
+        className="flex md:hidden items-center justify-center mt-6 -mb-2"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
+      >
+        <div className="scale-[0.72] origin-center">
+          <div className="relative flex items-center justify-center">
+            <div className="absolute w-56 h-56 rounded-full blur-[60px] opacity-30 pointer-events-none"
+              style={{ background: 'radial-gradient(circle, #5B7FFF 0%, #7C3AED 50%, transparent 70%)' }}
+              aria-hidden="true" />
+            <motion.div
+              className="absolute rounded-full pointer-events-none"
+              style={{ width: 220, height: 220, border: '1px solid rgba(91,127,255,0.28)' }}
+              animate={{ scale: [1, 1.05, 1], opacity: [0.6, 0.2, 0.6] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              aria-hidden="true"
+            />
+            <StudentIllustration />
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }
