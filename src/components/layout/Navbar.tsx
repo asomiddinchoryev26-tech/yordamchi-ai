@@ -9,7 +9,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, Menu, Search, Sun, Moon, Globe, ChevronDown, Check, Command } from 'lucide-react'
+import { Bell, Menu, Search, Sun, Moon, Globe, ChevronDown, Check, Command, Zap, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage, type Language } from '@/contexts/LanguageContext'
@@ -194,14 +194,34 @@ export function Navbar({
           className={glassBtn}
           aria-label={theme === 'dark' ? t.lightMode : t.darkMode}
           title={theme === 'dark' ? t.lightMode : t.darkMode}
-          style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
           {theme === 'dark'
             ? <Sun  className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             : <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+        </button>
+
+        {/* AI glow button */}
+        <button
+          type="button"
+          className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl text-white font-bold text-[11px] flex-shrink-0 transition-all hover:opacity-90"
+          style={{
+            background: 'linear-gradient(135deg, #5B7FFF, #7C3AED)',
+            boxShadow: '0 0 14px rgba(91,127,255,0.55), 0 4px 12px rgba(91,127,255,0.3)',
+          }}
+          aria-label="AI Yordamchi"
+        >
+          <Zap className="w-4 h-4" aria-hidden="true" />
+        </button>
+
+        {/* Chat icon */}
+        <button
+          type="button"
+          className={glassBtn}
+          aria-label="Xabarlar"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <MessageSquare className="w-4 h-4" aria-hidden="true" />
         </button>
 
         {/* Language switcher */}

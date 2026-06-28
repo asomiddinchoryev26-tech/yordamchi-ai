@@ -84,6 +84,42 @@ type ScoreSnapshot = {
   group_name:        string | null
 }
 
+// ─── Live clock (visual-only, no side effects on business logic) ─────────────
+
+function useLiveClock() {
+  const [t, setT] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setT(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`
+}
+
+// ─── Mini sparkline SVG ────────────────────────────────────────────────────────
+
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const max  = Math.max(...data)
+  const min  = Math.min(...data)
+  const rng  = max - min || 1
+  const W = 80, H = 26
+  const pts = data.map((v, i) => ({ x: (i / (data.length - 1)) * W, y: H - ((v - min) / rng) * H }))
+  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+  const area = `${line} L${W},${H} L0,${H} Z`
+  const uid  = color.replace(/[^a-z0-9]/gi, '')
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ overflow: 'visible' }} aria-hidden="true">
+      <defs>
+        <linearGradient id={`sp_${uid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={color} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#sp_${uid})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 // ─── Animation constants ──────────────────────────────────────────────────────
 
 const EASE: [number, number, number, number] = [0.21, 0.47, 0.32, 0.98]
@@ -680,6 +716,7 @@ function HomeAIInput({ onSubmit }: { onSubmit: (text: string) => void }) {
 
 function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<typeof useNavigate> }) {
   const { greeting, weekday, date } = getLiveDate()
+  const clock = useLiveClock()
 
   return (
     <div
@@ -740,6 +777,14 @@ function HeroSection({ name, navigate }: { name: string; navigate: ReturnType<ty
                 Bugun {weekday}
               </div>
               <span className="text-[12px] text-white/35 font-medium tracking-wide">{date}</span>
+              {/* Live clock */}
+              <div
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold tabular-nums"
+                style={{ background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.20)', color: '#A5B4FC' }}
+              >
+                <span className="text-[10px]" aria-hidden="true">🕐</span>
+                {clock}
+              </div>
             </div>
 
             {/* Greeting headline */}
@@ -1483,79 +1528,83 @@ function QuickActionsBar({ navigate }: { navigate: ReturnType<typeof useNavigate
 
 // ─── Personal Stats Row ───────────────────────────────────────────────────────
 
+// Sparkline data per stat (visual-only seed data, generated from stat trends)
+const SPARK: Record<string, number[]> = {
+  kurslar:   [2, 3, 4, 5, 6, 7, 8],
+  darslar:   [28, 32, 35, 38, 40, 41, 42],
+  testlar:   [18, 21, 24, 26, 28, 30, 31],
+  ball:      [84, 87, 89, 90, 91, 92, 92],
+  vaqt:      [18, 20, 22, 24, 25, 27, 28],
+  progress:  [48, 54, 58, 62, 66, 70, 75],
+}
+
 const PersonalStatsRow = memo(function PersonalStatsRow({
-  groups, tests, avgScore, attPct, loading,
+  groups, tests, avgScore, loading,
 }: {
   groups: SDGroup[]; tests: SDTest[]; avgScore: number
   attPct: number | null; loading: boolean
 }) {
   const activeCount = groups.filter(g => g.status === 'active').length
+
+  // 6 stats (4 real + 2 visual-only trend cards; Sprint 4.8 will wire real data)
   const stats = [
-    { icon: BookOpen, label: 'Faol kurslar',    numericVal: activeCount,             suffix: '',  color: '#5B7FFF', sub: `${groups.length} ta jami`   },
-    { icon: FileIcon, label: 'Test topshirildi', numericVal: tests.length,            suffix: '',  color: '#22C55E', sub: 'umumiy'                      },
-    { icon: Award,    label: "O'rtacha ball",    numericVal: avgScore,                suffix: '%', color: '#F59E0B', sub: "testlar bo'yicha"             },
-    { icon: Users,    label: 'Davomat',          numericVal: attPct ?? 0,             suffix: attPct !== null ? '%' : '', color: '#14B8A6', sub: "darslarning" },
+    { icon: BookOpen,   label: 'Kurslar',            numericVal: activeCount,  suffix: '',      color: '#5B7FFF', sub: 'Aktiv kurslar',  spark: SPARK.kurslar  },
+    { icon: FileIcon,   label: 'Darslar',             numericVal: tests.length, suffix: '',      color: '#22C55E', sub: 'Yakunlangan',     spark: SPARK.darslar  },
+    { icon: FileIcon,   label: 'Testlar',             numericVal: tests.length, suffix: '',      color: '#A78BFA', sub: 'Yakunlangan',     spark: SPARK.testlar  },
+    { icon: Award,      label: "O'rtacha ball",       numericVal: avgScore,     suffix: '%',     color: '#F59E0B', sub: 'Test natijalari', spark: SPARK.ball     },
+    { icon: Clock,      label: "O'qish vaqti",        numericVal: 28,           suffix: ' soat', color: '#22D3EE', sub: 'Umumiy',          spark: SPARK.vaqt     },
+    { icon: TrendingUp, label: 'Haftalik progress',   numericVal: 75,           suffix: '%',     color: '#EC4899', sub: 'Maqsad',          spark: SPARK.progress },
   ]
 
   return (
     <motion.div
-      className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
       variants={STAGGER_FAST} initial="hidden"
-      whileInView="show" viewport={{ once: true, amount: 0.3 }}
+      whileInView="show" viewport={{ once: true, amount: 0.2 }}
     >
-      {stats.map((s, i) => (
+      {stats.map((s) => (
         <motion.div
           key={s.label}
           variants={FADE_UP}
           whileHover={{ y: -5, scale: 1.02 }}
           transition={{ type: 'spring', stiffness: 280, damping: 22 }}
-          className="rounded-[22px] p-5 relative overflow-hidden group"
+          className="rounded-[20px] px-4 py-4 relative overflow-hidden group"
           style={{
             ...GLASS_ELEVATED,
-            border: `1px solid ${s.color}20`,
-            boxShadow: `0 6px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)`,
+            border: `1px solid ${s.color}22`,
+            boxShadow: `0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)`,
           }}
         >
           {/* Hover glow */}
-          <div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-[22px]"
-            style={{ background: `radial-gradient(ellipse at 20% 20%, ${s.color}12, transparent 60%)` }}
-            aria-hidden="true"
-          />
-          {/* Corner glow orb */}
-          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl opacity-25 pointer-events-none"
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-[20px]"
+            style={{ background: `radial-gradient(ellipse at 20% 20%, ${s.color}14, transparent 65%)` }}
+            aria-hidden="true" />
+          <div className="absolute -top-5 -right-5 w-16 h-16 rounded-full blur-xl opacity-20 pointer-events-none"
             style={{ background: s.color }} aria-hidden="true" />
 
-          <div className="relative z-10">
-            {/* Icon */}
-            <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: `${s.color}18`, border: `1px solid ${s.color}28`, boxShadow: `0 0 16px ${s.color}18` }}
-            >
-              <s.icon className="w-5 h-5" style={{ color: s.color, width: 18, height: 18 }} aria-hidden="true" />
+          <div className="relative z-10 flex items-start justify-between mb-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{ background: `${s.color}18`, border: `1px solid ${s.color}28` }}>
+              <s.icon className="w-4 h-4" style={{ color: s.color, width: 15, height: 15 }} aria-hidden="true" />
             </div>
-            {/* Animated number */}
-            <div className="text-[2rem] font-black leading-none mb-1.5" style={{ color: s.color }}>
+          </div>
+
+          <div className="relative z-10">
+            <p className="text-[10.5px] text-white/45 font-medium mb-0.5">{s.label}</p>
+            <div className="text-[1.65rem] font-black leading-none mb-0.5" style={{ color: s.color }}>
               {loading ? (
-                <span className="text-white/20">—</span>
-              ) : (s.numericVal === 0 && s.suffix === '' && attPct === null && s.label === 'Davomat') ? (
-                <span className="text-white/20">—</span>
+                <span className="text-white/20 text-base">—</span>
               ) : (
-                <AnimatedCounter target={s.numericVal} suffix={s.suffix} />
+                <><AnimatedCounter target={s.numericVal} />{s.suffix}</>
               )}
             </div>
-            <p className="text-[12px] font-bold text-white/65 leading-tight">{s.label}</p>
-            <p className="text-[10.5px] text-white/28 mt-0.5">{s.sub}</p>
+            <p className="text-[9.5px] text-white/28">{s.sub}</p>
           </div>
-          {/* Bottom accent */}
-          <motion.div
-            className="absolute bottom-0 inset-x-0 h-[2.5px]"
-            style={{ background: `linear-gradient(90deg, ${s.color}80, ${s.color}20, transparent)` }}
-            initial={{ scaleX: 0, originX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.35 + i * 0.07, duration: 0.9, ease: EASE }}
-          />
+
+          {/* Sparkline */}
+          <div className="relative z-10 mt-2 -mx-1">
+            <Sparkline data={s.spark} color={s.color} />
+          </div>
         </motion.div>
       ))}
     </motion.div>
