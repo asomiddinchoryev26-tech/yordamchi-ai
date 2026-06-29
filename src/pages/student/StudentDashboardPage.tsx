@@ -761,10 +761,10 @@ function StatsSection() {
         <motion.div
           key={s.label}
           variants={FADE_UP}
-          whileHover={{ y: -5, scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          whileHover={{ y: -4, scale: 1.015 }}
+          transition={{ type: 'spring', stiffness: 340, damping: 24 }}
           className="rounded-[22px] p-5 cursor-default relative overflow-hidden group"
-          style={{ ...GLASS_ELEVATED, borderColor: `${s.color}18`, borderRadius: CARD_RADIUS }}
+          style={{ ...GLASS_ELEVATED, borderColor: `${s.color}18`, borderRadius: CARD_RADIUS, willChange: 'transform' }}
         >
           {/* Hover glow */}
           <div

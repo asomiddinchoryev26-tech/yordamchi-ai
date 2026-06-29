@@ -210,15 +210,16 @@ function EmptyState({
             key={label}
             type="button"
             onClick={() => onAction(prompt)}
-            whileHover={{ y: -3, scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.15 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 340, damping: 24 }}
             className="flex flex-col items-start p-4 rounded-[20px] text-left transition-all duration-150"
             style={{
               background: 'rgba(255,255,255,0.05)',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
               border: '1px solid rgba(255,255,255,0.08)',
+              willChange: 'transform',
             }}
           >
             <span className="text-xl mb-2.5" aria-hidden="true">{icon}</span>

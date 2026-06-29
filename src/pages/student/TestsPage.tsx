@@ -408,17 +408,19 @@ export default function StudentTestsPage() {
                         <motion.label
                           key={oi}
                           htmlFor={`q-${q.id}-o-${oi}`}
-                          whileHover={{ scale: 1.01, x: 2 }}
-                          whileTap={{ scale: 0.99 }}
-                          transition={{ duration: 0.12 }}
+                          whileHover={{ scale: 1.008, x: 1.5 }}
+                          whileTap={{ scale: 0.992 }}
+                          transition={{ type: 'spring', stiffness: 360, damping: 26 }}
                           className="flex items-center gap-3 p-3.5 rounded-[16px] cursor-pointer transition-all duration-150"
                           style={selected ? {
                             background: 'rgba(91,92,246,0.15)',
                             border: '1.5px solid rgba(91,92,246,0.5)',
                             boxShadow: '0 0 16px rgba(91,92,246,0.2)',
+                            willChange: 'transform',
                           } : {
                             background: 'rgba(255,255,255,0.04)',
                             border: '1px solid rgba(255,255,255,0.08)',
+                            willChange: 'transform',
                           }}
                         >
                           <input

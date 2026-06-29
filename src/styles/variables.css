@@ -10,11 +10,12 @@
   --font-mono:    ui-monospace, 'Cascadia Code', 'Source Code Pro', Consolas, monospace;
   --font-heading: var(--font-sans);
 
-  /* ── Transitions ─────────────────────────────────────────────────────────── */
-  --t-fast:   100ms cubic-bezier(0.21, 0.47, 0.32, 0.98);
-  --t-base:   200ms cubic-bezier(0.21, 0.47, 0.32, 0.98);
-  --t-slow:   350ms cubic-bezier(0.21, 0.47, 0.32, 0.98);
-  --t-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Transitions (V6 tightened) ──────────────────────────────────────────── */
+  --t-fast:    90ms  cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --t-base:   180ms  cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --t-slow:   300ms  cubic-bezier(0.21, 0.47, 0.32, 0.98);
+  --t-spring: 380ms  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t-ease:   200ms  ease;
 
   /* ── Component: Button ───────────────────────────────────────────────────── */
   --btn-primary-bg:      linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%);
@@ -95,12 +96,5 @@
   --scrollbar-thumb: rgba(255,255,255,0.12);
 }
 
-/* ── Premium scrollbar ────────────────────────────────────────────────────────── */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-}
-*::-webkit-scrollbar        { width: 6px; height: 6px; }
-*::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
-*::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 99px; }
-*::-webkit-scrollbar-thumb:hover { background: rgba(91,92,246,0.4); }
+/* ── V6 scrollbar — overridden to use brand color, thinner ─────────────────── */
+/* (Full scrollbar rules are in globals.css; this kept for variable reference) */

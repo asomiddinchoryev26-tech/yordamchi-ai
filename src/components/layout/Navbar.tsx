@@ -119,7 +119,13 @@ export function Navbar({
   function handleLangSelect(code: Language) { setLanguage(code); setLangOpen(false) }
 
   // ── Shared glass button style ─────────────────────────────────────────────
-  const glassBtn = 'flex items-center justify-center rounded-[10px] text-white/38 hover:text-white/75 hover:bg-white/[0.055] transition-all duration-150 flex-shrink-0'
+  const glassBtn = [
+    'flex items-center justify-center rounded-[10px]',
+    'text-white/38 hover:text-white/78',
+    'hover:bg-white/[0.055] active:bg-white/[0.08]',
+    'transition-all duration-120 ease-out',
+    'flex-shrink-0 select-none',
+  ].join(' ')
 
   return (
     <header

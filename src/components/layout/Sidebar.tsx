@@ -122,11 +122,13 @@ function NavItem({
       onClick={onClose}
       aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'relative flex items-center gap-3 px-3 py-[9px] rounded-[12px] text-[13px] transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand/40 group',
+        'relative flex items-center gap-3 px-3 py-[9px] rounded-[12px] text-[13px] outline-none group',
+        'transition-colors duration-120',
         isActive
           ? cn(cfg.activeText, cfg.activeBg)
           : cn(cfg.inactiveText, cfg.inactiveHover),
       )}
+      style={{ willChange: 'auto' }}
     >
       {/* Sliding bg pill */}
       {isActive && (
@@ -242,8 +244,7 @@ export function Sidebar({
 
       {/* ── Navigation ───────────────────────────────────────────────────────── */}
       <nav
-        className="flex-1 px-3 py-3 overflow-y-auto"
-        style={{ scrollbarWidth: 'none' }}
+        className="flex-1 px-3 py-3 overflow-y-auto scrollbar-none"
         aria-label="Sidebar navigation"
       >
         <div className="space-y-5">

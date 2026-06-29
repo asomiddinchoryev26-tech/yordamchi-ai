@@ -210,12 +210,14 @@ function AttachmentCard({
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.01 }}
-      transition={{ duration: 0.15 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ type: 'spring', stiffness: 360, damping: 26 }}
       className="flex items-center gap-3 px-4 py-3 rounded-[16px]"
       style={{
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.08)',
         boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        willChange: 'transform',
       }}
     >
       <div

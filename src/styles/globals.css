@@ -5,6 +5,24 @@
 /* Tailwind v4: dark: variantini .dark CLASS bilan ishlash uchun */
 @variant dark (&:where(.dark, .dark *));
 
+/* ── Smooth scroll (entire app) ──────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+/* ── V6 Custom scrollbar ─────────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(91,127,255,0.20) transparent;
+}
+*::-webkit-scrollbar            { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track      { background: transparent; }
+*::-webkit-scrollbar-thumb      { background: rgba(91,127,255,0.18); border-radius: 10px; }
+*::-webkit-scrollbar-thumb:hover{ background: rgba(91,127,255,0.40); }
+*::-webkit-scrollbar-corner     { background: transparent; }
+
+/* ── Selection color ─────────────────────────────────────────────────────── */
+::selection         { background: rgba(91,127,255,0.30); color: #ffffff; }
+::-moz-selection    { background: rgba(91,127,255,0.30); color: #ffffff; }
+
 @theme {
   /* ── Semantic HSL tokens (used by hsl(var(--*))) ─────────────────────────── */
   --color-background:              hsl(var(--background));
@@ -154,6 +172,33 @@
   button, a, [role="button"] {
     -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* ── V6 Polish: New keyframes ──────────────────────────────────────────────── */
+
+/* Page-level entrance (applied to <main> on every navigation) */
+@keyframes v6-page-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Skeleton shimmer (matches existing s4-shimmer but named for V6 use) */
+@keyframes v6-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%);  }
+}
+
+/* Pulse ring for notifications / status dots */
+@keyframes v6-ring-pulse {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  70%  { transform: scale(1.6); opacity: 0;   }
+  100% { transform: scale(1.6); opacity: 0;   }
+}
+
+/* Subtle float for ambient particles */
+@keyframes v6-float {
+  0%, 100% { transform: translateY(0);    }
+  50%       { transform: translateY(-6px); }
 }
 
 /* ── Sprint 4: Keyframe animations ─────────────────────────────────────────── */
@@ -336,20 +381,98 @@
     box-shadow: 0 0 0 1px rgba(239,68,68,0.15);
   }
 
+  /* ── V6 page entrance animation ─────────────────────────────────────────── */
+  .page-enter {
+    animation: v6-page-enter 0.26s cubic-bezier(0.21,0.47,0.32,0.98) both;
+  }
+
+  /* ── V6 skeleton shimmer ─────────────────────────────────────────────────── */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,0.04);
+  }
+  .skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.05) 50%,
+      transparent 100%
+    );
+    animation: v6-shimmer 1.8s ease-in-out infinite;
+  }
+
+  /* ── V6 ring pulse (notification dots) ──────────────────────────────────── */
+  .ring-pulse::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: currentColor;
+    animation: v6-ring-pulse 1.5s cubic-bezier(0,0,0.2,1) infinite;
+    opacity: 0;
+  }
+
+  /* ── Scrollbar utilities ─────────────────────────────────────────────────── */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(91,127,255,0.20) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar       { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(91,127,255,0.22); border-radius: 10px; }
+
   /* ── Interaction ──────────────────────────────────────────────────────────── */
   .interactive {
-    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    transition:
+      transform  0.15s cubic-bezier(0.21,0.47,0.32,0.98),
+      box-shadow 0.15s cubic-bezier(0.21,0.47,0.32,0.98),
+      opacity    0.12s ease;
+    will-change: transform;
   }
-  .interactive:hover  { transform: translateY(-1px); }
-  .interactive:active { transform: translateY(0) scale(0.98); }
+  .interactive:hover  { transform: translateY(-2px); }
+  .interactive:active { transform: translateY(0) scale(0.975); }
 
-  /* ── Focus ring ───────────────────────────────────────────────────────────── */
+  /* ── Focus ring — unified V6 style ──────────────────────────────────────── */
   .focus-ring {
     outline: none;
   }
   .focus-ring:focus-visible {
-    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px rgba(91,92,246,0.5);
+    outline: none;
+    box-shadow:
+      0 0 0 2px #070B14,
+      0 0 0 4px rgba(91,127,255,0.55);
   }
+
+  /* Universal focus-visible for all interactive elements in V6 */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px #070B14,
+      0 0 0 4px rgba(91,127,255,0.50) !important;
+  }
+
+  /* ── Button active press state ──────────────────────────────────────────── */
+  button:active:not(:disabled) {
+    transform: scale(0.975);
+    transition: transform 0.08s ease;
+  }
+  /* Exception: preserve FM-controlled transforms */
+  button[data-framer]:active { transform: none; }
 
   /* ── Subtle noise texture overlay (premium feel) ─────────────────────────── */
   .noise-overlay::after {

@@ -421,9 +421,9 @@ function IdleHero({ language, onPrompt }: { language: Language; onPrompt: (text:
             onClick={() => onPrompt(action.prompt[language])}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 + i * 0.05, duration: 0.35, ease: EASE }}
-            whileHover={{ y: -4, scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ y: -4, scale: 1.015 }}
+            whileTap={{ scale: 0.965 }}
+            transition={{ type: 'spring', stiffness: 340, damping: 24, delay: 0.3 + i * 0.05 }}
             className="relative flex flex-col items-start p-4 rounded-[20px] text-left overflow-hidden group"
             style={{
               background: 'rgba(255,255,255,0.04)',
@@ -431,6 +431,7 @@ function IdleHero({ language, onPrompt }: { language: Language; onPrompt: (text:
               WebkitBackdropFilter: 'blur(16px)',
               border: '1px solid rgba(255,255,255,0.07)',
               boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+              willChange: 'transform',
             }}
           >
             {/* Gradient glow on hover */}

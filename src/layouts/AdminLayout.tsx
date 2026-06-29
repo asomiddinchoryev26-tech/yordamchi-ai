@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import {
@@ -146,7 +146,7 @@ export default function AdminLayout() {
           searchPlaceholder={t.adminSearchPlaceholder}
           avatarNode={avatarEl}
         />
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden page-enter">
           <Outlet />
         </main>
       </div>

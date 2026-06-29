@@ -222,7 +222,7 @@ export default function StudentLayout() {
           searchPlaceholder={t.studentSearchPlaceholder}
           avatarNode={avatarEl}
         />
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden page-enter">
           <Outlet />
         </main>
       </div>
