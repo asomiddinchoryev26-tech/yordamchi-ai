@@ -339,12 +339,113 @@ class EdgeFunctionProvider implements AIProvider {
   }
 }
 
-// ─── Eksport ──────────────────────────────────────────────────────────────────
-// Provaydern almashtirish: shu qatorni o'zgartiring:
-//   export const aiProvider: AIProvider = new MockAIProvider()   ← test uchun
-//   export const aiProvider: AIProvider = new EdgeFunctionProvider() ← Gemini
+// ─── Streaming support ────────────────────────────────────────────────────────
 
-export const aiProvider: AIProvider = new EdgeFunctionProvider()
+export interface FilePart {
+  type:     'file'
+  base64:   string
+  mimeType: string
+  name:     string
+}
+export interface TextPart {
+  type: 'text'
+  text: string
+}
+export type MessagePart = TextPart | FilePart
+
+export interface ChatMessageWithParts extends ChatMessage {
+  parts?: MessagePart[]
+}
+
+// ─── Streaming provider extension ────────────────────────────────────────────
+
+export interface StreamingAIProvider extends AIProvider {
+  streamComplete(
+    messages:  ChatMessageWithParts[],
+    context:   StudentContext,
+    options?:  AIProviderOptions,
+    signal?:   AbortSignal,
+  ): AsyncGenerator<string>
+}
+
+class StreamingEdgeFunctionProvider extends EdgeFunctionProvider implements StreamingAIProvider {
+  async *streamComplete(
+    messages:  ChatMessageWithParts[],
+    context:   StudentContext,
+    options?:  AIProviderOptions,
+    signal?:   AbortSignal,
+  ): AsyncGenerator<string> {
+    // Build rich system prompt same as complete()
+    let systemPrompt: string | undefined
+    if (options?.userId && options.conversationId) {
+      try {
+        const svc = await getIntelligenceService()
+        const lastMsg = options.lastUserMessage
+          ?? messages.filter(m => m.role === 'user').at(-1)?.content ?? ''
+        const built = svc.buildSystemPrompt(context, options.userId, options.conversationId, lastMsg)
+        if (built) systemPrompt = built
+      } catch { /* fall through */ }
+    }
+
+    // Auth headers
+    const { data: { session } } = await supabase.auth.getSession()
+    const token   = session?.access_token
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+    const fnUrl   = `${import.meta.env.VITE_SUPABASE_URL as string}/functions/v1/ai-chat`
+
+    const body: Record<string, unknown> = { messages, context, stream: true }
+    if (systemPrompt) body['systemPrompt'] = systemPrompt
+
+    const response = await fetch(fnUrl, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token ?? anonKey}`,
+        'apikey':         anonKey,
+      },
+      body:   JSON.stringify(body),
+      signal,
+    })
+
+    if (!response.ok) throw new Error(`Stream HTTP ${response.status}`)
+    if (!response.body)  throw new Error('Stream body empty')
+
+    const reader  = response.body.getReader()
+    const decoder = new TextDecoder()
+    let   buffer  = ''
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed.startsWith('data:')) continue
+          const raw = trimmed.slice(5).trim()
+          if (!raw || raw === '[DONE]') continue
+          try {
+            const parsed = JSON.parse(raw) as { text?: string; error?: string }
+            if (parsed.error) throw new Error(parsed.error)
+            if (parsed.text)  yield parsed.text
+          } catch (parseErr) {
+            if ((parseErr as Error).message.startsWith('Stream')) throw parseErr
+          }
+        }
+      }
+    } finally {
+      reader.cancel()
+    }
+  }
+}
+
+// ─── Eksport ──────────────────────────────────────────────────────────────────
+
+export const aiProvider: StreamingAIProvider = new StreamingEdgeFunctionProvider()
 
 // ─── Context yuklash ──────────────────────────────────────────────────────────
 

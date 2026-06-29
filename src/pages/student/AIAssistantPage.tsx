@@ -12,8 +12,9 @@ import {
   Send, Plus, Trash2, MessageSquare, Search,
   PanelLeftOpen, PanelLeftClose, AlertCircle, Loader2,
   Copy, Check, ThumbsUp, ThumbsDown, RefreshCw,
-  Mic, SidebarClose, SidebarOpen,
+  Mic, Square, Pin, PinOff, Pencil,
   Camera, ImageIcon, FileText as FileIcon, X as XIcon,
+  Upload,
 } from 'lucide-react'
 import { IllustrationImage, ILLUS } from '@/components/illustration'
 import { AITeacherPanel }   from '@/components/ai-teacher'
@@ -37,7 +38,65 @@ import {
 } from '@/components/ai'
 import MarkdownContent from '@/components/chat/MarkdownContent'
 import type { AiConversationRow, AiMessageRow } from '@/services/ai-chat.service'
-import type { StudentContext }                   from '@/services/ai-provider.service'
+import type { StudentContext, ChatMessageWithParts } from '@/services/ai-provider.service'
+
+// ─── Supported file types ─────────────────────────────────────────────────────
+
+const SUPPORTED_MIME_TYPES = new Set([
+  // Images
+  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+  // Documents
+  'application/pdf',
+  'text/plain',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  // Audio
+  'audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/aac', 'audio/ogg', 'audio/flac', 'audio/webm',
+])
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload  = (e) => {
+      const result = e.target?.result as string
+      resolve(result.split(',')[1] ?? result) // strip data:... prefix
+    }
+    reader.onerror = () => reject(new Error('File read error'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function fileToText(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload  = (e) => resolve(e.target?.result as string)
+    reader.onerror = () => reject(new Error('File read error'))
+    reader.readAsText(file, 'UTF-8')
+  })
+}
+
+function getFileIcon(mimeType: string): string {
+  if (mimeType.startsWith('image/'))  return '🖼️'
+  if (mimeType === 'application/pdf') return '📄'
+  if (mimeType === 'text/plain')      return '📝'
+  if (mimeType.includes('word'))      return '📃'
+  if (mimeType.startsWith('audio/'))  return '🎵'
+  return '📎'
+}
+
+// ─── Local storage: pinned conversations ──────────────────────────────────────
+
+const PINNED_KEY = 'yai_pinned_convs'
+
+function loadPinned(): Set<string> {
+  try {
+    const raw = localStorage.getItem(PINNED_KEY)
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
+  } catch { return new Set() }
+}
+
+function savePinned(ids: Set<string>): void {
+  try { localStorage.setItem(PINNED_KEY, JSON.stringify([...ids])) } catch { /* ignore */ }
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -384,13 +443,14 @@ const MessageBubble = memo(function MessageBubble({
   )
 })
 
-// ─── Premium ConvItem ─────────────────────────────────────────────────────────
+// ─── Premium ConvItem — rename + pin + delete ─────────────────────────────────
 
 function ConvItem({
-  conv, active, deleting, onSelect, onDelete,
+  conv, active, deleting, pinned, onSelect, onDelete, onPin, onRename,
 }: {
-  conv: AiConversationRow; active: boolean; deleting: boolean
+  conv: AiConversationRow; active: boolean; deleting: boolean; pinned: boolean
   onSelect: () => void; onDelete: (e: React.MouseEvent) => void
+  onPin: (e: React.MouseEvent) => void; onRename: (e: React.MouseEvent) => void
 }) {
   return (
     <motion.div variants={CONV_ITEM} layout>
@@ -409,23 +469,31 @@ function ConvItem({
           WebkitBackdropFilter: 'blur(8px)',
         } : {}}
       >
-        <MessageSquare
-          className={cn('w-3.5 h-3.5 flex-shrink-0 transition-colors', active ? 'text-brand-light' : 'text-white/25')}
-          aria-hidden="true"
-        />
-        <span className="flex-1 text-[12.5px] font-medium truncate pr-7">{conv.title}</span>
-        <span className="text-[10px] text-white/25 flex-shrink-0 group-hover:opacity-0 transition-opacity absolute right-8">
+        {pinned ? (
+          <Pin className="w-3 h-3 flex-shrink-0 text-amber-400/70" aria-hidden="true" />
+        ) : (
+          <MessageSquare className={cn('w-3.5 h-3.5 flex-shrink-0', active ? 'text-brand-light' : 'text-white/25')} aria-hidden="true" />
+        )}
+        <span className="flex-1 text-[12.5px] font-medium truncate pr-16">{conv.title}</span>
+        <span className="text-[10px] text-white/25 flex-shrink-0 group-hover:opacity-0 transition-opacity absolute right-9">
           {fmtDate(conv.updated_at)}
         </span>
-        <button
-          type="button"
-          onClick={onDelete}
-          disabled={deleting}
-          className="absolute right-2 w-6 h-6 flex items-center justify-center rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/15 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-30"
-          aria-label="O'chirish"
-        >
-          {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
-        </button>
+        {/* Action buttons — reveal on hover */}
+        <div className="absolute right-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+          <button type="button" onClick={onRename} aria-label="Nomini o'zgartirish"
+            className="w-6 h-6 flex items-center justify-center rounded-md text-white/20 hover:text-white/60 hover:bg-white/[0.07] transition-all">
+            <Pencil className="w-3 h-3" />
+          </button>
+          <button type="button" onClick={onPin} aria-label={pinned ? 'Pinni olib tashlash' : 'Pinlash'}
+            className={cn('w-6 h-6 flex items-center justify-center rounded-md transition-all',
+              pinned ? 'text-amber-400 hover:bg-amber-500/12' : 'text-white/20 hover:text-amber-400 hover:bg-white/[0.07]')}>
+            {pinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+          </button>
+          <button type="button" onClick={onDelete} disabled={deleting} aria-label="O'chirish"
+            className="w-6 h-6 flex items-center justify-center rounded-md text-white/20 hover:text-red-400 hover:bg-red-500/12 transition-all disabled:opacity-30">
+            {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+          </button>
+        </div>
       </button>
     </motion.div>
   )
@@ -448,7 +516,7 @@ export default function AIAssistantPage() {
   const { language } = useLanguage()
   const shouldReduce = useReducedMotion()
 
-  // ── All state (UNCHANGED) ──────────────────────────────────────────────────
+  // ── Core state (PRESERVED UNCHANGED) ─────────────────────────────────────
   const [conversations, setConversations] = useState<AiConversationRow[]>([])
   const [activeConvId,  setActiveConvId]  = useState<string | null>(null)
   const [messages,      setMessages]      = useState<UIMessage[]>([])
@@ -467,6 +535,22 @@ export default function AIAssistantPage() {
   const [filePreviewUrl,setFilePreviewUrl]= useState<string | null>(null)
   const [voiceError,    setVoiceError]    = useState<string | null>(null)
 
+  // ── Engine additions ───────────────────────────────────────────────────────
+  // Streaming
+  const [isStreaming,      setIsStreaming]      = useState(false)
+  const [_streamTempId,    setStreamTempId]     = useState<string | null>(null)
+  const abortRef                                = useRef<AbortController | null>(null)
+  // Extended file (base64 for DOCX/audio) — persisted alongside attachedFile
+  const [fileBase64,       setFileBase64]       = useState<string | null>(null)
+  // Drag & Drop
+  const [isDragging,       setIsDragging]       = useState(false)
+  // Rename
+  const [renamingId,       setRenamingId]       = useState<string | null>(null)
+  const [renameVal,        setRenameVal]        = useState('')
+  const renameInputRef                          = useRef<HTMLInputElement>(null)
+  // Pin (localStorage)
+  const [pinnedIds,        setPinnedIds]        = useState<Set<string>>(loadPinned)
+
   const { isListening, isSupported: voiceSupported, toggle: toggleVoice } = useVoiceInput({
     language,
     onResult: (transcript) => {
@@ -483,6 +567,7 @@ export default function AIAssistantPage() {
   const cameraInputRef  = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const pdfInputRef     = useRef<HTMLInputElement>(null)
+  const anyFileInputRef = useRef<HTMLInputElement>(null)
   const studentId        = auth.user?.id        ?? ''
   const studentName      = auth.user?.name      ?? 'Talaba'
   const studentAvatarUrl = auth.user?.avatarUrl ?? null
@@ -522,22 +607,109 @@ export default function AIAssistantPage() {
     } catch { setError("Yangi suhbat yaratishda xatolik") }
   }
 
-  function handleFileSelect(file: File) {
-    const { valid, errorCode } = validateFile(file)
-    if (!valid) { setError(errorCode ?? 'Fayl noto\'g\'ri'); return }
+  // ── Extended file handler (all types) ────────────────────────────────────
+  async function handleFileSelectExtended(file: File) {
+    setError(null)
     if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
-    setAttachedFile(file); setFilePreviewUrl(URL.createObjectURL(file)); setError(null)
+
+    const isImage = file.type.startsWith('image/')
+    const isPdf   = file.type === 'application/pdf'
+    const isTxt   = file.type === 'text/plain'
+    const isDocx  = file.type.includes('wordprocessingml')
+    const isAudio = file.type.startsWith('audio/')
+
+    if (isImage || isPdf) {
+      // Existing image validation path
+      const { valid, errorCode } = validateFile(file)
+      if (!valid) { setError(errorCode ?? 'Fayl noto\'g\'ri'); return }
+      setAttachedFile(file)
+      setFilePreviewUrl(URL.createObjectURL(file))
+      setFileBase64(null)
+      return
+    }
+
+    if (isTxt) {
+      try {
+        const text = await fileToText(file)
+        const excerpt = text.length > 4000 ? text.slice(0, 4000) + '\n...(qisqartirildi)' : text
+        setInput(prev => (prev ? prev + '\n\n' : '') + `[${file.name}]:\n\`\`\`\n${excerpt}\n\`\`\``)
+        setError(null)
+      } catch { setError('Matn faylni o\'qishda xatolik') }
+      return
+    }
+
+    if (isDocx || isAudio) {
+      if (!SUPPORTED_MIME_TYPES.has(file.type)) {
+        setError(`Qo'llab-quvvatlanmagan fayl turi`)
+        return
+      }
+      try {
+        const b64 = await fileToBase64(file)
+        setAttachedFile(file)
+        setFilePreviewUrl(null)   // no preview for these types
+        setFileBase64(b64)
+        setError(null)
+      } catch { setError('Fayl o\'qishda xatolik') }
+      return
+    }
+
+    setError(`Bu fayl turi qo'llab-quvvatlanmaydi: ${file.type || file.name.split('.').pop()}`)
   }
+
 
   function clearFile() {
     if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
-    setAttachedFile(null); setFilePreviewUrl(null)
+    setAttachedFile(null); setFilePreviewUrl(null); setFileBase64(null)
   }
 
   function onFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0]
-    if (f) handleFileSelect(f)
+    if (f) void handleFileSelectExtended(f)
     e.target.value = ''
+  }
+
+  // ── Drag & Drop ───────────────────────────────────────────────────────────
+  function handleDragOver(e: React.DragEvent) { e.preventDefault(); e.stopPropagation(); setIsDragging(true) }
+  function handleDragLeave(e: React.DragEvent) { e.preventDefault(); if (!chatAreaRef.current?.contains(e.relatedTarget as Node)) setIsDragging(false) }
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault(); e.stopPropagation(); setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) void handleFileSelectExtended(file)
+  }
+
+  // ── Stop generation ────────────────────────────────────────────────────────
+  function handleStop() {
+    abortRef.current?.abort()
+    abortRef.current = null
+  }
+
+  // ── Rename conversation ───────────────────────────────────────────────────
+  function startRename(e: React.MouseEvent, conv: AiConversationRow) {
+    e.stopPropagation()
+    setRenamingId(conv.id)
+    setRenameVal(conv.title)
+    setTimeout(() => renameInputRef.current?.focus(), 60)
+  }
+
+  async function commitRename(convId: string) {
+    const title = renameVal.trim()
+    setRenamingId(null)
+    if (!title || title === conversations.find(c => c.id === convId)?.title) return
+    try {
+      await aiChatService.updateTitle(convId, title)
+      setConversations(prev => prev.map(c => c.id === convId ? { ...c, title } : c))
+    } catch { /* silent */ }
+  }
+
+  // ── Pin conversation (localStorage) ───────────────────────────────────────
+  function togglePin(e: React.MouseEvent, convId: string) {
+    e.stopPropagation()
+    setPinnedIds(prev => {
+      const next = new Set(prev)
+      next.has(convId) ? next.delete(convId) : next.add(convId)
+      savePinned(next)
+      return next
+    })
   }
 
   async function callVisionInAssistant(
@@ -558,16 +730,18 @@ export default function AIAssistantPage() {
   async function handleSend() {
     const text = input.trim()
     if (!text && !attachedFile) return
-    if (!activeConvId || isTyping) return
+    if (!activeConvId || isTyping || isStreaming) return
 
     setInput(''); setError(null)
     if (inputRef.current) inputRef.current.style.height = 'auto'
 
-    const file = attachedFile
+    const file    = attachedFile
+    const b64     = fileBase64
     if (file) clearFile()
 
+    const icon = file ? getFileIcon(file.type) : ''
     const displayContent = file
-      ? (text ? `${text}\n📎 ${file.name}` : `📎 ${file.name}`)
+      ? (text ? `${text}\n${icon} ${file.name}` : `${icon} ${file.name}`)
       : text
 
     const tempMsg: UIMessage = {
@@ -592,9 +766,8 @@ export default function AIAssistantPage() {
         testStats: { passed: 0, total: 0, avgPct: 0 }, attPct: null, attTotal: 0,
       }
 
-      let aiResponse: string
-
-      if (file) {
+      // ── Vision path (image or processable file via ai-vision edge function) ──
+      if (file && (file.type.startsWith('image/') || file.type === 'application/pdf')) {
         const processed = await processImage(file)
         const profile   = intelligenceService.getProfile(currentCtx, studentId)
         const { systemInstruction } = buildVisionChatPrompt(
@@ -606,36 +779,108 @@ export default function AIAssistantPage() {
           : language === 'en' ? 'Analyze and explain'
           : 'Tahlil qiling va tushuntiring'
         )
-        aiResponse = await callVisionInAssistant(processed.base64, processed.mimeType, systemInstruction, question)
-      } else {
-        const history = [
-          ...newMsgs.filter(m => !m.id.startsWith('temp')), savedUser,
-        ].map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
-
-        intelligenceService.recordUserMessage(activeConvId, text, currentCtx)
-
-        aiResponse = await aiProvider.complete(history, currentCtx, {
-          userId: studentId, conversationId: activeConvId, lastUserMessage: text,
-        })
+        const aiResponse = await callVisionInAssistant(processed.base64, processed.mimeType, systemInstruction, question)
+        const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', aiResponse)
+        setMessages(prev => [...prev.filter(m => m.id !== tempMsg.id), savedUser, savedAI])
+        setStreamingId(savedAI.id)
+        setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c))
+        intelligenceService.recordAIResponse(activeConvId, aiResponse, displayContent, currentCtx)
+        return
       }
 
-      const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', aiResponse)
-      setMessages(prev => [...prev.filter(m => m.id !== tempMsg.id), savedUser, savedAI])
-      setStreamingId(savedAI.id)
-      setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c))
-      intelligenceService.recordAIResponse(activeConvId, aiResponse, displayContent, currentCtx)
+      // ── Streaming text path (DOCX/audio as inline data, or pure text) ────────
+      const historyBase = [
+        ...newMsgs.filter(m => !m.id.startsWith('temp')), savedUser,
+      ]
+
+      const historyForStream: ChatMessageWithParts[] = historyBase.map((m, idx) => {
+        // Attach file data only to the last user message
+        if (idx === historyBase.length - 1 && file && b64) {
+          return {
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+            parts: [
+              { type: 'text' as const, text: m.content },
+              { type: 'file' as const, base64: b64, mimeType: file.type, name: file.name },
+            ],
+          }
+        }
+        return { role: m.role as 'user' | 'assistant', content: m.content }
+      })
+
+      intelligenceService.recordUserMessage(activeConvId, text, currentCtx)
+
+      // Create streaming placeholder message
+      const tempAI: UIMessage = {
+        id:         `stream-${Date.now()}`,
+        role:       'assistant',
+        content:    '',
+        created_at: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev.filter(m => m.id !== tempMsg.id), savedUser, tempAI])
+      setIsStreaming(true)
+      setStreamTempId(tempAI.id)
+
+      const ctrl = new AbortController()
+      abortRef.current = ctrl
+
+      let fullText = ''
+      let aborted  = false
+
+      try {
+        const gen = aiProvider.streamComplete(
+          historyForStream, currentCtx,
+          { userId: studentId, conversationId: activeConvId, lastUserMessage: text },
+          ctrl.signal,
+        )
+
+        for await (const chunk of gen) {
+          fullText += chunk
+          const snapshot = fullText
+          setMessages(prev => prev.map(m => m.id === tempAI.id ? { ...m, content: snapshot } : m))
+          // Auto-scroll during streaming
+          bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+      } catch (streamErr) {
+        if ((streamErr as Error).name === 'AbortError') {
+          aborted = true
+        } else {
+          throw streamErr
+        }
+      } finally {
+        abortRef.current = null
+        setIsStreaming(false)
+        setStreamTempId(null)
+      }
+
+      // Save to DB (partial response if aborted)
+      const finalText = aborted && fullText
+        ? fullText + '\n\n*(Generatsiya to\'xtatildi)*'
+        : fullText
+
+      if (finalText) {
+        const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', finalText)
+        setMessages(prev => prev.map(m => m.id === tempAI.id ? { ...savedAI } : m))
+        setStreamingId(savedAI.id)
+        setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c))
+        intelligenceService.recordAIResponse(activeConvId, finalText, displayContent, currentCtx)
+      } else if (aborted) {
+        setMessages(prev => prev.filter(m => m.id !== tempAI.id))
+      }
 
     } catch {
       setError("Xabar yuborishda xatolik. Qayta urinib ko'ring.")
       setMessages(prev => prev.filter(m => m.id !== tempMsg.id))
-    } finally { setIsTyping(false) }
+    } finally {
+      setIsTyping(false)
+    }
   }
 
   async function handleRegenerate(aiMsgId: string) {
-    if (!activeConvId || isTyping) return
+    if (!activeConvId || isTyping || isStreaming) return
     const aiIdx = messages.findIndex(m => m.id === aiMsgId)
     if (aiIdx < 0) return
-    const history = messages.slice(0, aiIdx).map(m => ({
+    const history: ChatMessageWithParts[] = messages.slice(0, aiIdx).map(m => ({
       role: m.role as 'user' | 'assistant', content: m.content,
     }))
     if (!history.some(m => m.role === 'user')) return
@@ -647,12 +892,39 @@ export default function AIAssistantPage() {
         studentName, groups: [], recentLessons: [],
         testStats: { passed: 0, total: 0, avgPct: 0 }, attPct: null, attTotal: 0,
       }
-      const aiResponse = await aiProvider.complete(history, currentCtx, {
-        userId: studentId, conversationId: activeConvId, lastUserMessage: lastUserMsg,
-      })
-      const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', aiResponse)
-      setMessages(prev => [...prev.slice(0, aiIdx), savedAI])
-      intelligenceService.recordAIResponse(activeConvId, aiResponse, lastUserMsg, currentCtx)
+
+      // Streaming regenerate
+      const tempAI: UIMessage = {
+        id: `regen-${Date.now()}`, role: 'assistant', content: '', created_at: new Date().toISOString(),
+      }
+      setMessages(prev => [...prev.slice(0, aiIdx), tempAI])
+      setIsStreaming(true); setStreamTempId(tempAI.id)
+
+      const ctrl = new AbortController(); abortRef.current = ctrl
+      let fullText = ''
+
+      try {
+        for await (const chunk of aiProvider.streamComplete(history, currentCtx, {
+          userId: studentId, conversationId: activeConvId, lastUserMessage: lastUserMsg,
+        }, ctrl.signal)) {
+          fullText += chunk
+          const snap = fullText
+          setMessages(prev => prev.map(m => m.id === tempAI.id ? { ...m, content: snap } : m))
+          bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') throw e
+      } finally {
+        abortRef.current = null; setIsStreaming(false); setStreamTempId(null)
+      }
+
+      if (fullText) {
+        const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', fullText)
+        setMessages(prev => [...prev.slice(0, aiIdx), { ...savedAI }])
+        intelligenceService.recordAIResponse(activeConvId, fullText, lastUserMsg, currentCtx)
+      } else {
+        setMessages(prev => prev.slice(0, aiIdx))
+      }
     } catch { setError("Qaytadan yaratishda xatolik") }
     finally   { setIsTyping(false) }
   }
@@ -692,10 +964,49 @@ export default function AIAssistantPage() {
     else setTimeout(() => inputRef.current?.focus(), 60)
   }
 
-  const filtered = conversations.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
-  const grouped  = groupConversations(filtered)
+  // Pinned convs at top, then others grouped by date
+  const allFiltered  = conversations.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
+  const pinnedConvs  = allFiltered.filter(c => pinnedIds.has(c.id))
+  const unpinned     = allFiltered.filter(c => !pinnedIds.has(c.id))
+  const grouped      = groupConversations(unpinned)
+  const filtered     = allFiltered  // kept for compat
 
-  const canSend = (input.trim().length > 0 || attachedFile !== null) && !isTyping
+  const canSend      = (input.trim().length > 0 || attachedFile !== null) && !isTyping && !isStreaming
+
+  // ── ConvItem wrapper — handles rename inline mode ────────────────────────
+  function ConvItemWrapper({ c }: { c: AiConversationRow }) {
+    if (renamingId === c.id) {
+      return (
+        <motion.div variants={CONV_ITEM} layout className="px-1 py-0.5">
+          <input
+            ref={renameInputRef}
+            value={renameVal}
+            onChange={e => setRenameVal(e.target.value)}
+            onBlur={() => void commitRename(c.id)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') { e.preventDefault(); void commitRename(c.id) }
+              if (e.key === 'Escape') { setRenamingId(null) }
+            }}
+            className="w-full px-3 py-2 rounded-xl text-[12.5px] font-medium text-white/85 outline-none"
+            style={{ background: 'rgba(91,127,255,0.18)', border: '1px solid rgba(91,127,255,0.45)' }}
+            aria-label="Nomini tahrirlash"
+          />
+        </motion.div>
+      )
+    }
+    return (
+      <ConvItem
+        conv={c}
+        active={c.id === activeConvId}
+        deleting={deletingId === c.id}
+        pinned={pinnedIds.has(c.id)}
+        onSelect={() => { void selectConversation(c.id); if (window.innerWidth < 768) setSidebarOpen(false) }}
+        onDelete={e => void handleDelete(e, c.id)}
+        onPin={e => togglePin(e, c.id)}
+        onRename={e => startRename(e, c)}
+      />
+    )
+  }
 
   // ── RENDER — Premium dark design ─────────────────────────────────────────
   return (
@@ -797,14 +1108,19 @@ export default function AIAssistantPage() {
               initial={shouldReduce ? false : 'hidden'}
               animate={shouldReduce ? false : 'show'}
             >
+              {/* Pinned conversations */}
+              {pinnedConvs.length > 0 && (
+                <><GroupLabel label="📌 Pinlangan" />
+                {pinnedConvs.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
+              )}
               {grouped.today.length > 0 && (
-                <><GroupLabel label="Bugun" />{grouped.today.map(c => <ConvItem key={c.id} conv={c} active={c.id === activeConvId} deleting={deletingId === c.id} onSelect={() => { void selectConversation(c.id); if (window.innerWidth < 768) setSidebarOpen(false) }} onDelete={e => void handleDelete(e, c.id)} />)}</>
+                <><GroupLabel label="Bugun" />{grouped.today.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
               )}
               {grouped.yesterday.length > 0 && (
-                <><GroupLabel label="Kecha" />{grouped.yesterday.map(c => <ConvItem key={c.id} conv={c} active={c.id === activeConvId} deleting={deletingId === c.id} onSelect={() => { void selectConversation(c.id); if (window.innerWidth < 768) setSidebarOpen(false) }} onDelete={e => void handleDelete(e, c.id)} />)}</>
+                <><GroupLabel label="Kecha" />{grouped.yesterday.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
               )}
               {grouped.older.length > 0 && (
-                <><GroupLabel label="Oldingi" />{grouped.older.map(c => <ConvItem key={c.id} conv={c} active={c.id === activeConvId} deleting={deletingId === c.id} onSelect={() => { void selectConversation(c.id); if (window.innerWidth < 768) setSidebarOpen(false) }} onDelete={e => void handleDelete(e, c.id)} />)}</>
+                <><GroupLabel label="Oldingi" />{grouped.older.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
               )}
             </motion.div>
           )}
@@ -874,7 +1190,7 @@ export default function AIAssistantPage() {
               className="hidden xl:flex w-8 h-8 items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
               aria-label="Kontekst paneli"
             >
-              {rightOpen ? <SidebarClose className="w-4 h-4" /> : <SidebarOpen className="w-4 h-4" />}
+              {rightOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
             </button>
             <button
               type="button"
@@ -887,10 +1203,13 @@ export default function AIAssistantPage() {
           </div>
         </header>
 
-        {/* Messages area */}
+        {/* Messages area — drag & drop target */}
         <div
           ref={chatAreaRef}
-          className="flex-1 overflow-y-auto scroll-smooth"
+          className="flex-1 overflow-y-auto scroll-smooth relative"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
           style={{
             background: 'radial-gradient(ellipse 70% 50% at 30% 0%, rgba(99,102,241,0.05) 0%, transparent 65%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(124,58,237,0.04) 0%, transparent 55%)',
           }}
@@ -940,10 +1259,30 @@ export default function AIAssistantPage() {
               />
             ))}
 
-            {isTyping && <ThinkingCard />}
+            {isTyping && !isStreaming && <ThinkingCard />}
             <div ref={bottomRef} aria-hidden="true" />
           </div>
         </div>
+
+        {/* Drag & Drop overlay */}
+        <AnimatePresence>
+          {isDragging && (
+            <motion.div
+              key="drag-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
+              style={{ background: 'rgba(91,127,255,0.12)', backdropFilter: 'blur(4px)', border: '2px dashed rgba(91,127,255,0.6)', borderRadius: 20 }}
+              aria-hidden="true"
+            >
+              <Upload className="w-10 h-10 text-brand-light mb-3" />
+              <p className="text-base font-bold text-brand-light">Faylni bu yerga tashlang</p>
+              <p className="text-[12px] text-brand-light/60 mt-1">Rasm, PDF, DOCX, TXT, Audio</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Premium Input Area ─────────────────────────────────────────────── */}
         {activeConvId && (
@@ -1101,15 +1440,30 @@ export default function AIAssistantPage() {
                   <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-white/30 hover:text-white/60 hover:bg-white/[0.05] transition-all cursor-pointer">
                     <FileIcon className="w-3.5 h-3.5" aria-hidden="true" />
                     PDF
-                    <input ref={pdfInputRef} type="file" accept="application/pdf" className="sr-only" onChange={onFileInputChange} disabled={isTyping} />
+                    <input ref={pdfInputRef} type="file" accept="application/pdf" className="sr-only" onChange={onFileInputChange} disabled={isTyping || isStreaming} />
+                  </label>
+                  {/* Any file */}
+                  <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-white/30 hover:text-white/60 hover:bg-white/[0.05] transition-all cursor-pointer">
+                    <Upload className="w-3.5 h-3.5" aria-hidden="true" />
+                    {language === 'ru' ? 'Файл' : language === 'en' ? 'File' : 'Fayl'}
+                    <input ref={anyFileInputRef} type="file" accept=".docx,.txt,.wav,.mp3,.aac,.ogg,.flac,.webm,audio/*,text/*" className="sr-only" onChange={onFileInputChange} disabled={isTyping || isStreaming} />
                   </label>
 
+                  {/* Stop generation */}
+                  {isStreaming && (
+                    <button type="button" onClick={handleStop}
+                      className="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all">
+                      <Square className="w-3 h-3" aria-hidden="true" />
+                      {language === 'ru' ? 'Стоп' : language === 'en' ? 'Stop' : "To'xtatish"}
+                    </button>
+                  )}
+
                   {/* Voice error */}
-                  {voiceError && (
+                  {!isStreaming && voiceError && (
                     <span className="ml-auto text-[10.5px] text-amber-400/70 truncate max-w-[160px]">{voiceError}</span>
                   )}
 
-                  {!voiceError && (
+                  {!isStreaming && !voiceError && (
                     <p className="ml-auto text-[9.5px] text-white/15 select-none">Enter — yuborish</p>
                   )}
                 </div>
