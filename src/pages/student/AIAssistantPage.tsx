@@ -11,8 +11,8 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react'
 import {
   Send, Plus, Trash2, MessageSquare, Search,
   PanelLeftOpen, PanelLeftClose, AlertCircle, Loader2,
-  Copy, Check, ThumbsUp, ThumbsDown, RefreshCw,
-  Mic, Square, Pin, PinOff, Pencil,
+  Copy, Check, ThumbsUp, ThumbsDown, RefreshCw, ChevronRight,
+  Mic, Square, Pin, PinOff, Pencil, RotateCw, Download,
   Camera, ImageIcon, FileText as FileIcon, X as XIcon,
   Upload,
 } from 'lucide-react'
@@ -32,7 +32,6 @@ import { intelligenceService }            from '@/ai-brain/services/intelligence
 import {
   AsomiddinAvatar,
   UserAvatar,
-  StreamingMessage,
   MessageFooter,
   ThinkingCard,
 } from '@/components/ai'
@@ -53,26 +52,42 @@ const SUPPORTED_MIME_TYPES = new Set([
   'audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/aac', 'audio/ogg', 'audio/flac', 'audio/webm',
 ])
 
-function fileToBase64(file: File): Promise<string> {
+/** FileReader with onprogress (0-100) + abort support */
+function fileToBase64WithProgress(
+  file: File,
+  onProgress: (pct: number) => void,
+  readerRef?: React.MutableRefObject<FileReader | null>,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload  = (e) => {
-      const result = e.target?.result as string
-      resolve(result.split(',')[1] ?? result) // strip data:... prefix
-    }
-    reader.onerror = () => reject(new Error('File read error'))
+    if (readerRef) readerRef.current = reader
+    reader.onprogress = (e) => { if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 92)) }
+    reader.onload  = (e) => { onProgress(100); resolve(((e.target?.result as string).split(',')[1]) ?? '') }
+    reader.onerror = () => reject(new Error('Fayl o\'qishda xatolik'))
+    reader.onabort = () => reject(Object.assign(new Error('Yuklash bekor qilindi'), { name: 'AbortError' }))
     reader.readAsDataURL(file)
   })
 }
 
-function fileToText(file: File): Promise<string> {
+function fileToTextWithProgress(
+  file: File,
+  onProgress: (pct: number) => void,
+  readerRef?: React.MutableRefObject<FileReader | null>,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload  = (e) => resolve(e.target?.result as string)
-    reader.onerror = () => reject(new Error('File read error'))
+    if (readerRef) readerRef.current = reader
+    reader.onprogress = (e) => { if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 92)) }
+    reader.onload  = (e) => { onProgress(100); resolve(e.target?.result as string) }
+    reader.onerror = () => reject(new Error('Matn faylni o\'qishda xatolik'))
+    reader.onabort = () => reject(Object.assign(new Error('Yuklash bekor qilindi'), { name: 'AbortError' }))
     reader.readAsText(file, 'UTF-8')
   })
 }
+
+// (fileToBase64WithProgress + fileToTextWithProgress are the canonical versions)
+void fileToBase64WithProgress  // keep alive
+void fileToTextWithProgress    // keep alive
 
 function getFileIcon(mimeType: string): string {
   if (mimeType.startsWith('image/'))  return '🖼️'
@@ -83,19 +98,61 @@ function getFileIcon(mimeType: string): string {
   return '📎'
 }
 
-// ─── Local storage: pinned conversations ──────────────────────────────────────
+// ─── Export utilities ─────────────────────────────────────────────────────────
 
-const PINNED_KEY = 'yai_pinned_convs'
-
-function loadPinned(): Set<string> {
-  try {
-    const raw = localStorage.getItem(PINNED_KEY)
-    return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
-  } catch { return new Set() }
+function downloadBlob(content: string, mime: string, filename: string) {
+  const blob = new Blob([content], { type: mime + ';charset=utf-8' })
+  const url  = URL.createObjectURL(blob)
+  const a    = Object.assign(document.createElement('a'), { href: url, download: filename })
+  document.body.appendChild(a); a.click(); document.body.removeChild(a)
+  setTimeout(() => URL.revokeObjectURL(url), 1500)
 }
 
-function savePinned(ids: Set<string>): void {
-  try { localStorage.setItem(PINNED_KEY, JSON.stringify([...ids])) } catch { /* ignore */ }
+type ExportMsg = { role: string; content: string; created_at: string }
+
+function buildMarkdown(title: string, msgs: ExportMsg[]): string {
+  const lines = msgs.map(m => {
+    const who  = m.role === 'user' ? '**Siz**' : '**YordamchiAI**'
+    const ts   = new Date(m.created_at).toLocaleString('uz-UZ')
+    return `### ${who} — ${ts}\n\n${m.content}`
+  })
+  return `# ${title}\n\n*Eksport: ${new Date().toLocaleString('uz-UZ')}*\n\n---\n\n${lines.join('\n\n---\n\n')}`
+}
+
+function buildTxt(title: string, msgs: ExportMsg[]): string {
+  const sep = '=' .repeat(60)
+  const lines = msgs.map(m => {
+    const who  = m.role === 'user' ? 'SIZ' : 'YORDAMCHI AI'
+    const ts   = new Date(m.created_at).toLocaleString()
+    const text = m.content.replace(/#{1,6}\s?/g, '').replace(/[*_`]/g, '')
+    return `[${who} • ${ts}]\n${text}`
+  })
+  return `${title}\n${sep}\n\n${lines.join('\n\n' + '-'.repeat(40) + '\n\n')}`
+}
+
+function buildHtmlDoc(title: string, msgs: ExportMsg[]): string {
+  const rows = msgs.map(m => {
+    const who   = m.role === 'user' ? 'Siz' : 'YordamchiAI'
+    const color = m.role === 'user' ? '#1e3a8a' : '#4c1d95'
+    const ts    = new Date(m.created_at).toLocaleString()
+    const text  = m.content.replace(/\n/g, '<br>')
+    return `<div style="margin:16px 0;padding:12px;border-left:4px solid ${color}">
+      <b style="color:${color}">${who}</b> <small style="color:#888">${ts}</small><br><br>${text}</div>`
+  })
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
+    <style>body{font-family:sans-serif;max-width:800px;margin:40px auto;line-height:1.6}</style>
+    </head><body><h1>${title}</h1>${rows.join('')}</body></html>`
+}
+
+// ─── Pinned conversations: localStorage offline fallback ──────────────────────
+
+const PINNED_FALLBACK_KEY = 'yai_pinned_fallback'
+
+function getFallbackPinned(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(PINNED_FALLBACK_KEY) ?? '[]') as string[]) } catch { return new Set() }
+}
+function setFallbackPinned(ids: Set<string>) {
+  try { localStorage.setItem(PINNED_FALLBACK_KEY, JSON.stringify([...ids])) } catch { /* ignore */ }
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -318,14 +375,16 @@ function ActionBtn({
 // ─── Premium MessageBubble ────────────────────────────────────────────────────
 
 const MessageBubble = memo(function MessageBubble({
-  msg, onRegenerate, userName, userAvatarUrl, isStreaming, onStreamComplete,
+  msg, onRegenerate, onContinue, userName, userAvatarUrl, isStreaming, onStreamComplete, isLastAi,
 }: {
   msg: UIMessage
   onRegenerate?:     () => void
+  onContinue?:       () => void
   userName?:         string
   userAvatarUrl?:    string | null
   isStreaming?:      boolean
   onStreamComplete?: () => void
+  isLastAi?:         boolean
 }) {
   const shouldReduce = useReducedMotion()
   const [copied,     setCopied]     = useState(false)
@@ -338,6 +397,7 @@ const MessageBubble = memo(function MessageBubble({
   const handleLike           = () => { setLiked(v => !v); setDisliked(false) }
   const handleDislike        = () => { setDisliked(v => !v); setLiked(false) }
   const handleStreamComplete = useCallback(() => { setStreamDone(true); onStreamComplete?.() }, [onStreamComplete])
+  void handleStreamComplete  // consumed by streamDone state above
 
   /* ── USER message ────────────────────────────────────────────────────────── */
   if (isUser) {
@@ -412,9 +472,33 @@ const MessageBubble = memo(function MessageBubble({
             ASOMIDDIN AI
           </p>
 
-          {/* Content */}
-          {isStreaming && !streamDone ? (
-            <StreamingMessage text={msg.content} onComplete={handleStreamComplete} />
+          {/* Content — thinking state → cursor → rendered markdown */}
+          {isStreaming && !streamDone && msg.content === '' ? (
+            /* Thinking state: before first token */
+            <div className="flex items-center gap-2.5 py-1" aria-live="polite" aria-label="AI o'ylayapti">
+              <div className="flex gap-1">
+                {[0,1,2].map(i => (
+                  <motion.span
+                    key={i}
+                    className="block w-1.5 h-1.5 rounded-full"
+                    style={{ background: 'rgba(139,92,246,0.7)' }}
+                    animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
+                    transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut', delay: i * 0.18 }}
+                  />
+                ))}
+              </div>
+              <span className="text-[13px] text-white/40 font-medium">YordamchiAI o&apos;ylayapti…</span>
+            </div>
+          ) : isStreaming && !streamDone ? (
+            /* Streaming: show rendered content + blinking cursor */
+            <div className="relative">
+              <MarkdownContent text={msg.content} />
+              <span
+                className="inline-block w-[2px] h-[1.1em] bg-brand-light/85 ml-0.5 align-text-bottom"
+                style={{ animation: 'v6-ring-pulse 0.9s step-end infinite' }}
+                aria-hidden="true"
+              />
+            </div>
           ) : (
             <MarkdownContent text={msg.content} />
           )}
@@ -429,6 +513,12 @@ const MessageBubble = memo(function MessageBubble({
           <ActionBtn onClick={handleDislike} title="Yomon"            active={disliked}> <ThumbsDown className="w-3.5 h-3.5" /></ActionBtn>
           {onRegenerate && (
             <ActionBtn onClick={onRegenerate} title="Qaytadan yaratish"><RefreshCw className="w-3.5 h-3.5" /></ActionBtn>
+          )}
+          {/* Continue generation — only on last AI message, not while streaming */}
+          {isLastAi && !isStreaming && onContinue && (
+            <ActionBtn onClick={onContinue} title="Davom etish">
+              <ChevronRight className="w-3.5 h-3.5" />
+            </ActionBtn>
           )}
         </div>
 
@@ -538,18 +628,28 @@ export default function AIAssistantPage() {
   // ── Engine additions ───────────────────────────────────────────────────────
   // Streaming
   const [isStreaming,      setIsStreaming]      = useState(false)
-  const [_streamTempId,    setStreamTempId]     = useState<string | null>(null)
+  const [streamingMsgId,   setStreamingMsgId]  = useState<string | null>(null)
   const abortRef                                = useRef<AbortController | null>(null)
-  // Extended file (base64 for DOCX/audio) — persisted alongside attachedFile
+  // Extended file (base64 for DOCX/audio)
   const [fileBase64,       setFileBase64]       = useState<string | null>(null)
+  // Upload progress
+  const [uploadProgress,   setUploadProgress]  = useState<number | null>(null)
+  const uploadReaderRef                         = useRef<FileReader | null>(null)
   // Drag & Drop
   const [isDragging,       setIsDragging]       = useState(false)
   // Rename
   const [renamingId,       setRenamingId]       = useState<string | null>(null)
   const [renameVal,        setRenameVal]        = useState('')
   const renameInputRef                          = useRef<HTMLInputElement>(null)
-  // Pin (localStorage)
-  const [pinnedIds,        setPinnedIds]        = useState<Set<string>>(loadPinned)
+  // Pin (Supabase-backed, localStorage offline fallback)
+  const [pinnedIds,        setPinnedIds]        = useState<Set<string>>(getFallbackPinned)
+  // Network recovery
+  const [netError,         setNetError]         = useState<string | null>(null)
+  const retryRef                                = useRef<(() => void) | null>(null)
+  const inputDraftRef                           = useRef('')
+  // Export menu
+  const [showExportMenu,   setShowExportMenu]   = useState(false)
+  const exportMenuRef                           = useRef<HTMLDivElement>(null)
 
   const { isListening, isSupported: voiceSupported, toggle: toggleVoice } = useVoiceInput({
     language,
@@ -572,7 +672,13 @@ export default function AIAssistantPage() {
   const studentName      = auth.user?.name      ?? 'Talaba'
   const studentAvatarUrl = auth.user?.avatarUrl ?? null
 
-  // ── All effects + handlers (UNCHANGED) ────────────────────────────────────
+  // ── All effects + handlers ────────────────────────────────────────────────
+
+  // Memory cleanup on unmount
+  useEffect(() => () => {
+    abortRef.current?.abort()
+    if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
+  }, [])  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (studentId) void init(); else setConvLoading(false) }, [studentId])
 
@@ -584,6 +690,9 @@ export default function AIAssistantPage() {
         loadStudentContext(studentId, studentName),
       ])
       setConversations(convs); setContext(ctx)
+      // Sync pinned IDs from server (is_pinned field) + merge offline fallback
+      const serverPinned = new Set(convs.filter(c => c.is_pinned).map(c => c.id))
+      setPinnedIds(serverPinned); setFallbackPinned(serverPinned)
       if (convs.length > 0) await selectConversation(convs[0].id)
     } catch { setError("Ma'lumotlarni yuklashda xatolik") }
     finally  { setConvLoading(false) }
@@ -608,8 +717,13 @@ export default function AIAssistantPage() {
   }
 
   // ── Extended file handler (all types) ────────────────────────────────────
+  function cancelUpload() {
+    uploadReaderRef.current?.abort()
+    setUploadProgress(null)
+  }
+
   async function handleFileSelectExtended(file: File) {
-    setError(null)
+    setError(null); setNetError(null)
     if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
 
     const isImage = file.type.startsWith('image/')
@@ -619,47 +733,48 @@ export default function AIAssistantPage() {
     const isAudio = file.type.startsWith('audio/')
 
     if (isImage || isPdf) {
-      // Existing image validation path
+      setUploadProgress(30)
       const { valid, errorCode } = validateFile(file)
-      if (!valid) { setError(errorCode ?? 'Fayl noto\'g\'ri'); return }
-      setAttachedFile(file)
-      setFilePreviewUrl(URL.createObjectURL(file))
-      setFileBase64(null)
+      if (!valid) { setError(errorCode ?? 'Fayl noto\'g\'ri'); setUploadProgress(null); return }
+      setAttachedFile(file); setFilePreviewUrl(URL.createObjectURL(file)); setFileBase64(null)
+      setUploadProgress(100); setTimeout(() => setUploadProgress(null), 400)
       return
     }
 
     if (isTxt) {
+      setUploadProgress(0)
       try {
-        const text = await fileToText(file)
+        const text    = await fileToTextWithProgress(file, setUploadProgress, uploadReaderRef)
         const excerpt = text.length > 4000 ? text.slice(0, 4000) + '\n...(qisqartirildi)' : text
         setInput(prev => (prev ? prev + '\n\n' : '') + `[${file.name}]:\n\`\`\`\n${excerpt}\n\`\`\``)
-        setError(null)
-      } catch { setError('Matn faylni o\'qishda xatolik') }
+        setUploadProgress(100); setTimeout(() => setUploadProgress(null), 400)
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') setError('Matn faylni o\'qishda xatolik')
+        setUploadProgress(null)
+      }
       return
     }
 
     if (isDocx || isAudio) {
-      if (!SUPPORTED_MIME_TYPES.has(file.type)) {
-        setError(`Qo'llab-quvvatlanmagan fayl turi`)
-        return
-      }
+      if (!SUPPORTED_MIME_TYPES.has(file.type)) { setError(`Qo'llab-quvvatlanmagan fayl turi`); return }
+      setUploadProgress(0)
       try {
-        const b64 = await fileToBase64(file)
-        setAttachedFile(file)
-        setFilePreviewUrl(null)   // no preview for these types
-        setFileBase64(b64)
-        setError(null)
-      } catch { setError('Fayl o\'qishda xatolik') }
+        const b64 = await fileToBase64WithProgress(file, setUploadProgress, uploadReaderRef)
+        setAttachedFile(file); setFilePreviewUrl(null); setFileBase64(b64)
+        setUploadProgress(100); setTimeout(() => setUploadProgress(null), 400)
+      } catch (e) {
+        if ((e as Error).name !== 'AbortError') setError('Fayl o\'qishda xatolik')
+        setUploadProgress(null)
+      }
       return
     }
 
     setError(`Bu fayl turi qo'llab-quvvatlanmaydi: ${file.type || file.name.split('.').pop()}`)
   }
 
-
   function clearFile() {
     if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
-    setAttachedFile(null); setFilePreviewUrl(null); setFileBase64(null)
+    setAttachedFile(null); setFilePreviewUrl(null); setFileBase64(null); setUploadProgress(null)
   }
 
   function onFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -701,16 +816,129 @@ export default function AIAssistantPage() {
     } catch { /* silent */ }
   }
 
-  // ── Pin conversation (localStorage) ───────────────────────────────────────
+  // ── Pin conversation — Supabase + localStorage fallback ───────────────────
   function togglePin(e: React.MouseEvent, convId: string) {
     e.stopPropagation()
     setPinnedIds(prev => {
-      const next = new Set(prev)
-      next.has(convId) ? next.delete(convId) : next.add(convId)
-      savePinned(next)
+      const next    = new Set(prev)
+      const pinned  = !next.has(convId)
+      pinned ? next.add(convId) : next.delete(convId)
+      // Optimistic UI — update local state immediately
+      setConversations(p => p.map(c => c.id === convId ? { ...c, is_pinned: pinned } : c))
+      setFallbackPinned(next)  // persist to localStorage for offline
+      // Sync to Supabase in background
+      void aiChatService.setPinned(convId, pinned).catch(() => {
+        // Revert on failure
+        setPinnedIds(prev2 => {
+          const revert = new Set(prev2)
+          pinned ? revert.delete(convId) : revert.add(convId)
+          setFallbackPinned(revert)
+          return revert
+        })
+        setConversations(p => p.map(c => c.id === convId ? { ...c, is_pinned: !pinned } : c))
+      })
       return next
     })
   }
+
+  // ── Continue generation (ChatGPT-style append) ────────────────────────────
+  async function handleContinue(lastAiMsgId: string) {
+    if (!activeConvId || isTyping || isStreaming) return
+    const lastAI = messages.find(m => m.id === lastAiMsgId)
+    if (!lastAI) return
+
+    const history: ChatMessageWithParts[] = [
+      ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+      { role: 'user', content: language === 'ru'
+          ? 'Продолжи, пожалуйста. Напиши оставшуюся часть ответа.'
+          : language === 'en'
+          ? 'Please continue. Write the remaining part of your answer.'
+          : 'Iltimos, davom eting. Javobingizning qolgan qismini yozing.' },
+    ]
+
+    const currentCtx = context ?? {
+      studentName, groups: [], recentLessons: [],
+      testStats: { passed: 0, total: 0, avgPct: 0 }, attPct: null, attTotal: 0,
+    }
+    const originalContent = lastAI.content
+    const sep = '\n\n'
+
+    setIsTyping(true); setIsStreaming(true); setStreamingMsgId(lastAiMsgId)
+    const ctrl = new AbortController(); abortRef.current = ctrl
+    let cont = ''; let aborted = false
+
+    try {
+      for await (const chunk of aiProvider.streamComplete(history, currentCtx,
+        { userId: studentId, conversationId: activeConvId }, ctrl.signal)) {
+        cont += chunk
+        const combined = originalContent + sep + cont
+        setMessages(prev => prev.map(m => m.id === lastAiMsgId ? { ...m, content: combined } : m))
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') aborted = true
+      else { setError('Davom etishda xatolik'); setMessages(prev => prev.map(m => m.id === lastAiMsgId ? { ...m, content: originalContent } : m)) }
+    } finally {
+      abortRef.current = null; setIsStreaming(false); setStreamingMsgId(null); setIsTyping(false)
+    }
+
+    if (cont && !aborted) {
+      const combined = originalContent + sep + cont
+      await aiChatService.updateMessageContent(lastAiMsgId, combined).catch(() => {})
+    } else if (aborted && cont) {
+      const combined = originalContent + sep + cont + '\n\n*(to\'xtatildi)*'
+      setMessages(prev => prev.map(m => m.id === lastAiMsgId ? { ...m, content: combined } : m))
+      await aiChatService.updateMessageContent(lastAiMsgId, combined).catch(() => {})
+    }
+  }
+
+  // ── Network recovery ───────────────────────────────────────────────────────
+  function handleRetry() {
+    const fn = retryRef.current
+    if (!fn) return
+    retryRef.current = null
+    setNetError(null)
+    fn()
+  }
+
+  // ── Export conversation ────────────────────────────────────────────────────
+  function getActiveConv() { return conversations.find(c => c.id === activeConvId) }
+
+  function exportMarkdown() {
+    const conv = getActiveConv()
+    downloadBlob(buildMarkdown(conv?.title ?? 'Suhbat', messages), 'text/markdown', `suhbat-${Date.now()}.md`)
+    setShowExportMenu(false)
+  }
+  function exportTxt() {
+    const conv = getActiveConv()
+    downloadBlob(buildTxt(conv?.title ?? 'Suhbat', messages), 'text/plain', `suhbat-${Date.now()}.txt`)
+    setShowExportMenu(false)
+  }
+  function exportPdf() {
+    const conv  = getActiveConv()
+    const html  = buildHtmlDoc(conv?.title ?? 'Suhbat', messages)
+    const win   = window.open('', '_blank')
+    if (!win) return
+    win.document.write(html + '<script>window.onload=()=>setTimeout(()=>window.print(),200)</script>')
+    win.document.close()
+    setShowExportMenu(false)
+  }
+  function exportDoc() {
+    const conv = getActiveConv()
+    const html = buildHtmlDoc(conv?.title ?? 'Suhbat', messages)
+    downloadBlob(html, 'application/msword', `suhbat-${Date.now()}.doc`)
+    setShowExportMenu(false)
+  }
+
+  // Close export menu on outside click
+  useEffect(() => {
+    if (!showExportMenu) return
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) setShowExportMenu(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showExportMenu])
 
   async function callVisionInAssistant(
     imageBase64: string, mimeType: string,
@@ -819,7 +1047,7 @@ export default function AIAssistantPage() {
       }
       setMessages(prev => [...prev.filter(m => m.id !== tempMsg.id), savedUser, tempAI])
       setIsStreaming(true)
-      setStreamTempId(tempAI.id)
+      setStreamingMsgId(tempAI.id)
 
       const ctrl = new AbortController()
       abortRef.current = ctrl
@@ -850,7 +1078,7 @@ export default function AIAssistantPage() {
       } finally {
         abortRef.current = null
         setIsStreaming(false)
-        setStreamTempId(null)
+        setStreamingMsgId(null)
       }
 
       // Save to DB (partial response if aborted)
@@ -869,7 +1097,14 @@ export default function AIAssistantPage() {
       }
 
     } catch {
-      setError("Xabar yuborishda xatolik. Qayta urinib ko'ring.")
+      // Network recovery: preserve draft + offer retry
+      const draftText = displayContent
+      inputDraftRef.current = draftText
+      retryRef.current = () => {
+        setInput(draftText)
+        setTimeout(() => inputRef.current?.focus(), 60)
+      }
+      setNetError("Xabar yuborishda xatolik. Internet aloqasini tekshiring.")
       setMessages(prev => prev.filter(m => m.id !== tempMsg.id))
     } finally {
       setIsTyping(false)
@@ -898,7 +1133,7 @@ export default function AIAssistantPage() {
         id: `regen-${Date.now()}`, role: 'assistant', content: '', created_at: new Date().toISOString(),
       }
       setMessages(prev => [...prev.slice(0, aiIdx), tempAI])
-      setIsStreaming(true); setStreamTempId(tempAI.id)
+      setIsStreaming(true); setStreamingMsgId(tempAI.id)
 
       const ctrl = new AbortController(); abortRef.current = ctrl
       let fullText = ''
@@ -915,7 +1150,7 @@ export default function AIAssistantPage() {
       } catch (e) {
         if ((e as Error).name !== 'AbortError') throw e
       } finally {
-        abortRef.current = null; setIsStreaming(false); setStreamTempId(null)
+        abortRef.current = null; setIsStreaming(false); setStreamingMsgId(null)
       }
 
       if (fullText) {
@@ -1192,6 +1427,43 @@ export default function AIAssistantPage() {
             >
               {rightOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
             </button>
+            {/* Export conversation */}
+            {activeConvId && messages.length > 0 && (
+              <div className="relative" ref={exportMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowExportMenu(v => !v)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
+                  aria-label="Eksport"
+                >
+                  <Download className="w-4 h-4" aria-hidden="true" />
+                </button>
+                <AnimatePresence>
+                  {showExportMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.94, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.94, y: -4 }}
+                      transition={{ duration: 0.14 }}
+                      className="absolute right-0 top-10 z-50 py-1.5 rounded-[14px] min-w-[140px]"
+                      style={{ background: 'rgba(10,14,27,0.97)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 16px 48px rgba(0,0,0,0.5)' }}
+                    >
+                      {[
+                        { label: 'Markdown (.md)', fn: exportMarkdown },
+                        { label: 'Matn (.txt)',    fn: exportTxt     },
+                        { label: 'PDF (chop)',     fn: exportPdf     },
+                        { label: 'Word (.doc)',    fn: exportDoc     },
+                      ].map(({ label, fn }) => (
+                        <button key={label} type="button" onClick={fn}
+                          className="w-full px-4 py-2 text-left text-[12.5px] text-white/55 hover:text-white/90 hover:bg-white/[0.05] transition-colors">
+                          {label}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
             <button
               type="button"
               onClick={handleNewConversation}
@@ -1246,18 +1518,26 @@ export default function AIAssistantPage() {
               </div>
             )}
 
-            {/* Messages */}
-            {!msgLoading && messages.map(msg => (
-              <MessageBubble
-                key={msg.id}
-                msg={msg}
-                userName={studentName}
-                userAvatarUrl={studentAvatarUrl}
-                isStreaming={msg.id === streamingId}
-                onStreamComplete={msg.id === streamingId ? () => setStreamingId(null) : undefined}
-                onRegenerate={msg.role === 'assistant' ? () => void handleRegenerate(msg.id) : undefined}
-              />
-            ))}
+            {/* Messages — with content-visibility for perf on long lists */}
+            {!msgLoading && (() => {
+              const aiMsgs = messages.filter(m => m.role === 'assistant')
+              const lastAiId = aiMsgs.at(-1)?.id
+              return messages.map(msg => (
+                <div key={msg.id} style={{ contentVisibility: 'auto', containIntrinsicSize: '0 120px' }}>
+                  <MessageBubble
+                    msg={msg}
+                    userName={studentName}
+                    userAvatarUrl={studentAvatarUrl}
+                    isStreaming={msg.id === streamingId || msg.id === streamingMsgId}
+                    onStreamComplete={msg.id === streamingId ? () => setStreamingId(null) : undefined}
+                    onRegenerate={msg.role === 'assistant' ? () => void handleRegenerate(msg.id) : undefined}
+                    onContinue={msg.id === lastAiId && msg.role === 'assistant' && !isStreaming
+                      ? () => void handleContinue(msg.id) : undefined}
+                    isLastAi={msg.id === lastAiId}
+                  />
+                </div>
+              ))
+            })()}
 
             {isTyping && !isStreaming && <ThinkingCard />}
             <div ref={bottomRef} aria-hidden="true" />
@@ -1326,6 +1606,59 @@ export default function AIAssistantPage() {
                   </button>
                 </motion.div>
               )}
+
+              {/* Upload progress bar */}
+              <AnimatePresence>
+                {uploadProgress !== null && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    className="flex items-center gap-3 mb-2.5 px-4 py-2.5 rounded-xl"
+                    style={{ background: 'rgba(91,127,255,0.10)', border: '1px solid rgba(91,127,255,0.20)' }}
+                  >
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ background: 'linear-gradient(90deg,#5B7FFF,#7C3AED)' }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${uploadProgress}%` }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    </div>
+                    <span className="text-[11px] font-bold text-brand-light/70 flex-shrink-0 tabular-nums">
+                      {uploadProgress}%
+                    </span>
+                    {uploadProgress < 100 && (
+                      <button type="button" onClick={cancelUpload}
+                        className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0" aria-label="Bekor qilish">
+                        <XIcon className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Network error + retry */}
+              <AnimatePresence>
+                {netError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    className="flex items-center gap-3 mb-2.5 px-4 py-2.5 rounded-xl"
+                    style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.22)' }}
+                  >
+                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" aria-hidden="true" />
+                    <span className="flex-1 text-[12px] text-red-400">{netError}</span>
+                    <button type="button" onClick={handleRetry}
+                      className="flex items-center gap-1 text-[11px] font-bold text-brand-light/70 hover:text-brand-light transition-colors flex-shrink-0">
+                      <RotateCw className="w-3 h-3" aria-hidden="true" />
+                      Qayta
+                    </button>
+                    <button type="button" onClick={() => setNetError(null)}
+                      className="text-white/25 hover:text-white/55 transition-colors flex-shrink-0" aria-label="Yopish">
+                      <XIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Voice listening state */}
               {isListening && (

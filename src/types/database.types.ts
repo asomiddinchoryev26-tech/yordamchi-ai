@@ -472,6 +472,7 @@ export type Database = {
           id:         string
           student_id: string
           title:      string
+          is_pinned:  boolean
           created_at: string
           updated_at: string
         }
@@ -479,11 +480,13 @@ export type Database = {
           id?:         string
           student_id:  string
           title?:      string
+          is_pinned?:  boolean
           created_at?: string
           updated_at?: string
         }
         Update: {
           title?:      string
+          is_pinned?:  boolean
           updated_at?: string
         }
         Relationships: [
