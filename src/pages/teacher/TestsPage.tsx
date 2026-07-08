@@ -10,6 +10,7 @@ import { subjectService } from '@/services/subject.service'
 import { supabase } from '@/lib/supabase'
 import type { TestWithDetails, TestResultWithStudent, TestQuestion } from '@/services/test.service'
 import type { SubjectRow } from '@/services/subject.service'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ function fmtDate(d: string) {
 
 export default function TeacherTestsPage() {
   const auth = useAuth()
+  const { t } = useLanguage()
 
   const [tests,    setTests]    = useState<TestWithDetails[]>([])
   const [groups,   setGroups]   = useState<GroupOption[]>([])
@@ -77,7 +79,7 @@ export default function TeacherTestsPage() {
       setGroups((groupsRes.data ?? []) as GroupOption[])
       setSubjects(subjectsData)
     } catch {
-      setPageError("Ma'lumotlarni yuklashda xatolik")
+      setPageError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -136,12 +138,12 @@ export default function TeacherTestsPage() {
 
   async function handleSave() {
     if (!auth.user?.id) return
-    if (!form.title.trim()) { setFormError("Test nomi majburiy"); return }
-    if (!form.questions.length) { setFormError("Kamida 1 ta savol kerak"); return }
+    if (!form.title.trim()) { setFormError(t.ttNameRequired); return }
+    if (!form.questions.length) { setFormError(t.ttMinQuestion); return }
 
     for (const q of form.questions) {
-      if (!q.question.trim()) { setFormError("Barcha savollar to'ldirilishi kerak"); return }
-      if (q.options.some(o => !o.trim())) { setFormError("Barcha variantlar to'ldirilishi kerak"); return }
+      if (!q.question.trim()) { setFormError(t.ttFillAllQ); return }
+      if (q.options.some(o => !o.trim())) { setFormError(t.ttFillAllOpts); return }
     }
 
     setFormLoading(true)
@@ -167,7 +169,7 @@ export default function TeacherTestsPage() {
       await loadAll()
       setView('list')
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Saqlashda xatolik')
+      setFormError(err instanceof Error ? err.message : t.tcSaveErr)
     } finally {
       setFormLoading(false)
     }
@@ -179,16 +181,16 @@ export default function TeacherTestsPage() {
       setTests(prev => prev.filter(t => t.id !== id))
       setDeletingId(null)
     } catch {
-      setPageError("O'chirishda xatolik")
+      setPageError(t.aiDeleteErr)
     }
   }
 
-  async function togglePublish(t: TestWithDetails) {
+  async function togglePublish(tst: TestWithDetails) {
     try {
-      await testService.update(t.id, { is_published: !t.is_published })
-      setTests(prev => prev.map(x => x.id === t.id ? { ...x, is_published: !t.is_published } : x))
+      await testService.update(tst.id, { is_published: !tst.is_published })
+      setTests(prev => prev.map(x => x.id === tst.id ? { ...x, is_published: !tst.is_published } : x))
     } catch {
-      setPageError("Nashr holatini o'zgartirishda xatolik")
+      setPageError(t.ttPublishStatusErr)
     }
   }
 
@@ -199,7 +201,7 @@ export default function TeacherTestsPage() {
     try {
       setResults(await testService.getResults(testId))
     } catch {
-      setPageError("Natijalarni yuklashda xatolik")
+      setPageError(t.mpLoadErr)
     } finally {
       setResultsLoading(false)
     }
@@ -219,7 +221,7 @@ export default function TeacherTestsPage() {
         </div>
 
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Natijalar</h1>
+          <h1 className="text-xl font-bold text-gray-900">{t.ttResults}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             {test?.title} — {results.length} ta talaba topshirgan
           </p>
@@ -232,18 +234,19 @@ export default function TeacherTestsPage() {
         ) : results.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
             <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-            <p className="text-sm text-gray-400">Hali hech kim topshirmagan</p>
+            <p className="text-sm text-gray-400">{t.ttNoSubmissions}</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[520px]">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
                   <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">#</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Talaba</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Ball</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Foiz</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Sana</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tdColStudent}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.ttScore}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.ttPercent}</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tcDate}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -278,6 +281,7 @@ export default function TeacherTestsPage() {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>
@@ -294,33 +298,33 @@ export default function TeacherTestsPage() {
           </button>
           <span className="text-gray-300">/</span>
           <span className="text-sm font-semibold text-gray-900">
-            {editingId ? 'Testni tahrirlash' : 'Yangi test'}
+            {editingId ? t.ttEditTest : t.ttNewTest}
           </span>
         </div>
 
         {/* Test asosiy ma'lumotlari */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
-          <h2 className="text-base font-bold text-gray-900">Test ma'lumotlari</h2>
+          <h2 className="text-base font-bold text-gray-900">{t.ttTestInfo}</h2>
 
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">
-              Test nomi <span className="text-red-500">*</span>
+              {t.ttTestName} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-              placeholder="Masalan: Algebra — 1-bob testi"
+              placeholder={t.ttTestNamePh}
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Tavsif</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.ttDesc}</label>
             <textarea
               value={form.description}
               onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              placeholder="Test haqida qisqacha..."
+              placeholder={t.ttDescPh}
               rows={2}
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
             />
@@ -328,29 +332,29 @@ export default function TeacherTestsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Guruh</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.tfGroup}</label>
               <select
                 value={form.group_id}
                 onChange={e => setForm(f => ({ ...f, group_id: e.target.value }))}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               >
-                <option value="">— Guruh tanlanmagan —</option>
+                <option value="">{t.ttNoGroupSel}</option>
                 {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Fan</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.tcSubject}</label>
               <select
                 value={form.subject_id}
                 onChange={e => setForm(f => ({ ...f, subject_id: e.target.value }))}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               >
-                <option value="">— Fan tanlanmagan —</option>
+                <option value="">{t.tcNoSubject}</option>
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.icon} {s.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1.5">Vaqt (daqiqa)</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.ttDuration}</label>
               <input
                 type="number"
                 min={5}
@@ -369,7 +373,7 @@ export default function TeacherTestsPage() {
               onChange={e => setForm(f => ({ ...f, is_published: e.target.checked }))}
               className="w-4 h-4 rounded accent-indigo-600"
             />
-            <span className="text-sm text-gray-700 font-medium">Testni nashr qilish (talabalar ko'ra oladi)</span>
+            <span className="text-sm text-gray-700 font-medium">{t.ttPublish}</span>
           </label>
         </div>
 
@@ -377,7 +381,7 @@ export default function TeacherTestsPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-gray-900">
-              Savollar <span className="text-sm font-normal text-gray-400">({form.questions.length} ta)</span>
+              {t.ttQuestions} <span className="text-sm font-normal text-gray-400">({form.questions.length} {t.tdCount})</span>
             </h2>
             <button
               type="button"
@@ -385,13 +389,13 @@ export default function TeacherTestsPage() {
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              Savol qo'shish
+              {t.ttAddQuestion}
             </button>
           </div>
 
           {form.questions.length === 0 && (
             <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-              <p className="text-sm text-gray-400">Savol yo'q. "Savol qo'shish" tugmasini bosing</p>
+              <p className="text-sm text-gray-400">{t.ttNoQuestions}</p>
             </div>
           )}
 
@@ -405,7 +409,7 @@ export default function TeacherTestsPage() {
                   <textarea
                     value={q.question}
                     onChange={e => updateQuestion(q.id, 'question', e.target.value)}
-                    placeholder="Savol matni..."
+                    placeholder={t.ttQuestionPh}
                     rows={2}
                     className="flex-1 px-3 py-2 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
@@ -434,7 +438,7 @@ export default function TeacherTestsPage() {
                         type="text"
                         value={opt}
                         onChange={e => updateQuestion(q.id, 'option', oi, e.target.value)}
-                        placeholder={`Variant ${OPTION_LABELS[oi]}`}
+                        placeholder={`${t.ttVariant} ${OPTION_LABELS[oi]}`}
                         className={cn(
                           'flex-1 px-2.5 py-1.5 rounded-lg border text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none transition-colors',
                           q.correct_index === oi
@@ -465,7 +469,7 @@ export default function TeacherTestsPage() {
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {formLoading && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-            {editingId ? 'Saqlash' : 'Test yaratish'}
+            {editingId ? t.admSave : t.ttCreateTest}
           </button>
           <button
             type="button"
@@ -473,7 +477,7 @@ export default function TeacherTestsPage() {
             disabled={formLoading}
             className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
           >
-            Bekor
+            {t.fpCancel}
           </button>
         </div>
       </div>
@@ -485,9 +489,9 @@ export default function TeacherTestsPage() {
     <div className="space-y-5 pb-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Testlar</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.tsTitle}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {loading ? 'Yuklanmoqda...' : `${tests.length} ta test`}
+            {loading ? t.notifLoading : `${tests.length} ${t.ttCountWord}`}
           </p>
         </div>
         <button
@@ -496,7 +500,7 @@ export default function TeacherTestsPage() {
           className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          Yangi test
+          {t.ttNewTest}
         </button>
       </div>
 
@@ -527,15 +531,15 @@ export default function TeacherTestsPage() {
       {!loading && tests.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <FileText className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-gray-900 mb-1">Testlar yo'q</h3>
-          <p className="text-sm text-gray-400 mb-5">Birinchi testingizni yarating</p>
+          <h3 className="text-base font-semibold text-gray-900 mb-1">{t.ttEmpty}</h3>
+          <p className="text-sm text-gray-400 mb-5">{t.ttEmptyHint}</p>
           <button
             type="button"
             onClick={openCreate}
             className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Yangi test
+            {t.ttNewTest}
           </button>
         </div>
       )}
@@ -559,7 +563,7 @@ export default function TeacherTestsPage() {
                       'text-[11px] font-semibold px-2 py-0.5 rounded-full',
                       test.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500',
                     )}>
-                      {test.is_published ? 'Nashr qilingan' : 'Qoralama'}
+                      {test.is_published ? t.ttPublished : t.tcDraft}
                     </span>
                   </div>
 
@@ -572,9 +576,9 @@ export default function TeacherTestsPage() {
                     )}
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {test.duration_minutes} daqiqa
+                      {test.duration_minutes} {t.tsMinutes}
                     </span>
-                    <span>{test.questions.length} ta savol</span>
+                    <span>{test.questions.length} {t.tsQuestionWord}</span>
                     {test.results_count > 0 && (
                       <span className="text-indigo-500 font-medium">{test.results_count} ta natija</span>
                     )}
@@ -610,7 +614,7 @@ export default function TeacherTestsPage() {
                           type="button"
                           onClick={() => void openResults(test.id)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                          title="Natijalar"
+                          title={t.ttResults}
                         >
                           <Users className="w-3.5 h-3.5" />
                         </button>
@@ -618,7 +622,7 @@ export default function TeacherTestsPage() {
                           type="button"
                           onClick={() => togglePublish(test)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-emerald-300 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                          title={test.is_published ? "Qayta qoralama" : "Nashr qilish"}
+                          title={test.is_published ? t.ttUnpublish : t.ttPublishAction}
                         >
                           {test.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                         </button>
@@ -626,7 +630,7 @@ export default function TeacherTestsPage() {
                           type="button"
                           onClick={() => openEdit(test)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                          title="Tahrirlash"
+                          title={t.tcEditT}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
@@ -634,7 +638,7 @@ export default function TeacherTestsPage() {
                           type="button"
                           onClick={() => setDeletingId(test.id)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                          title="O'chirish"
+                          title={t.admDisable}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

@@ -8,6 +8,7 @@ import {
   buildPeriodLabel,
   type CertificateData,
 } from '@/services/certificate.service'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -27,13 +28,11 @@ type EarnedAchievement = {
 
 // ─── Yordamchi funksiyalar ─────────────────────────────────────────────────────
 
-function tierLabel(tier: string) {
-  switch (tier) {
-    case 'gold':    return 'Oltin'
-    case 'silver':  return 'Kumush'
-    case 'bronze':  return 'Bronza'
-    default:        return 'Maxsus'
-  }
+const TIER_KEY: Record<string, keyof Translations> = {
+  gold: 'tdGold', silver: 'tdSilver', bronze: 'tdBronze', special: 'tdSpecial',
+}
+function tierKey(tier: string): keyof Translations {
+  return TIER_KEY[tier] ?? 'tdSpecial'
 }
 
 function tierBadgeClass(tier: string) {
@@ -63,15 +62,16 @@ function tierGlow(tier: string) {
   }
 }
 
-const MONTHS = [
-  'Yanvar','Fevral','Mart','Aprel','May','Iyun',
-  'Iyul','Avgust','Sentabr','Oktyabr','Noyabr','Dekabr',
+const MONTH_KEYS: (keyof Translations)[] = [
+  'mJan','mFeb','mMar','mApr','mMay','mJun',
+  'mJul','mAug','mSep','mOct','mNov','mDec',
 ]
 
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function TeacherAchievementsPage() {
   const auth = useAuth()
+  const { t } = useLanguage()
 
   const [achievements,  setAchievements]  = useState<EarnedAchievement[]>([])
   const [loading,       setLoading]       = useState(true)
@@ -97,7 +97,7 @@ export default function TeacherAchievementsPage() {
       .order('earned_at', { ascending: false })
 
     if (err) {
-      setError("Yutuqlarni yuklashda xatolik")
+      setError(t.mpLoadErr)
       setLoading(false)
       return
     }
@@ -119,10 +119,10 @@ export default function TeacherAchievementsPage() {
     setDownloadingId(item.id)
     try {
       const certData: CertificateData = {
-        studentName:      auth.user?.name ?? "O'qituvchi",
+        studentName:      auth.user?.name ?? t.tdTeacher,
         achievementTitle: item.achievement.name?.uz
                           ?? item.achievement.name?.en
-                          ?? 'Yutuq',
+                          ?? t.tdAchievement,
         achievementTier:  item.achievement.tier,
         achievementEmoji: item.achievement.icon_emoji,
         earnedAt:         item.earned_at,
@@ -131,7 +131,7 @@ export default function TeacherAchievementsPage() {
       }
       generateCertificatePDF(certData)
     } catch {
-      setError("Sertifikat yaratishda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setDownloadingId(null)
     }
@@ -159,10 +159,10 @@ export default function TeacherAchievementsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <Crown className="w-6 h-6 text-amber-500" />
-          Mening yutuqlarim
+          {t.taMyAch}
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-          Har bir yutuq uchun sertifikat yuklab olish mumkin
+          {t.taMyAchSub}
         </p>
       </div>
 
@@ -180,10 +180,10 @@ export default function TeacherAchievementsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <Trophy className="w-12 h-12 text-gray-200 dark:text-gray-600 mx-auto mb-3" />
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            Hali yutuq yo'q
+            {t.tdNoAchYet}
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs mx-auto">
-            Admin oylik hisoblash siklini ishga tushirganda yutuqlar avtomatik beriladi
+            {t.taAchEmptyHint}
           </p>
         </div>
       )}
@@ -192,7 +192,7 @@ export default function TeacherAchievementsPage() {
       {achievements.length > 0 && (
         <>
           <p className="text-xs font-medium text-gray-400 dark:text-gray-500 px-1">
-            {achievements.length} ta yutuq
+            {achievements.length} {t.tdMoreAchievements}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {achievements.map(item => {
@@ -203,7 +203,7 @@ export default function TeacherAchievementsPage() {
                          ?? item.achievement.description?.en
                          ?? ''
               const earnedDate = new Date(item.earned_at)
-              const dateStr = `${earnedDate.getDate()} ${MONTHS[earnedDate.getMonth()]} ${earnedDate.getFullYear()}`
+              const dateStr = `${earnedDate.getDate()} ${t[MONTH_KEYS[earnedDate.getMonth()]]} ${earnedDate.getFullYear()}`
 
               return (
                 <div
@@ -221,7 +221,7 @@ export default function TeacherAchievementsPage() {
                       'text-[10px] font-bold px-2.5 py-1 rounded-full',
                       tierBadgeClass(item.achievement.tier),
                     )}>
-                      {tierLabel(item.achievement.tier)}
+                      {t[tierKey(item.achievement.tier)]}
                     </span>
                   </div>
 
@@ -241,14 +241,14 @@ export default function TeacherAchievementsPage() {
                   <div className="flex items-center justify-between pt-2 border-t border-white/60 dark:border-gray-700 mt-auto">
                     <div>
                       <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                        {MONTHS[item.period_month - 1]} {item.period_year}
+                        {t[MONTH_KEYS[item.period_month - 1]]} {item.period_year}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                         {dateStr}
                       </p>
                       {item.total_score !== null && (
                         <p className="text-[10px] font-bold text-gray-600 dark:text-gray-300 mt-0.5">
-                          Ball: {item.total_score}
+                          {t.taBall} {item.total_score}
                         </p>
                       )}
                     </div>
@@ -268,7 +268,7 @@ export default function TeacherAchievementsPage() {
                         ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         : <Download className="w-3.5 h-3.5" />
                       }
-                      Sertifikat
+                      {t.achCertificates}
                     </button>
                   </div>
                 </div>
@@ -283,11 +283,10 @@ export default function TeacherAchievementsPage() {
         <Award className="w-5 h-5 text-indigo-500 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400">
-            O'qituvchi yutuqlari haqida
+            {t.taAboutTitle}
           </p>
           <p className="text-xs text-indigo-600 dark:text-indigo-500 mt-1">
-            Eng yaxshi o'qituvchi, Top mentor va A'lo mukofoti — har oy admin tomonidan avtomatik beriladi.
-            Ballar davomad sifati, talabalar test natijalari va o'qitish faoliyati asosida hisoblanadi.
+            {t.taAboutDesc}
           </p>
         </div>
       </div>

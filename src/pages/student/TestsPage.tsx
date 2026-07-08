@@ -20,9 +20,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { IllustrationImage, ILLUS } from '@/components/illustration'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { useAuth } from '@/hooks/useAuth'
 import { testService } from '@/services/test.service'
-import type { TestForStudent, TestQuestion, TestResultRow } from '@/services/test.service'
+import type { TestForStudent, StudentQuestion, TestResultRow } from '@/services/test.service'
 
 // ─── Animation constants ──────────────────────────────────────────────────────
 
@@ -139,6 +140,7 @@ function TestSkeleton() {
 
 export default function StudentTestsPage() {
   const auth = useAuth()
+  const { t } = useLanguage()
 
   // ── All original state (PRESERVED EXACTLY) ────────────────────────────────
   const [tests,   setTests]   = useState<TestForStudent[]>([])
@@ -176,7 +178,7 @@ export default function StudentTestsPage() {
     setLoading(true)
     setError(null)
     try {
-      setTests(await testService.getForStudent(auth.user!.id))
+      setTests(await testService.getForStudent())
     } catch {
       setError("Testlarni yuklashda xatolik")
     } finally {
@@ -202,23 +204,21 @@ export default function StudentTestsPage() {
 
     const unanswered = activeTest.questions.filter(q => answers[q.id] === undefined)
     if (unanswered.length > 0) {
-      setSubmitError(`${unanswered.length} ta savolga javob berilmagan`)
+      setSubmitError(`${unanswered.length} ${t.tsUnanswered}`)
       return
     }
 
     setSubmitting(true)
     setSubmitError(null)
     try {
-      const result = await testService.submitResult(
-        activeTest.id,
-        auth.user.id,
-        answers,
-        activeTest.questions,
-      )
+      // Baholash serverda; RPC natija + (endi javoblar bilan) savollarni qaytaradi
+      const { result, questions } = await testService.submitTest(activeTest.id, answers)
       setFinalResult(result)
+      // Review ekrani uchun to'g'ri javoblar bilan savollarni yangilaymiz
+      setActiveTest(prev => (prev ? { ...prev, questions } : prev))
       setView('done')
       setTests(prev => prev.map(t =>
-        t.id === activeTest.id ? { ...t, result } : t
+        t.id === activeTest.id ? { ...t, result, questions } : t
       ))
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
@@ -279,7 +279,7 @@ export default function StudentTestsPage() {
               type="button"
               onClick={() => setView('list')}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-all flex-shrink-0"
-              aria-label="Testlar ro'yxatiga qaytish"
+              aria-label={t.tsBackToList}
             >
               <ChevronLeft className="w-5 h-5" aria-hidden="true" />
             </button>
@@ -288,7 +288,7 @@ export default function StudentTestsPage() {
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-black text-white/80 truncate tracking-tight">{activeTest.title}</p>
               <p className="text-[10px] text-white/30 mt-0.5">
-                {answered}/{total} javoblangan · {pct}%
+                {answered}/{total} {t.tsAnswered} · {pct}%
               </p>
             </div>
 
@@ -308,7 +308,7 @@ export default function StudentTestsPage() {
               type="button"
               onClick={() => setShowNav(v => !v)}
               className="sm:hidden w-9 h-9 rounded-xl flex items-center justify-center text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-all flex-shrink-0"
-              aria-label="Savollar"
+              aria-label={t.tsQuestions}
             >
               <Target className="w-4 h-4" aria-hidden="true" />
             </button>
@@ -333,7 +333,7 @@ export default function StudentTestsPage() {
               }}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[12px] font-bold text-white/60">Savollar palitasi</span>
+                <span className="text-[12px] font-bold text-white/60">{t.tsQuestionPalette}</span>
                 <button type="button" onClick={() => setShowNav(false)}
                   className="text-white/40 hover:text-white/70 transition-colors">
                   <X className="w-4 h-4" aria-hidden="true" />
@@ -358,7 +358,7 @@ export default function StudentTestsPage() {
             style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
           >
             <span className="text-[10px] font-bold text-white/25 uppercase tracking-wider w-full mb-1">
-              Savollar palitasi
+              {t.tsQuestionPalette}
             </span>
             {activeTest.questions.map((q, i) => (
               <QNavPill key={q.id} idx={i} answered={answers[q.id] !== undefined}
@@ -368,7 +368,7 @@ export default function StudentTestsPage() {
 
           {/* Questions list */}
           <div ref={questionsRef} className="space-y-4">
-            {activeTest.questions.map((q: TestQuestion, idx: number) => (
+            {activeTest.questions.map((q: StudentQuestion, idx: number) => (
               <motion.div
                 key={q.id}
                 id={`q-${idx}`}
@@ -521,7 +521,7 @@ export default function StudentTestsPage() {
               ) : (
                 <CheckCircle className="w-5 h-5" aria-hidden="true" />
               )}
-              Testni topshirish
+              {t.tsSubmit}
             </motion.button>
           </div>
         </div>
@@ -541,12 +541,12 @@ export default function StudentTestsPage() {
     const dashOffset  = circ - (pct / 100) * circ
 
     const motivational = pct >= 90
-      ? "Ajoyib! Siz bu mavzuni mukammal o'zlashtirgansiz! 🏆"
+      ? t.tsMotiv90
       : pct >= 80
-        ? "Zo'r natija! Deyarli mukammal erishuvingiz bor! ⭐"
+        ? t.tsMotiv80
         : pct >= 60
-          ? "Tabriklaymiz! Muvaffaqiyatli topshirdingiz! 🎉"
-          : "Yaxshi urinish! Biroz ko'proq mashq qilsangiz — muvaffaqiyatga erishasiz 📚"
+          ? t.tsMotiv60
+          : t.tsMotivLow
 
     return (
       <div className="pb-8 max-w-2xl" style={{ color: 'white' }}>
@@ -603,7 +603,7 @@ export default function StudentTestsPage() {
               >
                 {pct}%
               </motion.span>
-              <span className="text-[10px] text-white/30 font-bold tracking-wider mt-0.5">NATIJA</span>
+              <span className="text-[10px] text-white/30 font-bold tracking-wider mt-0.5">{t.tsResult}</span>
             </div>
           </div>
 
@@ -625,12 +625,12 @@ export default function StudentTestsPage() {
                   : { background: 'rgba(239,68,68,0.15)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)' }
                 }
               >
-                {passed ? "Muvaffaqiyatli topshirildi" : "Qaytadan urinib ko'ring"}
+                {passed ? t.tsPassed : t.tsRetry}
               </span>
             </div>
 
             <p className="text-white/50 text-sm">
-              {finalResult.score} ta to&apos;g&apos;ri / {finalResult.total_questions} ta savol
+              {finalResult.score} {t.tsCorrect} / {finalResult.total_questions} {t.tsQuestionWord}
             </p>
 
             {/* XP display (visual only) */}
@@ -661,9 +661,9 @@ export default function StudentTestsPage() {
           transition={{ delay: 0.4, duration: 0.4 }}
         >
           <h3 className="text-[13px] font-bold text-white/50 uppercase tracking-wider px-1">
-            Savollar tahlili
+            {t.tsQuestionAnalysis}
           </h3>
-          {activeTest.questions.map((q: TestQuestion, idx: number) => {
+          {activeTest.questions.map((q: StudentQuestion, idx: number) => {
             const selected  = finalResult.answers[q.id]
             const isCorrect = selected === q.correct_index
 
@@ -705,7 +705,7 @@ export default function StudentTestsPage() {
                       >
                         <span className="font-bold w-5 flex-shrink-0">{OPTION_LETTERS[oi]})</span>
                         <span className="flex-1">{opt}</span>
-                        {isRight && <span className="ml-auto font-bold text-emerald-400">✓ To&apos;g&apos;ri</span>}
+                        {isRight && <span className="ml-auto font-bold text-emerald-400">{t.tsCorrectMark}</span>}
                       </div>
                     )
                   })}
@@ -727,7 +727,7 @@ export default function StudentTestsPage() {
           className="mt-5 w-full py-3 rounded-[16px] text-sm font-semibold text-white/50 transition-all"
           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
-          ← Testlar ro&apos;yxatiga qaytish
+          ← {t.tsBackToList}
         </motion.button>
       </div>
     )
@@ -747,8 +747,8 @@ export default function StudentTestsPage() {
             <FileText className="w-5 h-5 text-white" aria-hidden="true" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Testlar</h1>
-            <p className="text-[12px] text-white/35 mt-0.5">Mavjud online testlar</p>
+            <h1 className="text-2xl font-black text-white tracking-tight">{t.tsTitle}</h1>
+            <p className="text-[12px] text-white/35 mt-0.5">{t.tsSubtitle}</p>
           </div>
         </div>
       </motion.div>
@@ -791,8 +791,8 @@ export default function StudentTestsPage() {
           >
             <Sparkles className="w-7 h-7 text-brand-light/60" />
           </motion.div>
-          <p className="text-sm font-semibold text-white/40 mb-1">Mavjud test yo&apos;q</p>
-          <p className="text-xs text-white/20">O&apos;qituvchi test nashr qilsa, bu yerda ko&apos;rinadi</p>
+          <p className="text-sm font-semibold text-white/40 mb-1">{t.tsNoTests}</p>
+          <p className="text-xs text-white/20">{t.tsNoTestsHint}</p>
         </motion.div>
       )}
 
@@ -854,9 +854,9 @@ export default function StudentTestsPage() {
                       {test.group && <span className="text-brand-light/60">{(test.group as { name?: string }).name}</span>}
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" aria-hidden="true" />
-                        {test.duration_minutes} daqiqa
+                        {test.duration_minutes} {t.tsMinutes}
                       </span>
-                      <span>{test.questions.length} ta savol</span>
+                      <span>{test.questions.length} {t.tsQuestionWord}</span>
                       {done && pct !== null && (
                         <span
                           className="font-bold px-2 py-0.5 rounded-full"
@@ -893,7 +893,7 @@ export default function StudentTestsPage() {
                           }}
                           className="text-[11px] font-semibold text-brand-light/70 hover:text-brand-light transition-colors"
                         >
-                          Ko&apos;rish
+                          {t.tdView}
                         </button>
                       </div>
                     ) : (
@@ -908,7 +908,7 @@ export default function StudentTestsPage() {
                           boxShadow: '0 4px 12px rgba(91,92,246,0.4)',
                         }}
                       >
-                        Boshlash
+                        {t.tsStart}
                       </motion.button>
                     )}
                   </div>

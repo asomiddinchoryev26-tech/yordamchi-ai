@@ -32,7 +32,7 @@ export default function Avatar({ src, name, size = 'md', className }: AvatarProp
       )}
     >
       {src ? (
-        <img src={src} alt={name} className="h-full w-full object-cover" />
+        <img src={src} alt={name} loading="lazy" decoding="async" className="h-full w-full object-cover" />
       ) : (
         <span>{getInitials(name)}</span>
       )}

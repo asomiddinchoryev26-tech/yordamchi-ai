@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, X, AlertCircle, Users, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 import { groupService } from '@/services/group.service'
 import { subjectService } from '@/services/subject.service'
 import type { GroupWithRelations, GroupInsert } from '@/services/group.service'
@@ -8,10 +9,10 @@ import type { SubjectRow } from '@/services/subject.service'
 
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
 
-const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  active:    { label: 'Faol',     className: 'bg-emerald-100 text-emerald-700' },
-  inactive:  { label: 'Nofaol',   className: 'bg-gray-100 text-gray-600'      },
-  completed: { label: 'Tugatilgan', className: 'bg-blue-100 text-blue-700'    },
+const STATUS_LABELS: Record<string, { label: keyof Translations; className: string }> = {
+  active:    { label: 'admActive',   className: 'bg-emerald-100 text-emerald-700' },
+  inactive:  { label: 'tdInactive',  className: 'bg-gray-100 text-gray-600'      },
+  completed: { label: 'tdCompleted', className: 'bg-blue-100 text-blue-700'    },
 }
 
 const EMPTY_FORM = {
@@ -28,6 +29,7 @@ const EMPTY_FORM = {
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function GroupsPage() {
+  const { t } = useLanguage()
   const [groups,     setGroups]     = useState<GroupWithRelations[]>([])
   const [subjects,   setSubjects]   = useState<SubjectRow[]>([])
   const [loading,    setLoading]    = useState(true)
@@ -105,7 +107,7 @@ export default function GroupsPage() {
   // ── Saqlash ───────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!form.name.trim()) {
-      setFormError("Guruh nomi bo'sh bo'lishi mumkin emas")
+      setFormError(t.agNameRequired)
       return
     }
     if (form.capacity < 1 || form.capacity > 200) {
@@ -162,9 +164,9 @@ export default function GroupsPage() {
       {/* ── Sarlavha ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Guruhlar</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.tdGroups}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {groups.length} ta guruh
+            {groups.length} {t.tdGroupWord}
           </p>
         </div>
         {!showForm && (
@@ -174,7 +176,7 @@ export default function GroupsPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Yangi guruh
+            {t.agNewGroup}
           </button>
         )}
       </div>
@@ -192,7 +194,7 @@ export default function GroupsPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-gray-900">
-              {editingId ? 'Guruhni tahrirlash' : 'Yangi guruh qo\'shish'}
+              {editingId ? t.agEditGroup : t.agAddGroup}
             </h2>
             <button
               type="button"
@@ -208,13 +210,13 @@ export default function GroupsPage() {
               {/* Nom */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Guruh nomi <span className="text-red-500">*</span>
+                  {t.agGroupName} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Masalan: G-101"
+                  placeholder={t.agNamePh}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 />
               </div>
@@ -222,14 +224,14 @@ export default function GroupsPage() {
               {/* Fan */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Fan
+                  {t.tcSubject}
                 </label>
                 <select
                   value={form.subject_id}
                   onChange={e => setForm(f => ({ ...f, subject_id: e.target.value }))}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 >
-                  <option value="">— Fan tanlanmagan —</option>
+                  <option value="">{t.tcNoSubject}</option>
                   {subjects.map(s => (
                     <option key={s.id} value={s.id}>
                       {s.icon} {s.name}
@@ -241,7 +243,7 @@ export default function GroupsPage() {
               {/* Sig'im */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Sig'im (o'quvchilar soni)
+                  {t.agCapacity}
                 </label>
                 <input
                   type="number"
@@ -256,23 +258,23 @@ export default function GroupsPage() {
               {/* Holat */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Holat
+                  {t.tdColStatus}
                 </label>
                 <select
                   value={form.status}
                   onChange={e => setForm(f => ({ ...f, status: e.target.value as typeof form.status }))}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 >
-                  <option value="active">Faol</option>
-                  <option value="inactive">Nofaol</option>
-                  <option value="completed">Tugatilgan</option>
+                  <option value="active">{t.admActive}</option>
+                  <option value="inactive">{t.tdInactive}</option>
+                  <option value="completed">{t.tdCompleted}</option>
                 </select>
               </div>
 
               {/* Boshlanish sanasi */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Boshlanish sanasi
+                  {t.agStartDate}
                 </label>
                 <input
                   type="date"
@@ -285,7 +287,7 @@ export default function GroupsPage() {
               {/* Tugash sanasi */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Tugash sanasi
+                  {t.agEndDate}
                 </label>
                 <input
                   type="date"
@@ -299,12 +301,12 @@ export default function GroupsPage() {
             {/* Tavsif */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Tavsif
+                {t.sbDescription}
               </label>
               <textarea
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Guruh haqida qo'shimcha ma'lumot..."
+                placeholder={t.agDescPh}
                 rows={2}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors resize-none"
               />
@@ -328,7 +330,7 @@ export default function GroupsPage() {
               >
                 {formLoading
                   ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : editingId ? 'Saqlash' : "Qo'shish"
+                  : editingId ? t.admSave : t.tcAdd
                 }
               </button>
               <button
@@ -336,7 +338,7 @@ export default function GroupsPage() {
                 onClick={closeForm}
                 className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
               >
-                Bekor
+                {t.fpCancel}
               </button>
             </div>
           </div>
@@ -351,7 +353,7 @@ export default function GroupsPage() {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Guruh, fan yoki o'qituvchi..."
+            placeholder={t.agSearchPh}
             className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
           />
         </div>
@@ -381,9 +383,9 @@ export default function GroupsPage() {
           <div className="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Users className="w-7 h-7 text-violet-600" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">Guruhlar yo'q</h3>
+          <h3 className="text-base font-semibold text-gray-900 mb-1">{t.agEmpty}</h3>
           <p className="text-sm text-gray-400 mb-5">
-            Hali hech qanday guruh qo'shilmagan
+            {t.agEmptyHint}
           </p>
           <button
             type="button"
@@ -391,7 +393,7 @@ export default function GroupsPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Birinchi guruhni qo'shing
+            {t.agAddFirst}
           </button>
         </div>
       )}
@@ -400,7 +402,7 @@ export default function GroupsPage() {
       {!loading && groups.length > 0 && filtered.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
           <p className="text-sm text-gray-500">
-            "<span className="font-medium">{search}</span>" bo'yicha guruh topilmadi
+            "<span className="font-medium">{search}</span>" {t.agSearchNotFoundSuffix}
           </p>
         </div>
       )}
@@ -433,7 +435,7 @@ export default function GroupsPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold text-gray-900">{group.name}</h3>
                       <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', status.className)}>
-                        {status.label}
+                        {t[status.label]}
                       </span>
                     </div>
 
@@ -450,7 +452,7 @@ export default function GroupsPage() {
                       )}
                       {group.teacher && (
                         <span className="text-gray-400">
-                          {group.teacher.full_name ?? group.teacher.email ?? 'O\'qituvchi'}
+                          {group.teacher.full_name ?? group.teacher.email ?? t.tdTeacher}
                         </span>
                       )}
                     </div>
@@ -459,7 +461,7 @@ export default function GroupsPage() {
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                       <span className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
-                        {group.capacity} o'rin
+                        {group.capacity} {t.agSeats}
                       </span>
                       {group.start_date && (
                         <span>
@@ -485,14 +487,14 @@ export default function GroupsPage() {
                           onClick={() => void handleDelete(group.id)}
                           className="px-3 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                         >
-                          O'chirish
+                          {t.admDisable}
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeletingId(null)}
                           className="px-3 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                         >
-                          Bekor
+                          {t.fpCancel}
                         </button>
                       </div>
                     ) : (
@@ -501,7 +503,7 @@ export default function GroupsPage() {
                           type="button"
                           onClick={() => openEdit(group)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-colors"
-                          title="Tahrirlash"
+                          title={t.tcEditT}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
@@ -509,7 +511,7 @@ export default function GroupsPage() {
                           type="button"
                           onClick={() => setDeletingId(group.id)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                          title="O'chirish"
+                          title={t.admDisable}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

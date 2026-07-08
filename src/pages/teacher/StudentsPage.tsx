@@ -6,6 +6,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ function fmtDate(d: string) {
 
 export default function TeacherStudentsPage() {
   const auth = useAuth()
+  const { t } = useLanguage()
 
   const [students,    setStudents]    = useState<StudentRow[]>([])
   const [groups,      setGroups]      = useState<GroupOption[]>([])
@@ -120,7 +122,7 @@ export default function TeacherStudentsPage() {
 
       setStudents(rows)
     } catch {
-      setError("Ma'lumotlarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -156,9 +158,9 @@ export default function TeacherStudentsPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Talabalarim</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t.tdTabStudents}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {students.length} ta talaba, {groups.length} ta guruh
+          {students.length} {t.tdStudentWord}, {groups.length} {t.tdGroupWord}
         </p>
       </div>
 
@@ -172,7 +174,7 @@ export default function TeacherStudentsPage() {
       {groups.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
           <GraduationCap className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Sizga biriktirilgan guruh yo'q</p>
+          <p className="text-sm text-gray-400">{t.tcNoGroup}</p>
         </div>
       )}
 
@@ -181,17 +183,17 @@ export default function TeacherStudentsPage() {
           {/* Statistika */}
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <p className="text-xs text-gray-400 font-medium">Jami talaba</p>
+              <p className="text-xs text-gray-400 font-medium">{t.tgTotalStudents}</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">{students.length}</p>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <p className="text-xs text-gray-400 font-medium">Faol</p>
+              <p className="text-xs text-gray-400 font-medium">{t.admActive}</p>
               <p className="text-2xl font-bold text-emerald-600 mt-1">
                 {students.filter(s => s.status === 'active').length}
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <p className="text-xs text-gray-400 font-medium">Guruhlar</p>
+              <p className="text-xs text-gray-400 font-medium">{t.tdGroups}</p>
               <p className="text-2xl font-bold text-indigo-600 mt-1">{groups.length}</p>
             </div>
           </div>
@@ -204,7 +206,7 @@ export default function TeacherStudentsPage() {
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Ism, email yoki telefon..."
+                placeholder={t.tstSearchPh}
                 className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
@@ -214,7 +216,7 @@ export default function TeacherStudentsPage() {
                 onChange={e => setGroupFilter(e.target.value)}
                 className="appearance-none pl-3 pr-8 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               >
-                <option value="all">Barcha guruhlar</option>
+                <option value="all">{t.tstAllGroups}</option>
                 {groups.map(g => <option key={g.id} value={g.id}>{g.subject_icon} {g.name}</option>)}
               </select>
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -225,13 +227,13 @@ export default function TeacherStudentsPage() {
           {students.length === 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
               <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-              <p className="text-sm text-gray-400">Guruhlarda talabalar yo'q</p>
+              <p className="text-sm text-gray-400">{t.tdNoStudents}</p>
             </div>
           )}
 
           {students.length > 0 && filtered.length === 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-              <p className="text-sm text-gray-500">Qidiruv bo'yicha talaba topilmadi</p>
+              <p className="text-sm text-gray-500">{t.tstNotFound}</p>
             </div>
           )}
 
@@ -255,13 +257,13 @@ export default function TeacherStudentsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-gray-900 text-sm truncate">
-                          {s.full_name ?? 'Ism kiritilmagan'}
+                          {s.full_name ?? t.taNoName}
                         </p>
                         <span className={cn(
                           'text-[11px] font-semibold px-2 py-0.5 rounded-full',
                           s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
                         )}>
-                          {s.status === 'active' ? 'Faol' : 'Nofaol'}
+                          {s.status === 'active' ? t.admActive : t.tdInactive}
                         </span>
                       </div>
                       <p className="text-xs text-gray-400 truncate mt-0.5">{s.email}</p>
@@ -292,7 +294,7 @@ export default function TeacherStudentsPage() {
                         )}>
                           {attPct}%
                         </p>
-                        <p className="text-[11px] text-gray-400">davomat</p>
+                        <p className="text-[11px] text-gray-400">{t.achAttendance.toLowerCase()}</p>
                       </div>
                     )}
                   </div>

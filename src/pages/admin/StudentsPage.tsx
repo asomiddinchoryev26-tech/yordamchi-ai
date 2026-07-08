@@ -4,6 +4,7 @@ import {
   Users, Search, BookOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { studentService } from '@/services/student.service'
 import { groupService   } from '@/services/group.service'
 import type { Student, CreateStudentPayload, UpdateStudentPayload } from '@/services/student.service'
@@ -35,6 +36,7 @@ function InitialAvatar({ name, email }: { name: string | null; email: string | n
 }
 
 function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
+  const { t } = useLanguage()
   return (
     <span className={cn(
       'text-[11px] font-semibold px-2 py-0.5 rounded-full',
@@ -42,7 +44,7 @@ function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
         ? 'bg-emerald-100 text-emerald-700'
         : 'bg-gray-100 text-gray-500',
     )}>
-      {status === 'active' ? 'Faol' : 'Nofaol'}
+      {status === 'active' ? t.admActive : t.tdInactive}
     </span>
   )
 }
@@ -52,6 +54,7 @@ function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function StudentsPage() {
+  const { t } = useLanguage()
   const [students,     setStudents]     = useState<Student[]>([])
   const [groups,       setGroups]       = useState<GroupWithRelations[]>([])
   const [loading,      setLoading]      = useState(true)
@@ -149,12 +152,12 @@ export default function StudentsPage() {
   // ── Saqlash ───────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!form.full_name.trim()) {
-      setFormError("Ism va familiya majburiy")
+      setFormError(t.thNameRequired)
       return
     }
     if (!editingId) {
       if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-        setFormError("To'g'ri email manzil kiriting")
+        setFormError(t.thEmailInvalid)
         return
       }
       if (form.password.length < 8) {
@@ -190,7 +193,7 @@ export default function StudentsPage() {
       await loadData()
       closeForm()
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Xatolik yuz berdi")
+      setFormError(err instanceof Error ? err.message : t.pfError)
     } finally {
       setFormLoading(false)
     }
@@ -220,9 +223,9 @@ export default function StudentsPage() {
       {/* ── Sarlavha ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Talabalar</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.tdStudents}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {loading ? 'Yuklanmoqda...' : `${students.length} ta talaba`}
+            {loading ? t.tcUploading : `${students.length} ${t.stuCount}`}
           </p>
         </div>
         {!showForm && (
@@ -232,7 +235,7 @@ export default function StudentsPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Yangi talaba
+            {t.stuNewStudent}
           </button>
         )}
       </div>
@@ -241,15 +244,15 @@ export default function StudentsPage() {
       {!loading && students.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Jami</p>
+            <p className="text-xs text-gray-400 font-medium">{t.thTotal}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{students.length}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Faol</p>
+            <p className="text-xs text-gray-400 font-medium">{t.admActive}</p>
             <p className="text-2xl font-bold text-emerald-600 mt-1">{activeCount}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Nofaol</p>
+            <p className="text-xs text-gray-400 font-medium">{t.tdInactive}</p>
             <p className="text-2xl font-bold text-gray-400 mt-1">{inactiveCount}</p>
           </div>
         </div>
@@ -271,7 +274,7 @@ export default function StudentsPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-gray-900">
-              {editingId ? "Talabani tahrirlash" : "Yangi talaba qo'shish"}
+              {editingId ? t.stuEditStudent : t.stuAddStudent}
             </h2>
             <button
               type="button"
@@ -287,13 +290,13 @@ export default function StudentsPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Ism va familiya <span className="text-red-500">*</span>
+                  {t.thFullName} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.full_name}
                   onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
-                  placeholder="Karimov Kamol"
+                  placeholder={t.stuNamePh}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                 />
               </div>
@@ -314,20 +317,20 @@ export default function StudentsPage() {
                   )}
                 />
                 {editingId && (
-                  <p className="text-xs text-gray-400 mt-1">Email tahrirlash uchun Supabase Dashboard'dan foydalaning</p>
+                  <p className="text-xs text-gray-400 mt-1">{t.thEmailEditHint}</p>
                 )}
               </div>
 
               {!editingId && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Vaqtinchalik parol <span className="text-red-500">*</span>
+                    {t.thTempPassword} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="password"
                     value={form.password}
                     onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                    placeholder="Kamida 8 ta belgi"
+                    placeholder={t.pfPwMin}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                   />
                 </div>
@@ -335,7 +338,7 @@ export default function StudentsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Telefon
+                  {t.thPhone}
                 </label>
                 <input
                   type="tel"
@@ -348,12 +351,12 @@ export default function StudentsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Qo'shimcha ma'lumot
+                  {t.stuExtraInfo}
                 </label>
                 <textarea
                   value={form.bio}
                   onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                  placeholder="Talaba haqida qisqacha..."
+                  placeholder={t.stuBioPh}
                   rows={3}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors resize-none"
                 />
@@ -364,13 +367,13 @@ export default function StudentsPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Guruhga qo'shish
+                  {t.stuAddToGroup}
                 </label>
                 {activeGroups.length === 0 ? (
                   <div className="p-4 rounded-xl border border-dashed border-gray-200 text-center">
                     <BookOpen className="w-6 h-6 text-gray-300 mx-auto mb-2" />
                     <p className="text-xs text-gray-400">
-                      Faol guruh yo'q. Avval <strong>Guruhlar</strong> modulidan guruh yarating.
+                      {t.stuNoGroupsA} <strong>{t.tdGroups}</strong> {t.stuNoGroupsB}
                     </p>
                   </div>
                 ) : (
@@ -403,15 +406,15 @@ export default function StudentsPage() {
               {editingId && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Holat
+                    {t.tdColStatus}
                   </label>
                   <select
                     value={form.status}
                     onChange={e => setForm(f => ({ ...f, status: e.target.value as typeof f.status }))}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                   >
-                    <option value="active">Faol</option>
-                    <option value="inactive">Nofaol</option>
+                    <option value="active">{t.admActive}</option>
+                    <option value="inactive">{t.tdInactive}</option>
                   </select>
                 </div>
               )}
@@ -436,7 +439,7 @@ export default function StudentsPage() {
             >
               {formLoading
                 ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : editingId ? 'Saqlash' : "Qo'shish"
+                : editingId ? t.admSave : t.tcAdd
               }
             </button>
             <button
@@ -445,7 +448,7 @@ export default function StudentsPage() {
               disabled={formLoading}
               className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
             >
-              Bekor
+              {t.fpCancel}
             </button>
           </div>
         </div>
@@ -460,7 +463,7 @@ export default function StudentsPage() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Ism, email yoki telefon..."
+              placeholder={t.tstSearchPh}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
             />
           </div>
@@ -479,7 +482,7 @@ export default function StudentsPage() {
                     : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300',
                 )}
               >
-                {s === 'all' ? 'Barchasi' : s === 'active' ? 'Faol' : 'Nofaol'}
+                {s === 'all' ? t.adAll : s === 'active' ? t.admActive : t.tdInactive}
               </button>
             ))}
 
@@ -490,7 +493,7 @@ export default function StudentsPage() {
                 onChange={e => setGroupFilter(e.target.value)}
                 className="px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
               >
-                <option value="all">Barcha guruhlar</option>
+                <option value="all">{t.tstAllGroups}</option>
                 {activeGroups.map(g => (
                   <option key={g.id} value={g.id}>{g.name}</option>
                 ))}
@@ -525,10 +528,10 @@ export default function StudentsPage() {
             <Users className="w-7 h-7 text-blue-600" />
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">
-            Talabalar yo'q
+            {t.stuEmpty}
           </h3>
           <p className="text-sm text-gray-400 mb-5">
-            Hali hech qanday talaba qo'shilmagan
+            {t.stuEmptyHint}
           </p>
           <button
             type="button"
@@ -536,7 +539,7 @@ export default function StudentsPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Birinchi talabani qo'shing
+            {t.stuAddFirst}
           </button>
         </div>
       )}
@@ -546,8 +549,8 @@ export default function StudentsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
           <p className="text-sm text-gray-500">
             {search
-              ? <>"<span className="font-medium">{search}</span>" bo'yicha talaba topilmadi</>
-              : "Tanlangan filtr bo'yicha natija yo'q"
+              ? <>"<span className="font-medium">{search}</span>" {t.stuSearchNotFoundSuffix}</>
+              : t.thFilterNoResult
             }
           </p>
         </div>
@@ -568,7 +571,7 @@ export default function StudentsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-gray-900 truncate">
-                      {student.full_name ?? 'Ism kiritilmagan'}
+                      {student.full_name ?? t.taNoName}
                     </span>
                     <StatusBadge status={student.status} />
                   </div>
@@ -599,7 +602,7 @@ export default function StudentsPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-400 mt-1.5 italic">Guruhga qo'shilmagan</p>
+                    <p className="text-xs text-gray-400 mt-1.5 italic">{t.stuNoGroupAssigned}</p>
                   )}
 
                   {student.bio && (
@@ -611,7 +614,7 @@ export default function StudentsPage() {
                 <div className="flex-shrink-0">
                   {deletingId === student.id ? (
                     <div className="flex flex-col gap-2 items-end">
-                      <p className="text-xs text-red-600 font-medium">O'chirilsinmi?</p>
+                      <p className="text-xs text-red-600 font-medium">{t.thDeleteQ}</p>
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -621,7 +624,7 @@ export default function StudentsPage() {
                         >
                           {deleteLoading
                             ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            : "Ha, o'chir"
+                            : t.pfYesDelete
                           }
                         </button>
                         <button
@@ -629,7 +632,7 @@ export default function StudentsPage() {
                           onClick={() => setDeletingId(null)}
                           className="px-3 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                         >
-                          Bekor
+                          {t.fpCancel}
                         </button>
                       </div>
                     </div>
@@ -639,7 +642,7 @@ export default function StudentsPage() {
                         type="button"
                         onClick={() => openEdit(student)}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                        title="Tahrirlash"
+                        title={t.tcEditT}
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
@@ -647,7 +650,7 @@ export default function StudentsPage() {
                         type="button"
                         onClick={() => setDeletingId(student.id)}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                        title="O'chirish"
+                        title={t.admDisable}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

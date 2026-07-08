@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { PATHS } from '@/routes/paths'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -20,11 +21,13 @@ type EnrolledCourse = {
   att_total:     number
 }
 
-const MONTHS = ['Yanvar','Fevral','Mart','Aprel','May','Iyun',
-                'Iyul','Avgust','Sentabr','Oktyabr','Noyabr','Dekabr']
-function fmtDate(d: string) {
+const MONTH_KEYS: (keyof Translations)[] = [
+  'mJan','mFeb','mMar','mApr','mMay','mJun',
+  'mJul','mAug','mSep','mOct','mNov','mDec',
+]
+function fmtDate(d: string, t: Translations) {
   const dt = new Date(d)
-  return `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`
+  return `${dt.getDate()} ${t[MONTH_KEYS[dt.getMonth()]]} ${dt.getFullYear()}`
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -32,6 +35,7 @@ function fmtDate(d: string) {
 export default function CourseCatalogPage() {
   const auth     = useAuth()
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   const [courses, setCourses] = useState<EnrolledCourse[]>([])
   const [loading, setLoading] = useState(true)
@@ -129,7 +133,7 @@ export default function CourseCatalogPage() {
 
       setCourses(rows)
     } catch {
-      setError("Kurslarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -149,9 +153,9 @@ export default function CourseCatalogPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Kurslarim</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t.ccTitle}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {courses.length} ta guruhga qo'shilgansiz
+          {courses.length} {t.ccJoinedGroups}
         </p>
       </div>
 
@@ -166,8 +170,8 @@ export default function CourseCatalogPage() {
       {courses.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Hali hech qanday kursga qo'shilmadingiz</p>
-          <p className="text-xs text-gray-400 mt-1">Administrator guruhga qo'shsa, shu yerda ko'rinadi</p>
+          <p className="text-sm text-gray-400">{t.ccEmpty}</p>
+          <p className="text-xs text-gray-400 mt-1">{t.ccEmptyHint}</p>
         </div>
       )}
 
@@ -177,17 +181,17 @@ export default function CourseCatalogPage() {
           {/* Umumiy statistika */}
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <p className="text-xs text-gray-400 font-medium">Kurslar</p>
+              <p className="text-xs text-gray-400 font-medium">{t.adCourses}</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">{courses.length}</p>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <p className="text-xs text-gray-400 font-medium">Jami dars</p>
+              <p className="text-xs text-gray-400 font-medium">{t.ccTotalLessons}</p>
               <p className="text-2xl font-bold text-blue-600 mt-1">
                 {courses.reduce((a, c) => a + c.lesson_count, 0)}
               </p>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <p className="text-xs text-gray-400 font-medium">Faol kurs</p>
+              <p className="text-xs text-gray-400 font-medium">{t.ccActiveCourses}</p>
               <p className="text-2xl font-bold text-emerald-600 mt-1">
                 {courses.filter(c => c.group_status === 'active').length}
               </p>
@@ -233,7 +237,7 @@ export default function CourseCatalogPage() {
                           <h3 className="font-bold text-gray-900 truncate">{c.group_name}</h3>
                           {c.group_status !== 'active' && (
                             <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 flex-shrink-0">
-                              {c.group_status === 'completed' ? 'Tugatilgan' : 'Nofaol'}
+                              {c.group_status === 'completed' ? t.tdCompleted : t.tdInactive}
                             </span>
                           )}
                         </div>
@@ -258,7 +262,7 @@ export default function CourseCatalogPage() {
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="bg-gray-50 rounded-xl p-3 text-center">
                         <p className="text-lg font-bold text-gray-900">{c.lesson_count}</p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">Dars</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">{t.ccLesson}</p>
                       </div>
                       <div className="bg-gray-50 rounded-xl p-3 text-center">
                         <p className={cn(
@@ -269,7 +273,7 @@ export default function CourseCatalogPage() {
                         )}>
                           {attPct !== null ? `${attPct}%` : '—'}
                         </p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">Davomat</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">{t.achAttendance}</p>
                       </div>
                     </div>
 
@@ -289,7 +293,7 @@ export default function CourseCatalogPage() {
                     {/* Footer */}
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-gray-400">
-                        Qo'shilgan: {fmtDate(c.enrolled_at)}
+                        {t.adJoined}: {fmtDate(c.enrolled_at, t)}
                       </span>
                       <span className="text-blue-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
                         Darslarga o'tish

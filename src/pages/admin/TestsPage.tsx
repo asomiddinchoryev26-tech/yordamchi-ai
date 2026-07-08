@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { FileText, AlertCircle, Trash2, X, Search, Clock, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { testService } from '@/services/test.service'
 import type { TestWithDetails } from '@/services/test.service'
 
 export default function AdminTestsPage() {
+  const { t } = useLanguage()
   const [tests,      setTests]      = useState<TestWithDetails[]>([])
   const [loading,    setLoading]    = useState(true)
   const [pageError,  setPageError]  = useState<string | null>(null)
@@ -20,7 +22,7 @@ export default function AdminTestsPage() {
     try {
       setTests(await testService.getAll())
     } catch {
-      setPageError("Testlarni yuklashda xatolik")
+      setPageError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -32,7 +34,7 @@ export default function AdminTestsPage() {
       setTests(prev => prev.filter(t => t.id !== id))
       setDeletingId(null)
     } catch {
-      setPageError("O'chirishda xatolik")
+      setPageError(t.aiDeleteErr)
     }
   }
 
@@ -54,8 +56,8 @@ export default function AdminTestsPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Testlar</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Barcha testlar va natijalar</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.tsTitle}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.atSubtitle}</p>
       </div>
 
       {pageError && (
@@ -72,15 +74,15 @@ export default function AdminTestsPage() {
       {!loading && tests.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Jami</p>
+            <p className="text-xs text-gray-400 font-medium">{t.thTotal}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{tests.length}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Nashr qilingan</p>
+            <p className="text-xs text-gray-400 font-medium">{t.alPublished}</p>
             <p className="text-2xl font-bold text-emerald-600 mt-1">{totalPublished}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Qoralama</p>
+            <p className="text-xs text-gray-400 font-medium">{t.tcDraft}</p>
             <p className="text-2xl font-bold text-gray-400 mt-1">{totalDraft}</p>
           </div>
         </div>
@@ -95,7 +97,7 @@ export default function AdminTestsPage() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Test nomi yoki guruh..."
+              placeholder={t.atSearchPh}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
@@ -112,7 +114,7 @@ export default function AdminTestsPage() {
                     : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300',
                 )}
               >
-                {f === 'all' ? 'Barchasi' : f === 'published' ? 'Nashr' : 'Qoralama'}
+                {f === 'all' ? t.adAll : f === 'published' ? t.tcPublished : t.tcDraft}
               </button>
             ))}
           </div>
@@ -136,8 +138,8 @@ export default function AdminTestsPage() {
       {!loading && tests.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <FileText className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Testlar yo'q</p>
-          <p className="text-xs text-gray-400 mt-1">O'qituvchilar test yaratgandan so'ng bu yerda ko'rinadi</p>
+          <p className="text-sm text-gray-400">{t.atEmpty}</p>
+          <p className="text-xs text-gray-400 mt-1">{t.atEmptyHint}</p>
         </div>
       )}
 
@@ -160,7 +162,7 @@ export default function AdminTestsPage() {
                       'text-[11px] font-semibold px-2 py-0.5 rounded-full',
                       test.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500',
                     )}>
-                      {test.is_published ? 'Nashr' : 'Qoralama'}
+                      {test.is_published ? t.tcPublished : t.tcDraft}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 flex-wrap">
@@ -172,13 +174,13 @@ export default function AdminTestsPage() {
                     )}
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {test.duration_minutes} daqiqa
+                      {test.duration_minutes} {t.tsMinutes}
                     </span>
-                    <span>{test.questions.length} ta savol</span>
+                    <span>{test.questions.length} {t.tsQuestionWord}</span>
                     {test.results_count > 0 && (
                       <span className="flex items-center gap-1 text-indigo-500 font-medium">
                         <Users className="w-3 h-3" />
-                        {test.results_count} natija
+                        {test.results_count} {t.atResults}
                       </span>
                     )}
                   </div>
@@ -192,14 +194,14 @@ export default function AdminTestsPage() {
                         onClick={() => void handleDelete(test.id)}
                         className="px-3 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                       >
-                        O'chir
+                        {t.tcDeleteShort}
                       </button>
                       <button
                         type="button"
                         onClick={() => setDeletingId(null)}
                         className="px-3 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                       >
-                        Bekor
+                        {t.fpCancel}
                       </button>
                     </div>
                   ) : (
@@ -207,7 +209,7 @@ export default function AdminTestsPage() {
                       type="button"
                       onClick={() => setDeletingId(test.id)}
                       className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                      title="O'chirish"
+                      title={t.admDisable}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -221,7 +223,7 @@ export default function AdminTestsPage() {
 
       {!loading && tests.length > 0 && filtered.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">Filtr bo'yicha test topilmadi</p>
+          <p className="text-sm text-gray-500">{t.atFilterNotFound}</p>
         </div>
       )}
     </div>

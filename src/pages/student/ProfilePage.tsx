@@ -56,7 +56,7 @@ const inputCls = cn(
 
 export default function StudentProfilePage() {
   const { profile, isLoading, isSaving, error, updateProfile, uploadAvatar, deleteAvatar, clearError } = useProfile()
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
 
   // Form state synced from profile
   const [form, setForm] = useState({
@@ -114,7 +114,7 @@ export default function StudentProfilePage() {
 
   async function handlePwChange() {
     if (pwForm.newPw.length < 8) { setPwError("Parol kamida 8 ta belgidan iborat bo'lishi kerak"); return }
-    if (pwForm.newPw !== pwForm.confirmPw) { setPwError('Parollar mos kelmadi'); return }
+    if (pwForm.newPw !== pwForm.confirmPw) { setPwError(t.pfPwMismatch); return }
     setPwSaving(true); setPwError(null)
     try {
       const { error: e } = await supabase.auth.updateUser({ password: pwForm.newPw })
@@ -123,7 +123,7 @@ export default function StudentProfilePage() {
       setShowPw(false); setPwSaved(true)
       setTimeout(() => setPwSaved(false), 4000)
     } catch (e) {
-      setPwError(e instanceof Error ? e.message : 'Xatolik yuz berdi')
+      setPwError(e instanceof Error ? e.message : t.pfError)
     } finally { setPwSaving(false) }
   }
 
@@ -139,7 +139,7 @@ export default function StudentProfilePage() {
   }
 
   const ROLE_LABELS: Record<string, string> = {
-    student: 'Talaba', teacher: "O'qituvchi", admin: 'Administrator',
+    student: t.adStudent, teacher: t.tdTeacher, admin: t.pfAdministrator,
   }
 
   return (
@@ -147,21 +147,21 @@ export default function StudentProfilePage() {
 
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Profil</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Shaxsiy ma'lumotlar va hisob sozlamalari</p>
+        <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">{t.pfTitle}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.pfSubtitle}</p>
       </div>
 
       {/* Global feedback */}
       {saved && (
         <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
           <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-          <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">Profil muvaffaqiyatli yangilandi</p>
+          <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">{t.pfUpdated}</p>
         </div>
       )}
       {pwSaved && (
         <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
           <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-          <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">Parol muvaffaqiyatli o'zgartirildi</p>
+          <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">{t.pfPwChanged}</p>
         </div>
       )}
       {error && (
@@ -177,7 +177,7 @@ export default function StudentProfilePage() {
           {/* Preview */}
           <div className="flex-shrink-0">
             <UserAvatar
-              name={profile?.fullName ?? 'Foydalanuvchi'}
+              name={profile?.fullName ?? t.adUserWord}
               avatarUrl={profile?.avatarUrl}
               size="xl"
             />
@@ -188,7 +188,7 @@ export default function StudentProfilePage() {
               {profile?.fullName ?? '—'}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-              {profile?.avatarUrl ? 'Yuklangan rasm ishlatilmoqda' : 'Ismi harflari ko\'rsatilmoqda'}
+              {profile?.avatarUrl ? t.pfAvatarUsing : t.pfAvatarInitials}
             </p>
 
             <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
@@ -198,7 +198,7 @@ export default function StudentProfilePage() {
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors shadow-sm"
               >
                 <Upload className="w-3.5 h-3.5" />
-                {profile?.avatarUrl ? 'Almashtirish' : 'Rasm yuklash'}
+                {profile?.avatarUrl ? t.fpReplace : t.pfUploadPhoto}
               </button>
               {profile?.avatarUrl && (
                 <button
@@ -208,7 +208,7 @@ export default function StudentProfilePage() {
                   className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  O'chirish
+                  {t.admDisable}
                 </button>
               )}
             </div>
@@ -216,7 +216,7 @@ export default function StudentProfilePage() {
             {/* Delete confirm */}
             {avatarConfirm === 'delete' && (
               <div className="mt-3 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-700 dark:text-red-300 font-medium mb-2.5">Avatar o'chirilsinmi?</p>
+                <p className="text-sm text-red-700 dark:text-red-300 font-medium mb-2.5">{t.pfAvatarDeleteQ}</p>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -225,14 +225,14 @@ export default function StudentProfilePage() {
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
                   >
                     {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                    Ha, o'chirish
+                    {t.pfYesDelete}
                   </button>
                   <button
                     type="button"
                     onClick={() => setAvatarConfirm(null)}
                     className="px-3 py-1.5 border border-gray-200 dark:border-gray-700 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    Bekor
+                    {t.fpCancel}
                   </button>
                 </div>
               </div>
@@ -254,19 +254,19 @@ export default function StudentProfilePage() {
       </Section>
 
       {/* ── Personal Information ────────────────────────────────────────────── */}
-      <Section icon={User} title="Shaxsiy ma'lumotlar">
+      <Section icon={User} title={t.pfPersonalInfo}>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="To'liq ism *">
+            <Field label={t.pfFullName}>
               <input
                 type="text"
                 value={form.fullName}
                 onChange={e => setField('fullName', e.target.value)}
                 className={inputCls}
-                placeholder="Ism Familiya"
+                placeholder={t.pfFullNamePh}
               />
             </Field>
-            <Field label="Email (o'zgartirib bo'lmaydi)">
+            <Field label={t.pfEmailNoChange}>
               <input
                 type="email"
                 value={profile?.email ?? ''}
@@ -276,7 +276,7 @@ export default function StudentProfilePage() {
             </Field>
           </div>
 
-          <Field label="Telefon raqami">
+          <Field label={t.pfPhone}>
             <input
               type="tel"
               value={form.phone}
@@ -290,7 +290,7 @@ export default function StudentProfilePage() {
             <textarea
               value={form.bio}
               onChange={e => setField('bio', e.target.value)}
-              placeholder="O'zingiz haqida qisqacha..."
+              placeholder={t.pfBioPh}
               rows={3}
               maxLength={300}
               className={cn(inputCls, 'resize-none leading-relaxed')}
@@ -307,19 +307,19 @@ export default function StudentProfilePage() {
             className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            O'zgarishlarni saqlash
+            {t.pfSaveChanges}
           </button>
         </div>
       </Section>
 
       {/* ── Account info (read-only) ────────────────────────────────────────── */}
-      <Section icon={GraduationCap} title="Hisob ma'lumotlari">
+      <Section icon={GraduationCap} title={t.pfAccountInfo}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { label: 'Rol',      value: ROLE_LABELS[profile?.role ?? 'student'] ?? profile?.role ?? '—' },
-            { label: 'Holat',    value: profile?.status === 'active' ? 'Faol' : 'Bloklangan' },
-            { label: 'Email',    value: profile?.email ?? '—' },
-            { label: 'Ro\'yxat', value: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('uz-UZ') : '—' },
+            { label: t.adRole,       value: ROLE_LABELS[profile?.role ?? 'student'] ?? profile?.role ?? '—' },
+            { label: t.tdColStatus,  value: profile?.status === 'active' ? t.admActive : t.pfBlocked },
+            { label: 'Email',        value: profile?.email ?? '—' },
+            { label: t.pfRegistered, value: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('uz-UZ') : '—' },
           ].map(({ label, value }) => (
             <div key={label} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3">
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wide mb-0.5">{label}</p>
@@ -330,7 +330,7 @@ export default function StudentProfilePage() {
       </Section>
 
       {/* ── Language ────────────────────────────────────────────────────────── */}
-      <Section icon={Globe} title="Til">
+      <Section icon={Globe} title={t.pfLanguage}>
         <div className="flex flex-wrap gap-2">
           {([['uz', "O'zbek 🇺🇿"], ['ru', 'Русский 🇷🇺'], ['en', 'English 🇬🇧']] as const).map(([code, label]) => (
             <button
@@ -352,13 +352,13 @@ export default function StudentProfilePage() {
 
       {/* ── About / Bio display ──────────────────────────────────────────────── */}
       {profile?.bio && (
-        <Section icon={FileText} title="Haqida">
+        <Section icon={FileText} title={t.pfAbout}>
           <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
         </Section>
       )}
 
       {/* ── Security ────────────────────────────────────────────────────────── */}
-      <Section icon={Shield} title="Xavfsizlik">
+      <Section icon={Shield} title={t.pfSecurity}>
         {!showPw ? (
           <button
             type="button"
@@ -366,17 +366,17 @@ export default function StudentProfilePage() {
             className="flex items-center gap-2 text-sm text-violet-600 dark:text-violet-400 font-semibold hover:underline"
           >
             <Shield className="w-4 h-4" />
-            Parolni o'zgartirish
+            {t.pfChangePw}
           </button>
         ) : (
           <div className="space-y-3">
-            <Field label="Yangi parol">
+            <Field label={t.pfNewPw}>
               <div className="relative">
                 <input
                   type={showMask ? 'text' : 'password'}
                   value={pwForm.newPw}
                   onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))}
-                  placeholder="Kamida 8 ta belgi"
+                  placeholder={t.pfPwMin}
                   className={cn(inputCls, 'pr-10')}
                 />
                 <button
@@ -388,12 +388,12 @@ export default function StudentProfilePage() {
                 </button>
               </div>
             </Field>
-            <Field label="Parolni tasdiqlash">
+            <Field label={t.pfConfirmPw}>
               <input
                 type={showMask ? 'text' : 'password'}
                 value={pwForm.confirmPw}
                 onChange={e => setPwForm(f => ({ ...f, confirmPw: e.target.value }))}
-                placeholder="Parolni qayta kiriting"
+                placeholder={t.pfPwRepeat}
                 className={inputCls}
               />
             </Field>
@@ -413,14 +413,14 @@ export default function StudentProfilePage() {
                 className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60"
               >
                 {pwSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Yangilash
+                {t.tfRefresh}
               </button>
               <button
                 type="button"
                 onClick={() => { setShowPw(false); setPwError(null); setPwForm({ newPw: '', confirmPw: '' }) }}
                 className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                Bekor
+                {t.fpCancel}
               </button>
             </div>
           </div>
@@ -428,9 +428,9 @@ export default function StudentProfilePage() {
       </Section>
 
       {/* ── Appearance placeholder ───────────────────────────────────────────── */}
-      <Section icon={Sun} title="Ko'rinish">
+      <Section icon={Sun} title={t.pfAppearance}>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Mavzu sozlamasi Navbar'dagi 🌙/☀️ tugmasi orqali o'zgartiriladi.
+          {t.pfThemeNote}
         </p>
       </Section>
 

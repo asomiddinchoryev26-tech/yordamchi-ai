@@ -1,5 +1,6 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, Suspense } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
+import PageLoader from '@/components/common/PageLoader'
 import { useAuth } from '@/hooks/useAuth'
 import {
   Home, Users, GraduationCap, Layers,
@@ -147,7 +148,9 @@ export default function AdminLayout() {
           avatarNode={avatarEl}
         />
         <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden page-enter">
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

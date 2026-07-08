@@ -7,14 +7,18 @@ import { attachmentService, getVideoEmbedUrl } from '@/services/attachment.servi
 import type { AttachmentRow } from '@/services/attachment.service'
 import type { LessonWithDetails } from '@/services/lesson.service'
 import type { GroupWithRelations } from '@/services/group.service'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
-const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
-function fmtDate(d: string) {
+const MONTH_KEYS: (keyof Translations)[] = [
+  'mJan','mFeb','mMar','mApr','mMay','mJun','mJul','mAug','mSep','mOct','mNov','mDec',
+]
+function fmtDate(d: string, t: Translations) {
   const dt = new Date(d)
-  return `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`
+  return `${dt.getDate()} ${t[MONTH_KEYS[dt.getMonth()]].slice(0,3)} ${dt.getFullYear()}`
 }
 
 export default function AdminLessonsPage() {
+  const { t } = useLanguage()
   const [lessons,  setLessons]  = useState<LessonWithDetails[]>([])
   const [groups,   setGroups]   = useState<GroupWithRelations[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -38,7 +42,7 @@ export default function AdminLessonsPage() {
       setLessons(lessonsData)
       setGroups(groupsData)
     } catch {
-      setError("Ma'lumotlarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -58,8 +62,8 @@ export default function AdminLessonsPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Darslar</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Barcha guruhlarning darslari</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.tdLessons}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.alSubtitle}</p>
       </div>
 
       {error && (
@@ -73,15 +77,15 @@ export default function AdminLessonsPage() {
       {!loading && lessons.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Jami dars</p>
+            <p className="text-xs text-gray-400 font-medium">{t.alTotalLessons}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{lessons.length}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Nashr qilingan</p>
+            <p className="text-xs text-gray-400 font-medium">{t.alPublished}</p>
             <p className="text-2xl font-bold text-emerald-600 mt-1">{publishedCount}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Qoralama</p>
+            <p className="text-xs text-gray-400 font-medium">{t.tcDraft}</p>
             <p className="text-2xl font-bold text-gray-400 mt-1">{lessons.length - publishedCount}</p>
           </div>
         </div>
@@ -96,7 +100,7 @@ export default function AdminLessonsPage() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Dars nomi yoki o'qituvchi..."
+              placeholder={t.alSearchPh}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
@@ -106,7 +110,7 @@ export default function AdminLessonsPage() {
               onChange={e => setGroupFilter(e.target.value)}
               className="appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             >
-              <option value="all">Barcha guruhlar</option>
+              <option value="all">{t.tstAllGroups}</option>
               {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -133,8 +137,8 @@ export default function AdminLessonsPage() {
       {!loading && lessons.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Darslar yo'q</p>
-          <p className="text-xs text-gray-400 mt-1">O'qituvchilar dars qo'shgach bu yerda ko'rinadi</p>
+          <p className="text-sm text-gray-400">{t.alEmpty}</p>
+          <p className="text-xs text-gray-400 mt-1">{t.alEmptyHint}</p>
         </div>
       )}
 
@@ -184,7 +188,7 @@ export default function AdminLessonsPage() {
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                           : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                       )}>
-                        {lesson.is_published ? 'Nashr' : 'Qoralama'}
+                        {lesson.is_published ? t.tcPublished : t.tcDraft}
                       </span>
                       {embedUrl && (
                         <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex items-center gap-0.5">
@@ -199,9 +203,9 @@ export default function AdminLessonsPage() {
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-gray-500 flex-wrap">
                       {grp && <span className="font-medium text-gray-600 dark:text-gray-300">{grp.name}</span>}
-                      {teacher && <span>{teacher.full_name ?? 'O\'qituvchi'}</span>}
+                      {teacher && <span>{teacher.full_name ?? t.tdTeacher}</span>}
                       {subj && <span style={{ color: subj.color }}>{subj.name}</span>}
-                      {lesson.lesson_date && <span>{fmtDate(lesson.lesson_date)}</span>}
+                      {lesson.lesson_date && <span>{fmtDate(lesson.lesson_date, t)}</span>}
                     </div>
                   </div>
                   <ChevronDown className={cn('w-4 h-4 text-gray-400 flex-shrink-0 transition-transform', isExp && 'rotate-180')} />
@@ -226,12 +230,12 @@ export default function AdminLessonsPage() {
                       </div>
                     )}
                     {!lesson.content && !embedUrl && (
-                      <p className="text-sm text-gray-400 dark:text-gray-500 italic">Kontent qo'shilmagan</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 italic">{t.alNoContent}</p>
                     )}
                     {attLoaded && lessonAtts.length > 0 && (
                       <div>
                         <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                          <Paperclip className="w-3.5 h-3.5" /> Biriktirmalar ({lessonAtts.length})
+                          <Paperclip className="w-3.5 h-3.5" /> {t.tcAttachments} ({lessonAtts.length})
                         </p>
                         <div className="space-y-1">
                           {lessonAtts.map(att => (

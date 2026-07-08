@@ -142,7 +142,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         }
       })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Xatolik yuz berdi')
+      console.error('[Profile] update failed:', e)
+      setError('Xatolik yuz berdi')
     } finally {
       setIsSaving(false)
     }
@@ -160,7 +161,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       // Use cache-busted URL for immediate in-memory display
       setProfile(prev => prev ? { ...prev, avatarUrl: publicUrl, avatarMode: 'uploaded' } : null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Avatar yuklanmadi')
+      console.error('[Profile] avatar upload failed:', e)
+      setError('Avatar yuklanmadi')
     } finally {
       setIsSaving(false)
     }
@@ -176,7 +178,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       await avatarService.saveUrl(profile.id, null)
       setProfile(prev => prev ? { ...prev, avatarUrl: null, avatarMode: 'initials' } : null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Avatar o\'chirilmadi')
+      console.error('[Profile] avatar delete failed:', e)
+      setError('Avatar o\'chirilmadi')
     } finally {
       setIsSaving(false)
     }

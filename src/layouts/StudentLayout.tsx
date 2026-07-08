@@ -7,8 +7,9 @@
  * Added visual-only nav items (Soon tags) + Premium plan section.
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
+import PageLoader from '@/components/common/PageLoader'
 import { useAuth } from '@/hooks/useAuth'
 import {
   Home, BookOpen, FileText, User, Award, Calendar, Settings,
@@ -24,9 +25,16 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { AsomiddinAIMenuIcon } from '@/components/ai'
 import { UserAvatar } from '@/components/identity'
 import { useProfile } from '@/hooks/useProfile'
+import StudentBottomNav from '@/components/student/StudentBottomNav'
+import NotificationsBell from '@/components/student/NotificationsBell'
+import { PremiumModal } from '@/components/student/AssignmentsAI'
+import { subscriptionService, PLAN_LABELS } from '@/services/subscription.service'
+import type { PlanType } from '@/types/lms.types'
 
 export default function StudentLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [premiumOpen, setPremiumOpen] = useState(false)
+  const [plan,        setPlan]        = useState<PlanType>('free')
   const auth        = useAuth()
   const { profile } = useProfile()
   const navigate    = useNavigate()
@@ -48,17 +56,17 @@ export default function StudentLayout() {
     {
       title: t.learningSection,
       items: [
-        { label: t.dashboard,    to: PATHS.STUDENT.ROOT,         icon: Home               },
+        { label: t.dashboard,       to: PATHS.STUDENT.ROOT,         icon: Home               },
+        { label: '🤖 Yordamchi AI', to: PATHS.STUDENT.AI_ASSISTANT, icon: AsomiddinAIMenuIcon},
         { label: t.myCourses,    to: PATHS.STUDENT.LESSONS,      icon: BookOpen           },
         { label: 'Darslar',      to: PATHS.STUDENT.LESSONS,      icon: Video              },
         { label: t.tests,        to: PATHS.STUDENT.TESTS,        icon: FileText           },
-        { label: t.aiAssistant,  to: PATHS.STUDENT.AI_ASSISTANT, icon: AsomiddinAIMenuIcon},
-        { label: 'Topshiriqlar', to: PATHS.STUDENT.PROFILE,      icon: Clipboard, tag: 'Soon' },
-        { label: 'Kalendar',     to: PATHS.STUDENT.PROFILE,      icon: Calendar,  tag: 'Soon' },
+        { label: 'Topshiriqlar', to: PATHS.STUDENT.ASSIGNMENTS,  icon: Clipboard          },
+        { label: 'Kalendar',     to: PATHS.STUDENT.ATTENDANCE,   icon: Calendar           },
         { label: t.achievements, to: PATHS.STUDENT.ACHIEVEMENTS, icon: Award              },
-        { label: 'Statistika',   to: PATHS.STUDENT.PROFILE,      icon: BarChart3, tag: 'Soon' },
-        { label: 'Sertifikatlar',to: PATHS.STUDENT.PROFILE,      icon: GraduationCap, tag: 'Soon' },
-        { label: 'Reyting',      to: PATHS.STUDENT.PROFILE,      icon: Trophy,    tag: 'Soon' },
+        { label: 'Statistika',   to: PATHS.STUDENT.MY_PROGRESS,  icon: BarChart3          },
+        { label: 'Sertifikatlar',to: PATHS.STUDENT.CERTIFICATES, icon: GraduationCap      },
+        { label: 'Reyting',      to: PATHS.STUDENT.LEADERBOARD,  icon: Trophy             },
       ],
     },
     {
@@ -110,6 +118,13 @@ export default function StudentLayout() {
       })
     })()
   }, [auth.user?.id])
+
+  // Joriy reja — premium badge + upsell holati uchun (on-demand, keshsiz)
+  useEffect(() => {
+    if (!auth.user?.id) return
+    void subscriptionService.getPlan(auth.user.id).then(setPlan)
+  }, [auth.user?.id])
+  const isPremiumUser = plan !== 'free'
 
   async function handleLogout() {
     await auth.logout()
@@ -175,13 +190,22 @@ export default function StudentLayout() {
             style={{ background: 'linear-gradient(135deg,#F59E0B,#EF4444)', boxShadow: '0 0 10px rgba(245,158,11,0.4)' }}>
             <span className="text-[10px]" aria-hidden="true">👑</span>
           </div>
-          <p className="text-[12px] font-bold text-white/75">Premium reja</p>
+          <p className="text-[12px] font-bold text-white/75">
+            {isPremiumUser ? PLAN_LABELS[plan] : 'Premium reja'}
+          </p>
+          {isPremiumUser && (
+            <span className="ml-auto text-[8.5px] font-black px-1.5 py-0.5 rounded-full text-emerald-300 tracking-wide"
+              style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}>
+              FAOL
+            </span>
+          )}
         </div>
         <p className="text-[10px] text-white/38 leading-snug mb-3 relative z-10">
-          Ko&apos;proq imkoniyatlar va cheksiz AI yordam!
+          {isPremiumUser ? 'Barcha premium imkoniyatlar ochiq. Rahmat! 👑' : "Ko'proq imkoniyatlar va cheksiz AI yordam!"}
         </p>
         <button
           type="button"
+          onClick={() => setPremiumOpen(true)}
           className="w-full py-[8px] rounded-[10px] text-[11.5px] font-bold text-white flex items-center justify-center gap-1.5 relative z-10 transition-all hover:opacity-88 active:scale-98"
           style={{
             background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)',
@@ -189,7 +213,7 @@ export default function StudentLayout() {
           }}
         >
           <Zap className="w-3 h-3" aria-hidden="true" />
-          Rejani yangilash
+          {isPremiumUser ? 'Rejani boshqarish' : 'Rejani yangilash'}
         </button>
       </div>
     </div>
@@ -215,17 +239,26 @@ export default function StudentLayout() {
       <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden" style={{ background: '#070B14' }}>
         <Navbar
           onMenuClick={() => setSidebarOpen(true)}
-          notificationCount={3}
           userName={userName}
           userInitial={initial}
           avatarGradient="bg-gradient-to-br from-blue-500 to-indigo-600"
           searchPlaceholder={t.studentSearchPlaceholder}
           avatarNode={avatarEl}
+          notificationsSlot={<NotificationsBell />}
         />
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden page-enter">
-          <Outlet />
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 pb-24 lg:pb-6 overflow-x-hidden page-enter">
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
+
+      {/* Mobil/planshet pastki navigatsiya (desktop'da sidebar bor — yashirin).
+          Drawer ochilganda ko'rsatmaymiz. */}
+      {!sidebarOpen && <StudentBottomNav />}
+
+      {/* Premium reja — "Rejani yangilash" bosilganda ochiladi (mavjud oqim) */}
+      <PremiumModal open={premiumOpen} onClose={() => setPremiumOpen(false)} />
     </div>
   )
 }

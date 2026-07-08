@@ -8,12 +8,13 @@
 
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AlertCircle, CheckCircle, User, Mail, Lock, ChevronDown } from 'lucide-react'
+import { AlertCircle, CheckCircle, User, Mail, Lock, Pencil } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
 import type { UserRole } from '@/types/auth.types'
 import logoSrc from '@/assets/images/logo.svg'
 import { useLanguage } from '@/contexts/LanguageContext'
+import RoleSelectionStep from './RoleSelectionStep'
 
 // ─── Business logic constants (PRESERVED EXACTLY) ─────────────────────────────
 
@@ -21,6 +22,12 @@ const ROLE_PATH: Record<UserRole, string> = {
   student: PATHS.STUDENT.ROOT,
   teacher: PATHS.TEACHER.ROOT,
   admin:   PATHS.ADMIN.ROOT,
+}
+
+const ROLE_LABEL: Record<UserRole, string> = {
+  student: 'Talaba',
+  teacher: "O'qituvchi",
+  admin:   "Ta'lim muassasasi",
 }
 
 // ─── V6 design tokens ─────────────────────────────────────────────────────────
@@ -54,9 +61,10 @@ export default function RegisterPage() {
   const navigate = useNavigate()
   const { t }    = useLanguage()
 
+  const [step,        setStep]        = useState<'role' | 'details'>('role')
   const [name,        setName]        = useState('')
   const [email,       setEmail]       = useState('')
-  const [role,        setRole]        = useState<UserRole>('student')
+  const [role,        setRole]        = useState<UserRole | null>(null)
   const [password,    setPassword]    = useState('')
   const [formLoading, setFormLoading] = useState(false)
   const [emailSent,   setEmailSent]   = useState(false)
@@ -64,6 +72,7 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
+    if (!role) { setStep('role'); return }   // rol tanlanmagan bo'lsa 1-bosqichga qaytamiz
     setFormLoading(true)
     auth.clearError()
     const user = await auth.register({ name, email, password, role })
@@ -119,6 +128,18 @@ export default function RegisterPage() {
     )
   }
 
+  // ── 1-bosqich: premium rol tanlash ekrani ─────────────────────────────────
+  if (step === 'role') {
+    return (
+      <RoleSelectionStep
+        selected={role}
+        onSelect={setRole}
+        onContinue={() => setStep('details')}
+      />
+    )
+  }
+
+  // ── 2-bosqich: hisob ma'lumotlari ─────────────────────────────────────────
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10" style={PAGE_BG}>
       {/* Ambient orbs */}
@@ -189,40 +210,31 @@ export default function RegisterPage() {
                   onFocus={() => setFocusField('email')}
                   onBlur={() => setFocusField(null)}
                   autoComplete="email"
-                  placeholder="sizning@email.com"
+                  placeholder={t.emailPlaceholder}
                   style={fi('email')}
                 />
               </div>
             </div>
 
-            {/* Role */}
+            {/* Selected role — 1-bosqichda tanlangan, bu yerdan o'zgartirish mumkin */}
             <div>
-              <label htmlFor="reg-role" className="block text-[11.5px] font-bold text-white/40 uppercase tracking-[0.12em] mb-1.5">
+              <label className="block text-[11.5px] font-bold text-white/40 uppercase tracking-[0.12em] mb-1.5">
                 {t.roleLabel}
               </label>
-              <div className="relative">
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                  style={{ color: 'rgba(255,255,255,0.28)' }} aria-hidden="true" />
-                <select
-                  id="reg-role"
-                  value={role}
-                  onChange={e => setRole(e.target.value as UserRole)}
-                  style={{
-                    ...INPUT_BASE,
-                    paddingLeft: 14,
-                    paddingRight: 36,
-                    appearance: 'none',
-                    ...(focusField === 'role' ? {
-                      borderColor: 'rgba(91,127,255,0.55)',
-                      boxShadow: '0 0 0 3px rgba(91,127,255,0.13)',
-                    } : {}),
-                  }}
-                  onFocus={() => setFocusField('role')}
-                  onBlur={() => setFocusField(null)}
+              <div
+                className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-[12px]"
+                style={{ background: 'rgba(91,127,255,0.10)', border: '1px solid rgba(91,127,255,0.30)' }}
+              >
+                <span className="text-[13.5px] font-semibold text-white">{role ? ROLE_LABEL[role] : ''}</span>
+                <button
+                  type="button"
+                  onClick={() => setStep('role')}
+                  className="inline-flex items-center gap-1 text-[12px] font-semibold transition-colors hover:opacity-80"
+                  style={{ color: '#93BBFF' }}
                 >
-                  <option value="student" style={{ background: '#0D1526' }}>{t.studentRole}</option>
-                  <option value="teacher" style={{ background: '#0D1526' }}>{t.teacherRole}</option>
-                </select>
+                  <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+                  O&apos;zgartirish
+                </button>
               </div>
             </div>
 

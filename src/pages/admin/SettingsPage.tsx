@@ -2,39 +2,42 @@ import { useState, useEffect } from 'react'
 import { Save, AlertCircle, CheckCircle, Settings } from 'lucide-react'
 import { settingsService } from '@/services/settings.service'
 import type { SettingsMap } from '@/services/settings.service'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
-const SETTING_FIELDS = [
+const SETTING_FIELDS: { key: string; labelKey: keyof Translations; placeholder: string; phKey?: keyof Translations; type: 'text' | 'textarea' | 'email' | 'number'; required: boolean }[] = [
   {
     key:         'org_name',
-    label:       'Tashkilot nomi',
+    labelKey:    'asOrgName',
     placeholder: 'YordamchiAI',
-    type:        'text' as const,
+    type:        'text',
     required:    true,
   },
   {
     key:         'org_description',
-    label:       'Tashkilot tavsifi',
-    placeholder: 'Online ta\'lim platformasi',
-    type:        'textarea' as const,
+    labelKey:    'asOrgDesc',
+    placeholder: '',
+    phKey:       'asOrgDescPh',
+    type:        'textarea',
     required:    false,
   },
   {
     key:         'support_email',
-    label:       'Yordam email manzili',
+    labelKey:    'asSupportEmail',
     placeholder: 'support@example.uz',
-    type:        'email' as const,
+    type:        'email',
     required:    false,
   },
   {
     key:         'max_group_size',
-    label:       'Guruhda maksimal talabalar soni',
+    labelKey:    'asMaxGroup',
     placeholder: '30',
-    type:        'number' as const,
+    type:        'number',
     required:    false,
   },
 ]
 
 export default function AdminSettingsPage() {
+  const { t } = useLanguage()
   const [settings,  setSettings]  = useState<SettingsMap>({})
   const [loading,   setLoading]   = useState(true)
   const [saving,    setSaving]    = useState(false)
@@ -49,7 +52,7 @@ export default function AdminSettingsPage() {
     try {
       setSettings(await settingsService.getAll())
     } catch {
-      setError("Sozlamalarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -61,7 +64,7 @@ export default function AdminSettingsPage() {
 
   async function handleSave() {
     if (!settings['org_name']?.trim()) {
-      setError("Tashkilot nomi majburiy")
+      setError(t.asOrgNameReq)
       return
     }
     setSaving(true)
@@ -71,7 +74,7 @@ export default function AdminSettingsPage() {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch {
-      setError("Saqlashda xatolik yuz berdi")
+      setError(t.tcSaveErr)
     } finally {
       setSaving(false)
     }
@@ -94,14 +97,14 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-5 pb-8 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Sozlamalar</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Tizim konfiguratsiyasi</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.asTitle}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.asSubtitle}</p>
       </div>
 
       {saved && (
         <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200">
           <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <p className="text-sm text-emerald-700 font-medium">Sozlamalar muvaffaqiyatli saqlandi</p>
+          <p className="text-sm text-emerald-700 font-medium">{t.asSaved}</p>
         </div>
       )}
       {error && (
@@ -115,20 +118,20 @@ export default function AdminSettingsPage() {
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-5">
         <div className="flex items-center gap-2 mb-2">
           <Settings className="w-4 h-4 text-emerald-600" />
-          <h2 className="text-base font-bold text-gray-900">Umumiy sozlamalar</h2>
+          <h2 className="text-base font-bold text-gray-900">{t.asGeneral}</h2>
         </div>
 
         {SETTING_FIELDS.map(field => (
           <div key={field.key}>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              {field.label}
+              {t[field.labelKey]}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {field.type === 'textarea' ? (
               <textarea
                 value={settings[field.key] ?? ''}
                 onChange={e => handleChange(field.key, e.target.value)}
-                placeholder={field.placeholder}
+                placeholder={field.phKey ? t[field.phKey] : field.placeholder}
                 rows={3}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
               />
@@ -137,7 +140,7 @@ export default function AdminSettingsPage() {
                 type={field.type}
                 value={settings[field.key] ?? ''}
                 onChange={e => handleChange(field.key, e.target.value)}
-                placeholder={field.placeholder}
+                placeholder={field.phKey ? t[field.phKey] : field.placeholder}
                 min={field.type === 'number' ? 1 : undefined}
                 max={field.type === 'number' ? 200 : undefined}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
@@ -149,11 +152,11 @@ export default function AdminSettingsPage() {
 
       {/* Tizim ma'lumotlari (read-only) */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900 mb-4">Tizim ma'lumotlari</h2>
+        <h2 className="text-base font-bold text-gray-900 mb-4">{t.asSystemInfo}</h2>
         <div className="space-y-3 text-sm">
           {[
-            { label: 'Platforma',    value: 'YordamchiAI LMS' },
-            { label: 'Versiya',      value: 'v1.0.0' },
+            { label: t.asPlatform,   value: 'YordamchiAI LMS' },
+            { label: t.asVersion,    value: 'v1.0.0' },
             { label: 'Backend',      value: 'Supabase (PostgreSQL)' },
             { label: 'Frontend',     value: 'React 19 + Vite + TypeScript' },
             { label: 'UI framework', value: 'Tailwind CSS v4' },
@@ -176,7 +179,7 @@ export default function AdminSettingsPage() {
           ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           : <Save className="w-4 h-4" />
         }
-        Saqlash
+        {t.admSave}
       </button>
     </div>
   )

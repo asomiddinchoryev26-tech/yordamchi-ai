@@ -4,14 +4,19 @@ export const PATHS = {
   LOGIN:           '/login',
   REGISTER:        '/register',
   FORGOT_PASSWORD: '/forgot-password',
+  WELCOME:         '/welcome',
 
   STUDENT: {
     ROOT:         '/dashboard',
     LESSONS:      '/dashboard/lessons',
+    ASSIGNMENTS:  '/dashboard/assignments',  // Migration 018 — Homework module
     ATTENDANCE:   '/dashboard/attendance',
     TESTS:        '/dashboard/tests',
     PROFILE:      '/dashboard/profile',
     ACHIEVEMENTS: '/dashboard/achievements',
+    MY_PROGRESS:  '/dashboard/progress',
+    CERTIFICATES: '/dashboard/certificates',
+    LEADERBOARD:  '/dashboard/leaderboard',
     AI_ASSISTANT: '/dashboard/ai-assistant',
     AI_VISION:    '/dashboard/ai-vision',    // Sprint 3.2 Phase 1
   },
@@ -21,6 +26,7 @@ export const PATHS = {
     STUDENTS:     '/teacher/students',
     GROUPS:       '/teacher/groups',
     COURSES:      '/teacher/courses',
+    ASSIGNMENTS:  '/teacher/assignments',  // Migration 018 — Homework module
     ATTENDANCE:   '/teacher/attendance',
     TESTS:        '/teacher/tests',
     PROFILE:      '/teacher/profile',

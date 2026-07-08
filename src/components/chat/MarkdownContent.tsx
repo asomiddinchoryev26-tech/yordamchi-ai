@@ -45,6 +45,16 @@ hljs.registerLanguage('c',          langCPP)
 
 // ── Katex math rendering ──────────────────────────────────────────────────────
 
+// HTML-escape untrusted text before it can reach dangerouslySetInnerHTML.
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function renderMath(source: string, display: boolean): string {
   try {
     return katex.renderToString(source, {
@@ -52,9 +62,11 @@ function renderMath(source: string, display: boolean): string {
       throwOnError: false,
       strict:       false,
       output:       'html',
+      trust:        false, // security: disallow \href, \htmlClass, raw HTML injection
     })
   } catch {
-    return source
+    // Security: never inject raw source into innerHTML — escape it first.
+    return escapeHtml(source)
   }
 }
 

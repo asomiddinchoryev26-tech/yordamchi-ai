@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
 import { Link, Outlet } from 'react-router-dom'
+import PageLoader from '@/components/common/PageLoader'
 import { Sun, Moon, Globe, ChevronDown, Menu, X, ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PATHS } from '@/routes/paths'
@@ -332,7 +333,9 @@ export default function MainLayout() {
 
       {/* Page content */}
       <main id="main-content" className="flex-1 min-w-0">
-        <Outlet />
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       {/* Footer */}

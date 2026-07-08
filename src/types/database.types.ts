@@ -247,14 +247,19 @@ export type Database = {
       }
       lesson_attachments: {
         Row: {
-          id:          string
-          lesson_id:   string
-          file_name:   string
-          file_path:   string
-          file_size:   number | null
-          mime_type:   string | null
-          uploaded_by: string | null
-          created_at:  string
+          id:                 string
+          lesson_id:          string
+          file_name:          string
+          file_path:          string
+          file_size:          number | null
+          mime_type:          string | null
+          uploaded_by:        string | null
+          created_at:         string
+          view_count:         number
+          download_count:     number
+          last_viewed_at:     string | null
+          last_downloaded_at: string | null
+          is_required:        boolean
         }
         Insert: {
           id?:          string
@@ -265,9 +270,11 @@ export type Database = {
           mime_type?:   string | null
           uploaded_by?: string | null
           created_at?:  string
+          is_required?: boolean
         }
         Update: {
-          file_name?: string
+          file_name?:   string
+          is_required?: boolean
         }
         Relationships: [
           { foreignKeyName: 'lesson_attachments_lesson_id_fkey';   columns: ['lesson_id'];   referencedRelation: 'lessons';  referencedColumns: ['id'] },
@@ -558,6 +565,187 @@ export type Database = {
         }
         Relationships: []
       }
+      // Migration 018 — Homework & Assignment module
+      assignments: {
+        Row: {
+          id:           string
+          teacher_id:   string
+          subject_id:   string | null
+          title:        string
+          description:  string | null
+          deadline:     string | null
+          max_score:    number
+          status:       'draft' | 'published'
+          published_at: string | null
+          deleted_at:   string | null
+          created_at:   string
+          updated_at:   string
+        }
+        Insert: {
+          id?:           string
+          teacher_id:    string
+          subject_id?:   string | null
+          title:         string
+          description?:  string | null
+          deadline?:     string | null
+          max_score?:    number
+          status?:       'draft' | 'published'
+          published_at?: string | null
+          deleted_at?:   string | null
+          created_at?:   string
+          updated_at?:   string
+        }
+        Update: {
+          subject_id?:   string | null
+          title?:        string
+          description?:  string | null
+          deadline?:     string | null
+          max_score?:    number
+          status?:       'draft' | 'published'
+          published_at?: string | null
+          deleted_at?:   string | null
+          updated_at?:   string
+        }
+        Relationships: [
+          { foreignKeyName: 'assignments_teacher_id_fkey'; columns: ['teacher_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] },
+          { foreignKeyName: 'assignments_subject_id_fkey'; columns: ['subject_id']; referencedRelation: 'subjects'; referencedColumns: ['id'] },
+        ]
+      }
+      assignment_groups: {
+        Row: {
+          id:            string
+          assignment_id: string
+          group_id:      string
+          created_at:    string
+        }
+        Insert: {
+          id?:            string
+          assignment_id:  string
+          group_id:       string
+          created_at?:    string
+        }
+        Update: {
+          group_id?: string
+        }
+        Relationships: [
+          { foreignKeyName: 'assignment_groups_assignment_id_fkey'; columns: ['assignment_id']; referencedRelation: 'assignments'; referencedColumns: ['id'] },
+          { foreignKeyName: 'assignment_groups_group_id_fkey';      columns: ['group_id'];      referencedRelation: 'groups';      referencedColumns: ['id'] },
+        ]
+      }
+      assignment_attachments: {
+        Row: {
+          id:            string
+          assignment_id: string
+          file_name:     string
+          file_path:     string
+          file_size:     number | null
+          mime_type:     string | null
+          uploaded_by:   string | null
+          created_at:    string
+        }
+        Insert: {
+          id?:            string
+          assignment_id:  string
+          file_name:      string
+          file_path:      string
+          file_size?:     number | null
+          mime_type?:     string | null
+          uploaded_by?:   string | null
+          created_at?:    string
+        }
+        Update: {
+          file_name?: string
+        }
+        Relationships: [
+          { foreignKeyName: 'assignment_attachments_assignment_id_fkey'; columns: ['assignment_id']; referencedRelation: 'assignments'; referencedColumns: ['id'] },
+        ]
+      }
+      assignment_submissions: {
+        Row: {
+          id:            string
+          assignment_id: string
+          student_id:    string
+          file_name:     string | null
+          file_path:     string | null
+          file_size:     number | null
+          mime_type:     string | null
+          comment:       string | null
+          status:        'submitted' | 'graded' | 'returned'
+          score:         number | null
+          feedback:      string | null
+          graded_by:     string | null
+          graded_at:     string | null
+          submitted_at:  string
+          deleted_at:    string | null
+          created_at:    string
+          updated_at:    string
+        }
+        Insert: {
+          id?:            string
+          assignment_id:  string
+          student_id:     string
+          file_name?:     string | null
+          file_path?:     string | null
+          file_size?:     number | null
+          mime_type?:     string | null
+          comment?:       string | null
+          status?:        'submitted' | 'graded' | 'returned'
+          score?:         number | null
+          feedback?:      string | null
+          graded_by?:     string | null
+          graded_at?:     string | null
+          submitted_at?:  string
+          deleted_at?:    string | null
+          created_at?:    string
+          updated_at?:    string
+        }
+        Update: {
+          file_name?:    string | null
+          file_path?:    string | null
+          file_size?:    number | null
+          mime_type?:    string | null
+          comment?:      string | null
+          status?:       'submitted' | 'graded' | 'returned'
+          score?:        number | null
+          feedback?:     string | null
+          graded_by?:    string | null
+          graded_at?:    string | null
+          deleted_at?:   string | null
+          updated_at?:   string
+        }
+        Relationships: [
+          { foreignKeyName: 'assignment_submissions_assignment_id_fkey'; columns: ['assignment_id']; referencedRelation: 'assignments'; referencedColumns: ['id'] },
+          { foreignKeyName: 'assignment_submissions_student_id_fkey';    columns: ['student_id'];    referencedRelation: 'profiles';    referencedColumns: ['id'] },
+        ]
+      }
+      notifications: {
+        Row: {
+          id:         string
+          user_id:    string
+          type:       'assignment_new' | 'assignment_graded' | 'assignment_deadline'
+          title:      string
+          body:       string | null
+          data:       Record<string, unknown>
+          read_at:    string | null
+          created_at: string
+        }
+        Insert: {
+          id?:         string
+          user_id:     string
+          type:        'assignment_new' | 'assignment_graded' | 'assignment_deadline'
+          title:       string
+          body?:       string | null
+          data?:       Record<string, unknown>
+          read_at?:    string | null
+          created_at?: string
+        }
+        Update: {
+          read_at?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: 'notifications_user_id_fkey'; columns: ['user_id']; referencedRelation: 'profiles'; referencedColumns: ['id'] },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -590,6 +778,27 @@ export type Database = {
       run_monthly_achievement_cycle: {
         Args:    { p_year: number; p_month: number }
         Returns: Record<string, unknown>
+      }
+      create_deadline_reminders: {
+        Args:    Record<string, never>
+        Returns: number
+      }
+      bump_attachment_stat: {
+        Args:    { p_id: string; p_kind: string }
+        Returns: undefined
+      }
+      // Migration 021 — test integrity (server-side, answer-safe)
+      get_student_tests: {
+        Args:    Record<string, never>
+        Returns: unknown[]
+      }
+      submit_test: {
+        Args:    { p_test_id: string; p_answers: Record<string, number> }
+        Returns: Record<string, unknown>
+      }
+      get_my_test_results: {
+        Args:    Record<string, never>
+        Returns: unknown[]
       }
     }
     Enums: {
@@ -638,4 +847,21 @@ export type AiConversationRow    = Database['public']['Tables']['ai_conversation
 export type AiConversationInsert = Database['public']['Tables']['ai_conversations']['Insert']
 export type AiMessageRow         = Database['public']['Tables']['ai_messages']['Row']
 export type AiMessageInsert      = Database['public']['Tables']['ai_messages']['Insert']
+
+// Migration 018 — Homework & Assignment module
+export type AssignmentRow    = Database['public']['Tables']['assignments']['Row']
+export type AssignmentInsert = Database['public']['Tables']['assignments']['Insert']
+export type AssignmentUpdate = Database['public']['Tables']['assignments']['Update']
+
+export type AssignmentGroupRow = Database['public']['Tables']['assignment_groups']['Row']
+
+export type AssignmentAttachmentRow    = Database['public']['Tables']['assignment_attachments']['Row']
+export type AssignmentAttachmentInsert = Database['public']['Tables']['assignment_attachments']['Insert']
+
+export type AssignmentSubmissionRow    = Database['public']['Tables']['assignment_submissions']['Row']
+export type AssignmentSubmissionInsert = Database['public']['Tables']['assignment_submissions']['Insert']
+export type AssignmentSubmissionUpdate = Database['public']['Tables']['assignment_submissions']['Update']
+
+export type NotificationRow    = Database['public']['Tables']['notifications']['Row']
+export type NotificationInsert = Database['public']['Tables']['notifications']['Insert']
 

@@ -158,7 +158,7 @@ export default function ForgotPasswordPage() {
                   onFocus={() => setFocused(true)}
                   onBlur={() => setFocused(false)}
                   autoComplete="email"
-                  placeholder="sizning@email.com"
+                  placeholder={t.emailPlaceholder}
                   style={inputStyle}
                 />
               </div>

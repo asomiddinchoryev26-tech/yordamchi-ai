@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { attendanceService, STATUS_META } from '@/services/attendance.service'
 import { supabase } from '@/lib/supabase'
 import type { AttendanceEntry, AttendanceStatus } from '@/services/attendance.service'
+import { QRAttendanceManager } from '@/components/teacher/TeacherFeatures'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 function todayStr() {
   return new Date().toISOString().split('T')[0]
@@ -12,10 +14,15 @@ function todayStr() {
 
 type GroupOption = { id: string; name: string }
 const STATUSES: AttendanceStatus[] = ['present', 'absent', 'late', 'excused']
+// Holat teglari — rang/fon servisdan, matn tarjimadan
+const ATT_STATUS_KEYS: Record<AttendanceStatus, keyof Translations> = {
+  present: 'sdPresent', absent: 'sdAbsent', late: 'sdLate', excused: 'sdExcused',
+}
 
 function StatusBtn({
   status, selected, onClick,
 }: { status: AttendanceStatus; selected: boolean; onClick: () => void }) {
+  const { t } = useLanguage()
   const m = STATUS_META[status]
   return (
     <button
@@ -28,13 +35,14 @@ function StatusBtn({
           : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300',
       )}
     >
-      {m.label}
+      {t[ATT_STATUS_KEYS[status]]}
     </button>
   )
 }
 
 export default function TeacherAttendancePage() {
   const auth = useAuth()
+  const { t } = useLanguage()
   const [groups,      setGroups]      = useState<GroupOption[]>([])
   const [groupId,     setGroupId]     = useState('')
   const [date,        setDate]        = useState(todayStr())
@@ -72,7 +80,7 @@ export default function TeacherAttendancePage() {
     try {
       setEntries(await attendanceService.getGroupAttendance(groupId, date))
     } catch {
-      setPageError("Davomatni yuklashda xatolik")
+      setPageError(t.mpLoadErr)
     } finally {
       setLoadingData(false)
     }
@@ -99,7 +107,7 @@ export default function TeacherAttendancePage() {
       setSavedMsg(true)
       setTimeout(() => setSavedMsg(false), 3000)
     } catch {
-      setPageError("Saqlashda xatolik yuz berdi")
+      setPageError(t.tcSaveErr)
     } finally {
       setSaving(false)
     }
@@ -111,14 +119,14 @@ export default function TeacherAttendancePage() {
   return (
     <div className="space-y-5 pb-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Davomat</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Guruh davomatini belgilang</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.achAttendance}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.taSubtitle}</p>
       </div>
 
       {savedMsg && (
         <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-700 font-medium flex items-center gap-2">
           <CheckSquare className="w-4 h-4" />
-          Davomat muvaffaqiyatli saqlandi
+          {t.taSaved}
         </div>
       )}
       {pageError && (
@@ -132,9 +140,9 @@ export default function TeacherAttendancePage() {
       <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Guruh</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.tfGroup}</label>
             {groups.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">Aktiv guruh topilmadi</p>
+              <p className="text-sm text-gray-400 italic">{t.taNoActiveGroup}</p>
             ) : (
               <div className="relative">
                 <select
@@ -149,7 +157,7 @@ export default function TeacherAttendancePage() {
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Sana</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.tcDate}</label>
             <input
               type="date"
               value={date}
@@ -161,10 +169,19 @@ export default function TeacherAttendancePage() {
         </div>
       </div>
 
+      {/* QR davomat (Premium) — additiv, tanlangan guruh uchun */}
+      {auth.user?.id && groupId && (
+        <QRAttendanceManager
+          teacherId={auth.user.id}
+          groupId={groupId}
+          groupName={groups.find(g => g.id === groupId)?.name}
+        />
+      )}
+
       {groups.length === 0 && !loadingData && (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Sizga biriktirilgan aktiv guruh yo'q</p>
+          <p className="text-sm text-gray-400">{t.taNoActiveGroupAssigned}</p>
         </div>
       )}
 
@@ -185,7 +202,7 @@ export default function TeacherAttendancePage() {
       {!loadingData && groupId && entries.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Bu guruhda talabalar yo'q</p>
+          <p className="text-sm text-gray-400">{t.tfNoStudents}</p>
         </div>
       )}
 
@@ -194,14 +211,14 @@ export default function TeacherAttendancePage() {
           {/* Statistika + ommaviy belgilash */}
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3 text-sm">
-              <span className="text-emerald-600 font-semibold">{presentCount} kelgan</span>
+              <span className="text-emerald-600 font-semibold">{presentCount} {t.sdPresent.toLowerCase()}</span>
               <span className="text-gray-300">·</span>
-              <span className="text-red-600 font-semibold">{absentCount} kelmagan</span>
+              <span className="text-red-600 font-semibold">{absentCount} {t.sdAbsent.toLowerCase()}</span>
               <span className="text-gray-300">·</span>
-              <span className="text-gray-500">{entries.length} jami</span>
+              <span className="text-gray-500">{entries.length} {t.adTotal.replace(':', '').toLowerCase()}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-gray-400 text-xs">Barchasi:</span>
+              <span className="text-gray-400 text-xs">{t.adAll}:</span>
               {STATUSES.map(s => (
                 <button
                   key={s}
@@ -209,7 +226,7 @@ export default function TeacherAttendancePage() {
                   onClick={() => setAllStatus(s)}
                   className={cn('px-2 py-1 rounded-lg font-semibold border transition-colors border-transparent', STATUS_META[s].bg, STATUS_META[s].color)}
                 >
-                  {STATUS_META[s].label}
+                  {t[ATT_STATUS_KEYS[s]]}
                 </button>
               ))}
             </div>
@@ -233,7 +250,7 @@ export default function TeacherAttendancePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">
-                      {entry.student.full_name ?? 'Ism kiritilmagan'}
+                      {entry.student.full_name ?? t.taNoName}
                     </p>
                     <p className="text-xs text-gray-400 truncate">{entry.student.email}</p>
                   </div>
@@ -254,7 +271,7 @@ export default function TeacherAttendancePage() {
                       type="text"
                       value={entry.note}
                       onChange={e => setNote(entry.student.id, e.target.value)}
-                      placeholder="Izoh (ixtiyoriy)..."
+                      placeholder={t.taNotePh}
                       className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                     />
                   </div>
@@ -274,7 +291,7 @@ export default function TeacherAttendancePage() {
                 ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 : <Save className="w-4 h-4" />
               }
-              Davomatni saqlash
+              {t.taSaveBtn}
             </button>
           </div>
         </>

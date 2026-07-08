@@ -370,7 +370,7 @@ function IdleHero({ language, onPrompt }: { language: Language; onPrompt: (text:
               style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#C4B5FD' }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true" />
-              AI Vision · Beta · Gemini 2.5 Flash
+              YordamchiAI Vision · Beta · Gemini 2.5 Flash
             </div>
 
             <h1
@@ -398,7 +398,7 @@ function IdleHero({ language, onPrompt }: { language: Language; onPrompt: (text:
           >
             <IllustrationImage
               src={ILLUS.AI_CHAT}
-              alt="AI Vision — sun'iy intellekt ko'rish imkoniyati"
+              alt="YordamchiAI Vision — sun'iy intellekt ko'rish imkoniyati"
               width={220}
               height={220}
               glow="0 0 50px rgba(99,102,241,0.55)"
@@ -617,7 +617,7 @@ export default function AIVisionPage() {
             <Sparkles className="w-4 h-4 text-white" aria-hidden="true" />
           </div>
           <div>
-            <span className="text-[14px] font-black text-white tracking-tight">AI Vision</span>
+            <span className="text-[14px] font-black text-white tracking-tight">YordamchiAI Vision</span>
             <span
               className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full"
               style={{ background: 'rgba(99,102,241,0.2)', color: '#C4B5FD', border: '1px solid rgba(99,102,241,0.3)' }}
@@ -737,7 +737,7 @@ export default function AIVisionPage() {
           )}
           {isChatMode && (
             <p className="text-center text-[9.5px] text-white/15 mt-2 select-none tracking-wide">
-              YordamchiAI · AI Vision · Gemini 2.5 Flash
+              YordamchiAI Vision · Gemini 2.5 Flash
             </p>
           )}
         </div>

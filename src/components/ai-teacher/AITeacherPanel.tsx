@@ -15,6 +15,7 @@ import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { ProgressRing } from '@/components/dashboard'
 import { CtxSection }   from './CtxSection'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 import type { StudentContext } from '@/services/ai-provider.service'
 
 // ─── Ease constant ────────────────────────────────────────────────────────────
@@ -25,16 +26,16 @@ const EASE: [number, number, number, number] = [0.21, 0.47, 0.32, 0.98]
 
 interface LevelDef {
   min: number; max: number
-  label: string; emoji: string
+  labelKey: keyof Translations; emoji: string
   from: string; to: string   // CSS gradient colors
 }
 
 const LEVELS: LevelDef[] = [
-  { min: 0,    max: 150,  label: 'Yangi boshlovchi', emoji: '🌱', from: '#10B981', to: '#059669' },
-  { min: 150,  max: 400,  label: "O'rganuvchi",      emoji: '📚', from: '#3B82F6', to: '#2563EB' },
-  { min: 400,  max: 750,  label: 'Bilimdon',         emoji: '⭐', from: '#8B5CF6', to: '#7C3AED' },
-  { min: 750,  max: 1200, label: 'Ustoz shogird',    emoji: '🎓', from: '#F59E0B', to: '#D97706' },
-  { min: 1200, max: 9999, label: 'Ekspert',          emoji: '🏆', from: '#EF4444', to: '#DC2626' },
+  { min: 0,    max: 150,  labelKey: 'atpLvlBeginner', emoji: '🌱', from: '#10B981', to: '#059669' },
+  { min: 150,  max: 400,  labelKey: 'atpLvlLearner',  emoji: '📚', from: '#3B82F6', to: '#2563EB' },
+  { min: 400,  max: 750,  labelKey: 'atpLvlKnower',   emoji: '⭐', from: '#8B5CF6', to: '#7C3AED' },
+  { min: 750,  max: 1200, labelKey: 'atpLvlMentor',   emoji: '🎓', from: '#F59E0B', to: '#D97706' },
+  { min: 1200, max: 9999, labelKey: 'atpLvlExpert',   emoji: '🏆', from: '#EF4444', to: '#DC2626' },
 ]
 
 function getLevel(xp: number) {
@@ -105,40 +106,38 @@ function computeStreak(attPct: number | null): number {
 
 // ─── AI Insight generation ────────────────────────────────────────────────────
 
-function generateInsights(ctx: StudentContext | null): string[] {
-  if (!ctx) return [
-    "AI o'qituvchi ma'lumotlaringizni yuklamoqda…",
-  ]
+function generateInsights(ctx: StudentContext | null, t: Translations): string[] {
+  if (!ctx) return [t.atpInsLoading]
   const { testStats, attPct, groups } = ctx
   const insights: string[] = []
 
   if (testStats && testStats.avgPct < 60 && testStats.total > 0) {
-    insights.push(`Test o'rtachangiz ${testStats.avgPct}% — diskriminant hisoblashga e'tibor bering.`)
+    insights.push(t.atpInsTestLow.replace('{pct}', String(testStats.avgPct)))
   } else if (testStats && testStats.avgPct >= 80 && testStats.total > 0) {
-    insights.push(`Test natijalaringiz zo'r (${testStats.avgPct}%)! Siz keyingi darajaga tayor.`)
+    insights.push(t.atpInsTestHigh.replace('{pct}', String(testStats.avgPct)))
   } else if (testStats && testStats.total === 0) {
-    insights.push("Hali test topshirmadingiz. Birinchi testni sinab ko'ring!")
+    insights.push(t.atpInsTestNone)
   }
 
   if (attPct !== null && attPct < 75) {
-    insights.push(`Davomatingiz ${attPct}% — har bir dars natijangizni 3% ga oshiradi.`)
+    insights.push(t.atpInsAttLow.replace('{pct}', String(attPct)))
   } else if (attPct !== null && attPct >= 90) {
-    insights.push(`Davomatingiz ${attPct}% — bu muvaffaqiyatning eng kuchli garovidir!`)
+    insights.push(t.atpInsAttHigh.replace('{pct}', String(attPct)))
   } else if (attPct !== null) {
-    insights.push(`Davomatingiz ${attPct}% — yana bir oz zo'r bo'lsangiz, yangi rekord!`)
+    insights.push(t.atpInsAttMid.replace('{pct}', String(attPct)))
   }
 
   if (groups && groups.length > 0) {
-    insights.push(`${groups[0].subjectName ?? groups[0].name} bo'yicha tizimli ravishda o'sib borayapsiz.`)
+    insights.push(t.atpInsSubject.replace('{subject}', groups[0].subjectName ?? groups[0].name))
   }
 
   const xp = computeXP(ctx)
   if (xp >= 500) {
-    insights.push("Ishonchingiz so'nggi haftada 12% oshdi. Shunday davom eting!")
+    insights.push(t.atpInsXpHigh)
   } else if (xp >= 150) {
-    insights.push("Har kuni AI bilan 20 daqiqa mashq — bu 40% tez o'rganishni ta'minlaydi.")
+    insights.push(t.atpInsXpMid)
   } else {
-    insights.push("Birinchi suhbatdan keyin AI o'quv reja tuzib beradi. Boshlang!")
+    insights.push(t.atpInsXpLow)
   }
 
   return insights.slice(0, 4)
@@ -148,27 +147,27 @@ function generateInsights(ctx: StudentContext | null): string[] {
 
 interface WeakTopic { topic: string; score: number; color: string }
 
-function computeWeakTopics(ctx: StudentContext | null): WeakTopic[] {
+function computeWeakTopics(ctx: StudentContext | null, t: Translations): WeakTopic[] {
   const avgPct = ctx?.testStats?.avgPct ?? 75
   if (avgPct >= 75) return []
   return [
-    { topic: 'Diskriminant hisoblash', score: Math.max(20, avgPct - 28), color: '#EF4444' },
-    { topic: 'Manfiy ildizlar',        score: Math.max(30, avgPct - 17), color: '#F59E0B' },
-    { topic: 'Funksiya qiymatlari',    score: Math.max(42, avgPct - 8),  color: '#F97316' },
-  ].filter(t => t.score < 65)
+    { topic: t.atpWeakDiscriminant, score: Math.max(20, avgPct - 28), color: '#EF4444' },
+    { topic: t.atpWeakNegRoots,     score: Math.max(30, avgPct - 17), color: '#F59E0B' },
+    { topic: t.atpWeakFuncVals,     score: Math.max(42, avgPct - 8),  color: '#F97316' },
+  ].filter(w => w.score < 65)
 }
 
 // ─── Learning Path ────────────────────────────────────────────────────────────
 
 interface PathItem { title: string; status: 'completed' | 'current' | 'upcoming' }
 
-function computeLearningPath(ctx: StudentContext | null): PathItem[] {
+function computeLearningPath(ctx: StudentContext | null, t: Translations): PathItem[] {
   const lessons = ctx?.recentLessons ?? []
   return [
     ...(lessons.slice(0, 2).map(l => ({ title: l.title, status: 'completed' as const }))),
-    { title: lessons[2]?.title ?? 'Joriy mavzu', status: 'current'   as const },
-    { title: 'Uchinchi daraja tenglamalar',       status: 'upcoming'  as const },
-    { title: 'Funksiyalar va grafiklar',          status: 'upcoming'  as const },
+    { title: lessons[2]?.title ?? t.atpPathCurrent, status: 'current'   as const },
+    { title: t.atpPathTopic3,                       status: 'upcoming'  as const },
+    { title: t.atpPathTopic4,                       status: 'upcoming'  as const },
   ]
 }
 
@@ -176,39 +175,39 @@ function computeLearningPath(ctx: StudentContext | null): PathItem[] {
 
 interface AchievementDef { emoji: string; name: string; desc: string; earned: boolean }
 
-function computeAchievements(ctx: StudentContext | null, xp: number): AchievementDef[] {
+function computeAchievements(ctx: StudentContext | null, xp: number, t: Translations): AchievementDef[] {
   const attPct   = ctx?.attPct ?? 0
   const avgPct   = ctx?.testStats?.avgPct ?? 0
   const passed   = ctx?.testStats?.passed ?? 0
   return [
-    { emoji: '💬', name: 'Birinchi savol',    desc: 'AI bilan birinchi suhbat',   earned: true          },
-    { emoji: '🔥', name: 'Haftalik jangchi',  desc: '7 kun ketma-ket faol',       earned: computeStreak(attPct > 0 ? attPct : null) >= 7 },
-    { emoji: '🏆', name: 'Test ustasi',       desc: "O'rtacha 75%+ test natijasi", earned: avgPct >= 75  },
-    { emoji: '✅', name: 'Davomat qahramoni', desc: '90%+ davomat',               earned: attPct >= 90  },
-    { emoji: '📚', name: 'Bilimdon',          desc: '500+ XP yig\'ish',            earned: xp >= 500    },
-    { emoji: '⭐', name: 'Perfeksionist',     desc: 'Barcha testlarda 90%+',       earned: avgPct >= 90  },
-    { emoji: '🎯', name: 'Aniq nishonchi',    desc: '5 ta test topshirish',        earned: passed >= 5   },
-    { emoji: '🚀', name: 'Tez o\'rganuvchi',  desc: 'Birinchi haftada 3+ dars',   earned: (ctx?.groups?.length ?? 0) >= 1 },
+    { emoji: '💬', name: t.atpAch1Name, desc: t.atpAch1Desc, earned: true          },
+    { emoji: '🔥', name: t.atpAch2Name, desc: t.atpAch2Desc, earned: computeStreak(attPct > 0 ? attPct : null) >= 7 },
+    { emoji: '🏆', name: t.atpAch3Name, desc: t.atpAch3Desc, earned: avgPct >= 75  },
+    { emoji: '✅', name: t.atpAch4Name, desc: t.atpAch4Desc, earned: attPct >= 90  },
+    { emoji: '📚', name: t.atpAch5Name, desc: t.atpAch5Desc, earned: xp >= 500    },
+    { emoji: '⭐', name: t.atpAch6Name, desc: t.atpAch6Desc, earned: avgPct >= 90  },
+    { emoji: '🎯', name: t.atpAch7Name, desc: t.atpAch7Desc, earned: passed >= 5   },
+    { emoji: '🚀', name: t.atpAch8Name, desc: t.atpAch8Desc, earned: (ctx?.groups?.length ?? 0) >= 1 },
   ]
 }
 
 // ─── Weekly Mission ───────────────────────────────────────────────────────────
 
-function computeMission(ctx: StudentContext | null) {
+function computeMission(ctx: StudentContext | null, t: Translations) {
   void (ctx?.attPct ?? 0) // attPct informs task state indirectly via xp
   const total  = ctx?.testStats?.total ?? 0
   const avgPct = ctx?.testStats?.avgPct ?? 0
   const groups = ctx?.groups?.length ?? 0
   const xp     = computeXP(ctx)
   return {
-    title: "Haftalik missiya",
-    reward: "100 XP + 🏆 Nishon",
+    title: t.atpMissionTitle,
+    reward: t.atpMissionReward,
     tasks: [
-      { label: '3 ta dars o\'tish',    done: groups >= 1       },
-      { label: '2 ta test topshirish', done: total >= 2        },
-      { label: 'AI bilan suhbat',      done: true              },
-      { label: '80%+ test natijasi',   done: avgPct >= 80      },
-      { label: '50+ XP yig\'ish',      done: xp >= 50          },
+      { label: t.atpMissionTask1, done: groups >= 1       },
+      { label: t.atpMissionTask2, done: total >= 2        },
+      { label: t.atpMissionTask3, done: true              },
+      { label: t.atpMissionTask4, done: avgPct >= 80      },
+      { label: t.atpMissionTask5, done: xp >= 50          },
     ],
   }
 }
@@ -216,6 +215,7 @@ function computeMission(ctx: StudentContext | null) {
 // ─── XP Level Widget ─────────────────────────────────────────────────────────
 
 function XPLevelWidget({ xp, ctx: _ctx }: { xp: number; ctx: StudentContext | null }) {
+  const { t }    = useLanguage()
   const level    = getLevel(xp)
   const xpInLvl  = xp - level.min
   const xpToNext = level.max - level.min
@@ -240,10 +240,10 @@ function XPLevelWidget({ xp, ctx: _ctx }: { xp: number; ctx: StudentContext | nu
         </motion.div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-none mb-1">
-            Daraja
+            {t.atpLevel}
           </p>
           <p className="text-[15px] font-black text-gray-900 dark:text-white leading-none truncate">
-            {level.label}
+            {t[level.labelKey]}
           </p>
         </div>
         <div className="text-right flex-shrink-0">
@@ -270,7 +270,7 @@ function XPLevelWidget({ xp, ctx: _ctx }: { xp: number; ctx: StudentContext | nu
             <CountUp to={xpInLvl} /> XP
           </span>
           <span className="text-[9px] text-gray-400 dark:text-gray-500 font-medium">
-            {xpToNext} XP → keyingi daraja
+            {xpToNext} XP → {t.atpNextLevel}
           </span>
         </div>
       </div>
@@ -281,7 +281,8 @@ function XPLevelWidget({ xp, ctx: _ctx }: { xp: number; ctx: StudentContext | nu
 // ─── Streak Widget ────────────────────────────────────────────────────────────
 
 function StreakWidget({ streak }: { streak: number }) {
-  const days     = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya']
+  const { t }    = useLanguage()
+  const days     = [t.atpDayMon, t.atpDayTue, t.atpDayWed, t.atpDayThu, t.atpDayFri, t.atpDaySat, t.atpDaySun]
   const todayRaw = new Date().getDay() // 0=Sun
   const todayIdx = todayRaw === 0 ? 6 : todayRaw - 1 // Mo=0
 
@@ -301,20 +302,20 @@ function StreakWidget({ streak }: { streak: number }) {
             <span className="text-2xl font-black text-gray-900 dark:text-white">
               <CountUp to={streak} />
             </span>
-            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">kun</span>
+            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">{t.atpKun}</span>
           </div>
-          <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Ketma-ket faollik!</p>
+          <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">{t.atpStreakActive}</p>
         </div>
         <div className="ml-auto text-right">
           <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 justify-end">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" aria-hidden="true" />
-            Bugun faol
+            {t.atpTodayActive}
           </p>
         </div>
       </div>
 
       {/* Day dots */}
-      <div className="grid grid-cols-7 gap-1" role="list" aria-label="Haftalik faollik">
+      <div className="grid grid-cols-7 gap-1" role="list" aria-label={t.atpWeeklyActivity}>
         {days.map((d, i) => {
           const daysAgo  = (todayIdx - i + 7) % 7
           const isActive = daysAgo < Math.min(streak, 7) && daysAgo >= 0
@@ -349,6 +350,7 @@ function StreakWidget({ streak }: { streak: number }) {
 // ─── Mastery Score Widget ─────────────────────────────────────────────────────
 
 function MasteryWidget({ ctx }: { ctx: StudentContext | null }) {
+  const { t }   = useLanguage()
   const attPct  = ctx?.attPct ?? 0
   const avgPct  = ctx?.testStats?.avgPct ?? 0
   const groups  = ctx?.groups?.length ?? 0
@@ -357,15 +359,15 @@ function MasteryWidget({ ctx }: { ctx: StudentContext | null }) {
   const masteryColor = mastery >= 80 ? '#22C55E' : mastery >= 60 ? '#5B5CF6' : '#F59E0B'
 
   const bars = [
-    { label: 'Davomat',  value: attPct, color: '#22C55E' },
-    { label: 'Testlar',  value: avgPct, color: '#5B5CF6' },
-    { label: 'Faollik',  value: Math.min(groups * 20, 100), color: '#F59E0B' },
+    { label: t.attendance,      value: attPct, color: '#22C55E' },
+    { label: t.tests,           value: avgPct, color: '#5B5CF6' },
+    { label: t.tdScoreActivity, value: Math.min(groups * 20, 100), color: '#F59E0B' },
   ]
 
   return (
     <div className="flex items-start gap-4">
       <div className="flex-shrink-0">
-        <ProgressRing value={mastery} size={68} strokeWidth={6} color={masteryColor} label="Umumiy" animDelay={0.5} />
+        <ProgressRing value={mastery} size={68} strokeWidth={6} color={masteryColor} label={t.atpMasteryOverall} animDelay={0.5} />
       </div>
       <div className="flex-1 space-y-2.5 min-w-0">
         {bars.map(b => (
@@ -409,6 +411,7 @@ function LearningPathTimeline({ items, onPromptSelect }: {
   items: PathItem[]
   onPromptSelect: (text: string) => void
 }) {
+  const { t } = useLanguage()
   return (
     <div className="relative">
       {/* Vertical line */}
@@ -443,7 +446,7 @@ function LearningPathTimeline({ items, onPromptSelect }: {
               <button
                 type="button"
                 disabled={isUpcoming}
-                onClick={() => isCurrent && onPromptSelect(`"${item.title}" mavzusida menga yordam ber`)}
+                onClick={() => isCurrent && onPromptSelect(t.atpPromptPath.replace('{topic}', item.title))}
                 className={cn(
                   'flex-1 min-w-0 text-left p-2 rounded-xl transition-all duration-150 text-[11px] font-medium leading-snug',
                   isDone    && 'text-gray-500 dark:text-gray-400',
@@ -453,10 +456,10 @@ function LearningPathTimeline({ items, onPromptSelect }: {
               >
                 <span className="line-clamp-2">{item.title}</span>
                 {isDone && (
-                  <span className="text-[9px] text-emerald-500 font-semibold block mt-0.5">Tugatildi ✓</span>
+                  <span className="text-[9px] text-emerald-500 font-semibold block mt-0.5">{t.atpDone} ✓</span>
                 )}
                 {isCurrent && (
-                  <span className="text-[9px] text-brand dark:text-brand-light font-semibold block mt-0.5">Davom etmoqda ▶</span>
+                  <span className="text-[9px] text-brand dark:text-brand-light font-semibold block mt-0.5">{t.atpInProgress} ▶</span>
                 )}
               </button>
             </motion.div>
@@ -495,8 +498,9 @@ function AchievementBadge({ emoji, name, earned, desc }: AchievementDef) {
 // ─── Weekly Mission ───────────────────────────────────────────────────────────
 
 function WeeklyMission({ ctx }: { ctx: StudentContext | null }) {
-  const mission = computeMission(ctx)
-  const done    = mission.tasks.filter(t => t.done).length
+  const { t }   = useLanguage()
+  const mission = computeMission(ctx, t)
+  const done    = mission.tasks.filter(task => task.done).length
   const total   = mission.tasks.length
   const pct     = Math.round((done / total) * 100)
 
@@ -504,7 +508,7 @@ function WeeklyMission({ ctx }: { ctx: StudentContext | null }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300">
-          {done}/{total} vazifa bajarildi
+          {done}/{total} {t.atpMissionDoneSuffix}
         </span>
         <span className="text-[10px] font-bold text-brand dark:text-brand-light bg-brand/10 dark:bg-brand/15 px-2 py-0.5 rounded-md">
           {mission.reward}
@@ -559,19 +563,20 @@ interface AITeacherPanelProps {
 }
 
 export function AITeacherPanel({ context, onPromptSelect }: AITeacherPanelProps) {
+  const { t }        = useLanguage()
   const xp           = computeXP(context)
   const streak       = computeStreak(context?.attPct ?? null)
-  const insights     = generateInsights(context)
-  const weakTopics   = computeWeakTopics(context)
-  const pathItems    = computeLearningPath(context)
-  const achievements = computeAchievements(context, xp)
+  const insights     = generateInsights(context, t)
+  const weakTopics   = computeWeakTopics(context, t)
+  const pathItems    = computeLearningPath(context, t)
+  const achievements = computeAchievements(context, xp, t)
   const earnedCount  = achievements.filter(a => a.earned).length
 
   return (
     <aside
       className="flex-shrink-0 flex flex-col bg-white dark:bg-[#0F172A] border-l border-gray-100 dark:border-white/[0.06] overflow-hidden"
       style={{ width: 272 }}
-      aria-label="AI o'qituvchi paneli"
+      aria-label={t.atpPanelAria}
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-4 h-14 border-b border-gray-100 dark:border-white/[0.06] flex-shrink-0">
@@ -584,7 +589,7 @@ export function AITeacherPanel({ context, onPromptSelect }: AITeacherPanelProps)
           🧑‍🏫
         </motion.span>
         <h2 className="text-[13px] font-black text-gray-900 dark:text-white flex-1 tracking-tight">
-          AI O&apos;qituvchi
+          {t.atpTitle}
         </h2>
         <Sparkles className="w-3.5 h-3.5 text-brand" aria-hidden="true" />
       </div>
@@ -599,12 +604,12 @@ export function AITeacherPanel({ context, onPromptSelect }: AITeacherPanelProps)
         <div className="h-px bg-gray-100 dark:bg-white/[0.05] mx-3" />
 
         {/* 2. Daily Streak */}
-        <CtxSection icon={Flame} title="Kundalik streak" defaultOpen>
+        <CtxSection icon={Flame} title={t.atpStreakTitle} defaultOpen>
           <StreakWidget streak={streak} />
         </CtxSection>
 
         {/* 3. AI Insights */}
-        <CtxSection icon={Lightbulb} title="AI tahlil" defaultOpen badge="Yangi">
+        <CtxSection icon={Lightbulb} title={t.atpInsightsTitle} defaultOpen badge={t.atpNewBadge}>
           <div className="space-y-2">
             {insights.map((text, i) => (
               <InsightItem key={i} text={text} index={i} />
@@ -613,28 +618,28 @@ export function AITeacherPanel({ context, onPromptSelect }: AITeacherPanelProps)
         </CtxSection>
 
         {/* 4. Mastery Score */}
-        <CtxSection icon={TrendingUp} title="O'zlashtirish darajasi" defaultOpen>
+        <CtxSection icon={TrendingUp} title={t.atpMasteryTitle} defaultOpen>
           <MasteryWidget ctx={context} />
         </CtxSection>
 
         {/* 5. Weak Topics — only shown when struggling */}
         {weakTopics.length > 0 && (
-          <CtxSection icon={AlertTriangle} title="Zaif tomonlar" defaultOpen>
+          <CtxSection icon={AlertTriangle} title={t.atpWeakTitle} defaultOpen>
             <div className="space-y-2">
-              {weakTopics.map((t, i) => (
+              {weakTopics.map((wt, i) => (
                 <button
                   key={i}
                   type="button"
-                  onClick={() => onPromptSelect(`"${t.topic}" mavzusini batafsilroq tushuntir va misollar ber`)}
+                  onClick={() => onPromptSelect(t.atpPromptWeak.replace('{topic}', wt.topic))}
                   className="w-full text-left p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/15 border border-red-100 dark:border-red-900/25 bg-red-50/50 dark:bg-red-900/10 transition-all group"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-semibold text-red-700 dark:text-red-400 truncate">{t.topic}</span>
-                    <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: t.color }}>{t.score}%</span>
+                    <span className="text-[11px] font-semibold text-red-700 dark:text-red-400 truncate">{wt.topic}</span>
+                    <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: wt.color }}>{wt.score}%</span>
                   </div>
-                  <AnimBar value={t.score} color={t.color} />
+                  <AnimBar value={wt.score} color={wt.color} />
                   <p className="text-[9px] text-red-500 dark:text-red-400 mt-1.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight className="w-2.5 h-2.5" aria-hidden="true" /> Mashq qilish uchun bosing
+                    <ChevronRight className="w-2.5 h-2.5" aria-hidden="true" /> {t.atpWeakPractice}
                   </p>
                 </button>
               ))}
@@ -643,22 +648,22 @@ export function AITeacherPanel({ context, onPromptSelect }: AITeacherPanelProps)
         )}
 
         {/* 6. Learning Path */}
-        <CtxSection icon={BookOpen} title="O'quv yo'li">
+        <CtxSection icon={BookOpen} title={t.atpPathTitle}>
           <LearningPathTimeline items={pathItems} onPromptSelect={onPromptSelect} />
         </CtxSection>
 
         {/* 7. Today's Goal */}
-        <CtxSection icon={Target} title="Bugungi maqsad" defaultOpen>
+        <CtxSection icon={Target} title={t.atpGoalTitle} defaultOpen>
           <div className="p-3 rounded-xl bg-brand/6 dark:bg-brand/10 border border-brand/15 dark:border-brand/20">
             <div className="flex items-start gap-2">
               <CheckCircle className="w-4 h-4 text-brand dark:text-brand-light flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <p className="text-[12px] font-semibold text-brand dark:text-brand-light leading-snug">
-                  {context?.groups?.[0]?.subjectName ?? context?.groups?.[0]?.name ?? 'O\'rganish'}
-                  {' — 1 soat mashg\'ulot'}
+                  {context?.groups?.[0]?.subjectName ?? context?.groups?.[0]?.name ?? t.atpGoalStudy}
+                  {' '}{t.atpGoalHourSuffix}
                 </p>
                 <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
-                  AI bilan birga takrorlang
+                  {t.atpGoalReview}
                 </p>
               </div>
             </div>
@@ -667,9 +672,11 @@ export function AITeacherPanel({ context, onPromptSelect }: AITeacherPanelProps)
           {/* Quick prompts for today */}
           <div className="space-y-1.5 mt-1">
             {[
-              context?.groups?.[0] ? `${context.groups[0].subjectName ?? context.groups[0].name} bo'yicha savol ber` : "Bugungi darsni tushuntir",
-              "Imtihonga tayyorlanish rejasi tuz",
-              "Zaif mavzularimni qanday yaxshilashim mumkin?",
+              context?.groups?.[0]
+                ? t.atpPromptSubject.replace('{subject}', context.groups[0].subjectName ?? context.groups[0].name)
+                : t.atpPromptToday,
+              t.atpPromptExam,
+              t.atpPromptWeakImprove,
             ].map((p, i) => (
               <button
                 key={i}
@@ -685,27 +692,27 @@ export function AITeacherPanel({ context, onPromptSelect }: AITeacherPanelProps)
         </CtxSection>
 
         {/* 8. Achievement Badges */}
-        <CtxSection icon={Trophy} title="Yutuqlar" badge={`${earnedCount}/${achievements.length}`}>
+        <CtxSection icon={Trophy} title={t.atpAchTitle} badge={`${earnedCount}/${achievements.length}`}>
           <div className="grid grid-cols-4 gap-2">
             {achievements.map((a, i) => (
               <AchievementBadge key={i} {...a} />
             ))}
           </div>
           <p className="text-[9px] text-gray-400 dark:text-gray-600 text-center mt-1">
-            {achievements.length - earnedCount} ta nishon qulflanmagan
+            {achievements.length - earnedCount} {t.atpAchLockedSuffix}
           </p>
         </CtxSection>
 
         {/* 9. Weekly Mission */}
-        <CtxSection icon={Star} title="Haftalik missiya" defaultOpen>
+        <CtxSection icon={Star} title={t.atpMissionTitle} defaultOpen>
           <WeeklyMission ctx={context} />
         </CtxSection>
 
         {/* 10. Next Level Teaser */}
-        <CtxSection icon={Calendar} title="Sprint 2.3 da">
+        <CtxSection icon={Calendar} title={t.atpNextTitle}>
           <div className="text-center py-2">
             <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed">
-              Uyga vazifalar, o&apos;qituvchi izohlari va reja tuzish real ma&apos;lumotlar bilan
+              {t.atpNextDesc}
             </p>
           </div>
         </CtxSection>

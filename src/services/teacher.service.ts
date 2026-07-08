@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import type { ProfileRow, SubjectRow } from '@/types/database.types'
+import { adminCreateAuthUser, adminDeleteAuthUser } from './adminUser.service'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -80,34 +81,22 @@ export const teacherService = {
     return data
   },
 
-  // Edge Function orqali yangi o'qituvchi yaratish (service_role talab qiladi)
+  // Edge Function orqali yangi o'qituvchi yaratish (auth.users + profil + rol)
   create: async (payload: CreateTeacherPayload): Promise<string> => {
-    const { data, error } = await supabase.functions.invoke('admin-users', {
-      body: {
-        action:    'create',
-        email:     payload.email,
-        full_name: payload.full_name,
-        password:  payload.password,
-        phone:     payload.phone  ?? null,
-        bio:       payload.bio    ?? null,
-        role:      'teacher',
-      },
+    const userId = await adminCreateAuthUser({
+      email:     payload.email,
+      full_name: payload.full_name,
+      password:  payload.password,
+      phone:     payload.phone ?? null,
+      bio:       payload.bio   ?? null,
+      role:      'teacher',
     })
 
-    if (error) {
-      throw new Error(
-        "Foydalanuvchi yaratishda xatolik.\n" +
-        "Edge Function ishga solinganmi? (supabase functions deploy admin-users)"
-      )
-    }
-    if ((data as any)?.error) throw new Error((data as any).error)
-
-    const userId = (data as any)?.userId as string
-
-    if (payload.subject_ids?.length && userId) {
-      await supabase.from('teacher_subjects').insert(
+    if (payload.subject_ids?.length) {
+      const { error } = await supabase.from('teacher_subjects').insert(
         payload.subject_ids.map(subject_id => ({ teacher_id: userId, subject_id }))
       )
+      if (error) throw new Error(`O'qituvchi yaratildi, ammo fanlarni biriktirishda xatolik: ${error.message}`)
     }
 
     return userId
@@ -115,16 +104,6 @@ export const teacherService = {
 
   // Edge Function orqali o'chirish (auth foydalanuvchisi ham o'chadi)
   delete: async (id: string): Promise<void> => {
-    const { data, error } = await supabase.functions.invoke('admin-users', {
-      body: { action: 'delete', userId: id },
-    })
-
-    if (error) {
-      // Edge Function ishlamasa — faqat profilni o'chiramiz
-      const { error: dbErr } = await supabase.from('profiles').delete().eq('id', id)
-      if (dbErr) throw new Error(dbErr.message)
-      return
-    }
-    if ((data as any)?.error) throw new Error((data as any).error)
+    await adminDeleteAuthUser(id)
   },
 }

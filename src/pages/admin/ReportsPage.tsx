@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { AlertCircle, BarChart2, Users, BookOpen, CheckSquare, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -56,6 +57,7 @@ function StatBar({ label, value, max, color }: { label: string; value: number; m
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function AdminReportsPage() {
+  const { t } = useLanguage()
   const [summary,      setSummary]      = useState<Summary | null>(null)
   const [groupReports, setGroupReports] = useState<GroupReport[]>([])
   const [testReports,  setTestReports]  = useState<TestReport[]>([])
@@ -147,7 +149,7 @@ export default function AdminReportsPage() {
           .slice(0, 8)
       )
     } catch {
-      setError("Ma'lumotlarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -165,8 +167,8 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Hisobotlar</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Platforma statistikasi va hisobotlari</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.tdTabReports}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.arpSubtitle}</p>
       </div>
 
       {error && (
@@ -180,12 +182,12 @@ export default function AdminReportsPage() {
       {summary && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
-            { label: 'Talabalar',  value: summary.students,   icon: Users,       color: 'text-blue-600',   bg: 'bg-blue-50'   },
-            { label: "O'qituvchilar", value: summary.teachers, icon: Users,      color: 'text-indigo-600', bg: 'bg-indigo-50' },
-            { label: 'Guruhlar',   value: summary.groups,     icon: BarChart2,   color: 'text-violet-600', bg: 'bg-violet-50' },
-            { label: 'Darslar',    value: summary.lessons,    icon: BookOpen,    color: 'text-emerald-600',bg: 'bg-emerald-50'},
-            { label: 'Testlar',    value: summary.tests,      icon: FileText,    color: 'text-amber-600',  bg: 'bg-amber-50'  },
-            { label: 'Davomat',    value: summary.attendance, icon: CheckSquare, color: 'text-teal-600',   bg: 'bg-teal-50'   },
+            { label: t.tdStudents,  value: summary.students,   icon: Users,       color: 'text-blue-600',   bg: 'bg-blue-50'   },
+            { label: t.adTeachers,  value: summary.teachers,   icon: Users,       color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            { label: t.tdGroups,    value: summary.groups,     icon: BarChart2,   color: 'text-violet-600', bg: 'bg-violet-50' },
+            { label: t.tdLessons,   value: summary.lessons,    icon: BookOpen,    color: 'text-emerald-600',bg: 'bg-emerald-50'},
+            { label: t.adTests,     value: summary.tests,      icon: FileText,    color: 'text-amber-600',  bg: 'bg-amber-50'  },
+            { label: t.achAttendance, value: summary.attendance, icon: CheckSquare, color: 'text-teal-600',   bg: 'bg-teal-50'   },
           ].map(s => {
             const Icon = s.icon
             return (
@@ -206,7 +208,7 @@ export default function AdminReportsPage() {
       {/* Guruh davomat hisoboti */}
       {groupReports.length > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-5">Guruh bo'yicha davomat</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-5">{t.arpGroupAtt}</h2>
           <div className="space-y-4">
             {groupReports.map(g => {
               const presentPct = g.total > 0 ? Math.round((g.present / g.total) * 100) : 0
@@ -215,26 +217,26 @@ export default function AdminReportsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-800">{g.name}</span>
                     <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <span>{g.total} dars</span>
+                      <span>{g.total} {t.tdLessonWord}</span>
                       <span className={cn(
                         'font-bold',
                         presentPct >= 80 ? 'text-emerald-600' : presentPct >= 60 ? 'text-amber-600' : 'text-red-600'
                       )}>
-                        {presentPct}% kelgan
+                        {presentPct}% {t.tdPresentPct}
                       </span>
                     </div>
                   </div>
                   <div className="flex h-4 rounded-full overflow-hidden gap-0.5">
-                    {g.present  > 0 && <div className="bg-emerald-500 h-full" style={{ width: `${(g.present /g.total)*100}%` }} title={`Kelgan: ${g.present}`} />}
-                    {g.late     > 0 && <div className="bg-amber-400  h-full" style={{ width: `${(g.late    /g.total)*100}%` }} title={`Kechikkan: ${g.late}`} />}
-                    {g.excused  > 0 && <div className="bg-blue-400   h-full" style={{ width: `${(g.excused /g.total)*100}%` }} title={`Sababli: ${g.excused}`} />}
-                    {g.absent   > 0 && <div className="bg-red-400    h-full" style={{ width: `${(g.absent  /g.total)*100}%` }} title={`Kelmagan: ${g.absent}`} />}
+                    {g.present  > 0 && <div className="bg-emerald-500 h-full" style={{ width: `${(g.present /g.total)*100}%` }} title={`${t.sdPresent}: ${g.present}`} />}
+                    {g.late     > 0 && <div className="bg-amber-400  h-full" style={{ width: `${(g.late    /g.total)*100}%` }} title={`${t.sdLate}: ${g.late}`} />}
+                    {g.excused  > 0 && <div className="bg-blue-400   h-full" style={{ width: `${(g.excused /g.total)*100}%` }} title={`${t.sdExcused}: ${g.excused}`} />}
+                    {g.absent   > 0 && <div className="bg-red-400    h-full" style={{ width: `${(g.absent  /g.total)*100}%` }} title={`${t.sdAbsent}: ${g.absent}`} />}
                   </div>
                   <div className="flex gap-4 text-[11px] text-gray-400">
-                    <span className="text-emerald-600">✓ {g.present} kelgan</span>
-                    <span className="text-red-500">✗ {g.absent} kelmagan</span>
-                    {g.late   > 0 && <span className="text-amber-500">⏱ {g.late} kechikkan</span>}
-                    {g.excused > 0 && <span className="text-blue-500">📋 {g.excused} sababli</span>}
+                    <span className="text-emerald-600">✓ {g.present} {t.sdPresent}</span>
+                    <span className="text-red-500">✗ {g.absent} {t.sdAbsent}</span>
+                    {g.late   > 0 && <span className="text-amber-500">⏱ {g.late} {t.sdLate}</span>}
+                    {g.excused > 0 && <span className="text-blue-500">📋 {g.excused} {t.sdExcused}</span>}
                   </div>
                 </div>
               )
@@ -246,30 +248,30 @@ export default function AdminReportsPage() {
       {/* Test natijalari hisoboti */}
       {testReports.length > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-5">Test natijalari</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-5">{t.tdTestResults}</h2>
           <div className="space-y-3">
-            {testReports.map(t => {
-              const passPct = t.total > 0 ? Math.round((t.passed / t.total) * 100) : 0
-              const avgPct  = t.avgTotal > 0 ? Math.round((t.avgScore / t.avgTotal) * 100) : 0
+            {testReports.map(tr => {
+              const passPct = tr.total > 0 ? Math.round((tr.passed / tr.total) * 100) : 0
+              const avgPct  = tr.avgTotal > 0 ? Math.round((tr.avgScore / tr.avgTotal) * 100) : 0
               return (
-                <div key={t.id} className="space-y-1.5">
+                <div key={tr.id} className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-800 truncate flex-1 mr-4">{t.title}</span>
+                    <span className="text-sm font-medium text-gray-800 truncate flex-1 mr-4">{tr.title}</span>
                     <div className="flex items-center gap-3 text-xs flex-shrink-0">
-                      <span className="text-gray-500">{t.total} talaba</span>
+                      <span className="text-gray-500">{tr.total} {t.tdStudentWord}</span>
                       <span className={cn(
                         'font-bold',
                         passPct >= 70 ? 'text-emerald-600' : passPct >= 50 ? 'text-amber-600' : 'text-red-600'
                       )}>
-                        {passPct}% o'tdi
+                        {passPct}% {t.mpPassed}
                       </span>
-                      <span className="text-gray-500">O'rtacha: {avgPct}%</span>
+                      <span className="text-gray-500">{t.arpAvg} {avgPct}%</span>
                     </div>
                   </div>
                   <StatBar
-                    label={`${t.passed}/${t.total}`}
-                    value={t.passed}
-                    max={t.total}
+                    label={`${tr.passed}/${tr.total}`}
+                    value={tr.passed}
+                    max={tr.total}
                     color="bg-emerald-500"
                   />
                 </div>
@@ -283,9 +285,9 @@ export default function AdminReportsPage() {
       {groupReports.length === 0 && testReports.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <BarChart2 className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Hisobot uchun ma'lumot yo'q</p>
+          <p className="text-sm text-gray-400">{t.arpEmpty}</p>
           <p className="text-xs text-gray-400 mt-1">
-            Davomat va test natijalarini qo'shgandan so'ng hisobot paydo bo'ladi
+            {t.arpEmptyHint}
           </p>
         </div>
       )}

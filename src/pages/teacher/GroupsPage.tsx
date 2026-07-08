@@ -3,6 +3,7 @@ import { Users, AlertCircle, BookOpen, ChevronDown, ChevronRight } from 'lucide-
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -25,10 +26,11 @@ type GroupDetail = {
   }[]
 }
 
-const STATUS_LABELS: Record<string, { label: string; bg: string; color: string }> = {
-  active:    { label: 'Faol',       bg: 'bg-emerald-100', color: 'text-emerald-700' },
-  inactive:  { label: 'Nofaol',    bg: 'bg-gray-100',    color: 'text-gray-600'    },
-  completed: { label: 'Tugatilgan',bg: 'bg-blue-100',    color: 'text-blue-700'    },
+// Holat teglari — matn tarjimadan (rang/fon saqlanadi)
+const STATUS_LABELS: Record<string, { label: keyof Translations; bg: string; color: string }> = {
+  active:    { label: 'admActive',   bg: 'bg-emerald-100', color: 'text-emerald-700' },
+  inactive:  { label: 'tdInactive',  bg: 'bg-gray-100',    color: 'text-gray-600'    },
+  completed: { label: 'tdCompleted', bg: 'bg-blue-100',    color: 'text-blue-700'    },
 }
 
 const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
@@ -41,6 +43,7 @@ function fmtDate(d: string) {
 
 export default function TeacherGroupsPage() {
   const auth = useAuth()
+  const { t } = useLanguage()
 
   const [groups,     setGroups]     = useState<GroupDetail[]>([])
   const [loading,    setLoading]    = useState(true)
@@ -89,7 +92,7 @@ export default function TeacherGroupsPage() {
           .sort((a: any, b: any) => (a.full_name ?? '').localeCompare(b.full_name ?? '')),
       })))
     } catch {
-      setError("Guruhlarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -117,9 +120,9 @@ export default function TeacherGroupsPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Guruhlarim</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t.tdTabCourses}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {groups.length} ta guruh
+          {groups.length} {t.tdGroupWord}
         </p>
       </div>
 
@@ -133,8 +136,8 @@ export default function TeacherGroupsPage() {
       {groups.length === 0 && !error && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Sizga biriktirilgan guruh yo'q</p>
-          <p className="text-xs text-gray-400 mt-1">Administrator guruh belgilaydi</p>
+          <p className="text-sm text-gray-400">{t.tcNoGroup}</p>
+          <p className="text-xs text-gray-400 mt-1">{t.tcNoGroupHint}</p>
         </div>
       )}
 
@@ -142,17 +145,17 @@ export default function TeacherGroupsPage() {
       {groups.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Jami guruh</p>
+            <p className="text-xs text-gray-400 font-medium">{t.tgTotalGroups}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{groups.length}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Jami talaba</p>
+            <p className="text-xs text-gray-400 font-medium">{t.tgTotalStudents}</p>
             <p className="text-2xl font-bold text-blue-600 mt-1">
               {groups.reduce((a, g) => a + g.student_count, 0)}
             </p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Jami dars</p>
+            <p className="text-xs text-gray-400 font-medium">{t.ccTotalLessons}</p>
             <p className="text-2xl font-bold text-indigo-600 mt-1">
               {groups.reduce((a, g) => a + g.lesson_count, 0)}
             </p>
@@ -192,7 +195,7 @@ export default function TeacherGroupsPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-gray-900">{group.name}</span>
                     <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', st.bg, st.color)}>
-                      {st.label}
+                      {t[st.label]}
                     </span>
                   </div>
                   {group.subject && (
@@ -207,7 +210,7 @@ export default function TeacherGroupsPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <BookOpen className="w-3 h-3" />
-                      {group.lesson_count} dars
+                      {group.lesson_count} {t.tdLessonWord}
                     </span>
                     {group.start_date && <span>{fmtDate(group.start_date)}</span>}
                     {group.end_date && <span>→ {fmtDate(group.end_date)}</span>}
@@ -241,11 +244,11 @@ export default function TeacherGroupsPage() {
                     <p className="text-sm text-gray-500 mb-3 italic">{group.description}</p>
                   )}
                   {group.students.length === 0 ? (
-                    <p className="text-sm text-gray-400 italic py-2">Guruhda talabalar yo'q</p>
+                    <p className="text-sm text-gray-400 italic py-2">{t.tfNoStudents}</p>
                   ) : (
                     <div>
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                        {group.students.length} ta talaba
+                        {group.students.length} {t.tdStudentWord}
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {group.students.map(st => (
@@ -255,7 +258,7 @@ export default function TeacherGroupsPage() {
                             </div>
                             <div className="min-w-0">
                               <p className="text-sm font-medium text-gray-800 truncate">
-                                {st.full_name ?? 'Ism yo\'q'}
+                                {st.full_name ?? t.taNoName}
                               </p>
                               <p className="text-[11px] text-gray-400 truncate">{st.email}</p>
                             </div>
@@ -263,7 +266,7 @@ export default function TeacherGroupsPage() {
                               'ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0',
                               st.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
                             )}>
-                              {st.status === 'active' ? 'Faol' : 'Nofaol'}
+                              {st.status === 'active' ? t.admActive : t.tdInactive}
                             </span>
                           </div>
                         ))}

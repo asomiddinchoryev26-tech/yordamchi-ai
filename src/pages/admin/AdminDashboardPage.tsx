@@ -3,14 +3,18 @@ import type { ComponentType } from 'react'
 import {
   BarChart2, Users, GraduationCap, BookOpen,
   Layers, Search, TrendingUp, Check,
-  ChevronRight, Shield, Activity,
+  ChevronRight, Shield, Activity, Crown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
+import { AdminPremiumStats } from '@/components/admin/AdminFeatures'
+import { SuperAdminPanel } from '@/components/admin/SuperAdminPRO'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
-type AdminTab  = 'statistics' | 'users' | 'teachers' | 'students' | 'courses' | 'activity'
+type AdminTab  = 'statistics' | 'users' | 'teachers' | 'students' | 'courses' | 'activity' | 'superadmin'
 type UserRole  = 'student' | 'teacher' | 'admin'
 
 interface TabDef    { key: AdminTab; label: string; icon: ComponentType<{ className?: string }> }
@@ -24,19 +28,20 @@ interface DActivity { id: string; type: 'signup'|'test'; name: string; detail: s
 
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
 
-const TABS: TabDef[] = [
-  { key:'statistics', label:'Statistika',       icon: BarChart2     },
-  { key:'users',      label:'Foydalanuvchilar', icon: Users         },
-  { key:'teachers',   label:"O'qituvchilar",    icon: GraduationCap },
-  { key:'students',   label:'Talabalar',        icon: Layers        },
-  { key:'courses',    label:'Kurslar',          icon: BookOpen      },
-  { key:'activity',   label:'Faollik',          icon: Activity      },
+const TABS: { key: AdminTab; label: keyof Translations; icon: TabDef['icon'] }[] = [
+  { key:'statistics', label:'navStats',       icon: BarChart2     },
+  { key:'users',      label:'adTabUsers',     icon: Users         },
+  { key:'teachers',   label:'adTabTeachers',  icon: GraduationCap },
+  { key:'students',   label:'tdStudents',     icon: Layers        },
+  { key:'courses',    label:'adCourses',      icon: BookOpen      },
+  { key:'activity',   label:'adTabActivity',  icon: Activity      },
+  { key:'superadmin', label:'admSuperAdmin',  icon: Crown         },
 ]
 
-const ROLE_CFG: Record<UserRole, { label: string; cls: string }> = {
-  student: { label:'Talaba',      cls:'bg-blue-100 text-blue-700'     },
-  teacher: { label:"O'qituvchi",  cls:'bg-indigo-100 text-indigo-700' },
-  admin:   { label:'Admin',       cls:'bg-emerald-100 text-emerald-700'},
+const ROLE_CFG: Record<UserRole, { label: keyof Translations; cls: string }> = {
+  student: { label:'adStudent', cls:'bg-blue-100 text-blue-700'     },
+  teacher: { label:'tdTeacher', cls:'bg-indigo-100 text-indigo-700' },
+  admin:   { label:'adAdmin',   cls:'bg-emerald-100 text-emerald-700'},
 }
 
 const MONTH_LABELS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
@@ -61,6 +66,8 @@ function fmtDate(d: string) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function AdminDashboardPage() {
+  const auth = useAuth()
+  const { t } = useLanguage()
   const [tab,    setTab]    = useState<AdminTab>('statistics')
   const [loading,setLoading]= useState(true)
 
@@ -167,16 +174,16 @@ export default function AdminDashboardPage() {
         return {
           id:     r.id,
           type:   'test' as const,
-          name:   (r.student as any)?.full_name ?? 'Talaba',
-          detail: `${(r.test as any)?.title ?? 'Test'} — ${r.score}/${r.total_questions} (${pct}%)`,
+          name:   (r.student as any)?.full_name ?? t.adStudent,
+          detail: `${(r.test as any)?.title ?? t.adTest} — ${r.score}/${r.total_questions} (${pct}%)`,
           time:   fmtDate(r.submitted_at),
         }
       })
       const recentSignups: DActivity[] = (usersRes.data ?? []).slice(0,5).map((u:any) => ({
         id:     `s-${u.id}`,
         type:   'signup' as const,
-        name:   u.full_name ?? u.email ?? 'Foydalanuvchi',
-        detail: ROLE_CFG[u.role as UserRole]?.label ?? u.role,
+        name:   u.full_name ?? u.email ?? t.adUserWord,
+        detail: ROLE_CFG[u.role as UserRole] ? t[ROLE_CFG[u.role as UserRole].label] : u.role,
         time:   fmtDate(u.created_at),
       }))
       setActivity([...recentSignups, ...recentActivity].slice(0,12))
@@ -204,21 +211,21 @@ export default function AdminDashboardPage() {
         <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/5" />
         <div className="relative z-10 flex items-center justify-between gap-6">
           <div>
-            <p className="text-emerald-200 text-sm mb-1">Xush kelibsiz 👋</p>
-            <h1 className="text-2xl font-bold text-white">Administrator Paneli</h1>
+            <p className="text-emerald-200 text-sm mb-1">{t.adWelcome}</p>
+            <h1 className="text-2xl font-bold text-white">{t.adTitle}</h1>
             <p className="text-emerald-200 text-sm mt-1">
-              Tizimda{' '}
+              {t.adInSystem}{' '}
               {loading
                 ? <span className="inline-block w-8 h-4 bg-white/20 rounded animate-pulse align-middle" />
                 : <span className="font-semibold text-white">{(stats?.students??0) + (stats?.teachers??0)}</span>
               }{' '}
-              ta foydalanuvchi
+              {t.adUsersWord}
             </p>
           </div>
           <div className="hidden sm:flex flex-col items-center gap-1">
             <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center text-3xl">⚙️</div>
             <div className="flex items-center gap-1 text-emerald-300 text-xs">
-              <TrendingUp className="w-3 h-3" /> Real vaqt
+              <TrendingUp className="w-3 h-3" /> {t.adRealtime}
             </div>
           </div>
         </div>
@@ -226,18 +233,18 @@ export default function AdminDashboardPage() {
 
       {/* ── Tabs ── */}
       <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-x-auto">
-        {TABS.map(t => {
-          const Icon = t.icon
-          const active = tab === t.key
+        {TABS.map(ti => {
+          const Icon = ti.icon
+          const active = tab === ti.key
           return (
-            <button key={t.key} type="button" onClick={() => setTab(t.key)}
+            <button key={ti.key} type="button" onClick={() => setTab(ti.key)}
               className={cn(
                 'flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0',
                 active ? 'bg-white dark:bg-gray-700 text-emerald-700 dark:text-emerald-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/60',
               )}
             >
               <Icon className="w-4 h-4" />
-              <span className="hidden sm:inline">{t.label}</span>
+              <span className="hidden sm:inline">{t[ti.label]}</span>
             </button>
           )
         })}
@@ -252,12 +259,12 @@ export default function AdminDashboardPage() {
                   <div key={i} className="bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse h-28" />
                 ))
               : [
-                  { l:'Talabalar',       v: stats!.students, e:'📚', bg:'bg-violet-50  dark:bg-violet-950/40'  },
-                  { l:"O'qituvchilar",   v: stats!.teachers, e:'🎓', bg:'bg-indigo-50  dark:bg-indigo-950/40'  },
-                  { l:'Guruhlar',        v: stats!.groups,   e:'🏫', bg:'bg-blue-50    dark:bg-blue-950/40'    },
-                  { l:'Darslar',         v: stats!.lessons,  e:'📖', bg:'bg-emerald-50 dark:bg-emerald-950/40' },
-                  { l:'Testlar',         v: stats!.tests,    e:'📝', bg:'bg-amber-50   dark:bg-amber-950/40'   },
-                  { l:'Davomat yozuvi', v: stats!.att,      e:'✅', bg:'bg-teal-50    dark:bg-teal-950/40'    },
+                  { l:t.tdStudents,   v: stats!.students, e:'📚', bg:'bg-violet-50  dark:bg-violet-950/40'  },
+                  { l:t.adTeachers,   v: stats!.teachers, e:'🎓', bg:'bg-indigo-50  dark:bg-indigo-950/40'  },
+                  { l:t.tdGroups,     v: stats!.groups,   e:'🏫', bg:'bg-blue-50    dark:bg-blue-950/40'    },
+                  { l:t.tdLessons,    v: stats!.lessons,  e:'📖', bg:'bg-emerald-50 dark:bg-emerald-950/40' },
+                  { l:t.adTests,      v: stats!.tests,    e:'📝', bg:'bg-amber-50   dark:bg-amber-950/40'   },
+                  { l:t.adAttRecords, v: stats!.att,      e:'✅', bg:'bg-teal-50    dark:bg-teal-950/40'    },
                 ].map(s => (
                   <div key={s.l} className={cn('rounded-2xl border border-gray-100 dark:border-gray-700 p-5', s.bg)}>
                     <span className="text-2xl">{s.e}</span>
@@ -275,11 +282,11 @@ export default function AdminDashboardPage() {
                 <div className="w-7 h-7 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center">
                   <BarChart2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                Oylik ro&apos;yxatdan o&apos;tish (so&apos;nggi 12 oy)
+                {t.adMonthlySignups}
               </h2>
               {!loading && (
                 <span className="text-xs text-gray-400 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-lg">
-                  Jami: {monthly.reduce((a,b)=>a+b.count,0)}
+                  {t.adTotal} {monthly.reduce((a,b)=>a+b.count,0)}
                 </span>
               )}
             </div>
@@ -308,13 +315,16 @@ export default function AdminDashboardPage() {
           {/* Tizim holati */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
             <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
-              <Shield className="w-4 h-4 text-emerald-500" /> Tizim holati
+              <Shield className="w-4 h-4 text-emerald-500" /> {t.saSysHealth}
             </h2>
             <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
               <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Barcha tizimlar ishlayapti — Supabase ulanishi faol</p>
+              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{t.adAllSystemsOk}</p>
             </div>
           </div>
+
+          {/* Premium statistikasi (additiv) */}
+          <AdminPremiumStats />
         </div>
       )}
 
@@ -325,7 +335,7 @@ export default function AdminDashboardPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input type="text" value={userSearch} onChange={e=>setUserSearch(e.target.value)}
-                placeholder="Ism yoki email..."
+                placeholder={t.adSearchUser}
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
               />
             </div>
@@ -336,7 +346,7 @@ export default function AdminDashboardPage() {
                     userRoleFilter===r ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600',
                   )}
                 >
-                  {r==='all' ? 'Hammasi' : ROLE_CFG[r].label}
+                  {r==='all' ? t.adAll : t[ROLE_CFG[r].label]}
                 </button>
               ))}
             </div>
@@ -353,7 +363,7 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-sm min-w-[540px]">
                   <thead>
                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
-                      {['Foydalanuvchi','Email','Rol','Holat',"Qo'shildi"].map(h => (
+                      {[t.adUser,'Email',t.adRole,t.tdColStatus,t.adJoined].map(h => (
                         <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-4 last:pr-4 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -378,7 +388,7 @@ export default function AdminDashboardPage() {
                             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
                               u.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
-                              {u.status==='active'?'Faol':'Nofaol'}
+                              {u.status==='active'?t.admActive:t.tdInactive}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{fmtDate(u.created_at)}</td>
@@ -401,14 +411,14 @@ export default function AdminDashboardPage() {
                           <p className="text-xs text-gray-400 dark:text-gray-500">{u.email}</p>
                         </div>
                         <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', ROLE_CFG[u.role]?.cls)}>
-                          {ROLE_CFG[u.role]?.label}
+                          {ROLE_CFG[u.role] ? t[ROLE_CFG[u.role].label] : u.role}
                         </span>
                       </div>
                     )
                   })}
                 </div>
                 {filteredUsers.length === 0 && (
-                  <div className="p-10 text-center text-sm text-gray-400">Foydalanuvchi topilmadi</div>
+                  <div className="p-10 text-center text-sm text-gray-400">{t.adUserNotFound}</div>
                 )}
               </>
             )}
@@ -419,34 +429,34 @@ export default function AdminDashboardPage() {
       {/* ══ O'QITUVCHILAR ══ */}
       {tab === 'teachers' && (
         <div className="space-y-5">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${teachers.length} ta o'qituvchi`}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${teachers.length} ${t.adTeachersCount}`}</p>
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1,2,3,4].map(i => <div key={i} className="h-32 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse" />)}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {teachers.map(t => {
-                const letter = (t.full_name??t.email??'O').charAt(0).toUpperCase()
+              {teachers.map(tc => {
+                const letter = (tc.full_name??tc.email??'O').charAt(0).toUpperCase()
                 return (
-                  <div key={t.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md dark:hover:shadow-gray-900/40 transition-shadow">
+                  <div key={tc.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md dark:hover:shadow-gray-900/40 transition-shadow">
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-bold flex-shrink-0 text-white text-lg bg-gradient-to-br from-indigo-500 to-violet-600">
                         {letter}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">{t.full_name ?? '—'}</h3>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{t.email}</p>
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">{tc.full_name ?? '—'}</h3>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">{tc.email}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-blue-50 dark:bg-blue-950/40 rounded-xl p-3 text-center">
-                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{t.group_count}</p>
-                        <p className="text-[10px] text-blue-400 dark:text-blue-500">Guruh</p>
+                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{tc.group_count}</p>
+                        <p className="text-[10px] text-blue-400 dark:text-blue-500">{t.adGroupC}</p>
                       </div>
                       <div className="bg-indigo-50 dark:bg-indigo-950/40 rounded-xl p-3 text-center">
-                        <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{t.student_count}</p>
-                        <p className="text-[10px] text-indigo-400 dark:text-indigo-500">Talaba</p>
+                        <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{tc.student_count}</p>
+                        <p className="text-[10px] text-indigo-400 dark:text-indigo-500">{t.adStudent}</p>
                       </div>
                     </div>
                   </div>
@@ -454,14 +464,14 @@ export default function AdminDashboardPage() {
               })}
               {teachers.length === 0 && (
                 <div className="sm:col-span-2 p-10 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-                  O'qituvchilar yo'q
+                  {t.adNoTeachers}
                 </div>
               )}
             </div>
           )}
           <div className="text-center">
             <a href="/admin/teachers" className="text-sm text-emerald-600 font-medium hover:underline inline-flex items-center gap-1">
-              Barcha o'qituvchilar <ChevronRight className="w-4 h-4" />
+              {t.adAllTeachers} <ChevronRight className="w-4 h-4" />
             </a>
           </div>
         </div>
@@ -470,7 +480,7 @@ export default function AdminDashboardPage() {
       {/* ══ TALABALAR ══ */}
       {tab === 'students' && (
         <div className="space-y-5">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${students.length} ta so'nggi talaba`}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${students.length} ${t.adRecentStudents}`}</p>
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
             {loading ? (
               <div className="p-4 sm:p-6 space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"/>)}</div>
@@ -480,7 +490,7 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-sm min-w-[500px]">
                   <thead>
                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
-                      {['Talaba','Email','Guruh','Holat',"Qo'shildi"].map(h=>(
+                      {[t.adStudent,'Email',t.adGroupC,t.tdColStatus,t.adJoined].map(h=>(
                         <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-4 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -506,7 +516,7 @@ export default function AdminDashboardPage() {
                             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
                               s.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
-                              {s.status==='active'?'Faol':'Nofaol'}
+                              {s.status==='active'?t.admActive:t.tdInactive}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{fmtDate(s.created_at)}</td>
@@ -531,7 +541,7 @@ export default function AdminDashboardPage() {
       {/* ══ KURSLAR ══ */}
       {tab === 'courses' && (
         <div className="space-y-5">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${groups.length} ta kurs (guruh)`}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{loading ? '...' : `${groups.length} ${t.adCoursesCount}`}</p>
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1,2,3,4].map(i=><div key={i} className="h-36 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse"/>)}
@@ -554,7 +564,7 @@ export default function AdminDashboardPage() {
                           <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0',
                             g.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':g.status==='completed'?'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                           )}>
-                            {g.status==='active'?'Faol':g.status==='completed'?'Tugatilgan':'Nofaol'}
+                            {g.status==='active'?t.admActive:g.status==='completed'?t.tdCompleted:t.tdInactive}
                           </span>
                         </div>
                         {g.subject && <p className="text-xs mt-0.5 font-medium" style={{color:g.subject.color}}>{g.subject.name}</p>}
@@ -562,20 +572,20 @@ export default function AdminDashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                      <span>{g.student_count} talaba</span>
-                      <span>{g.lesson_count} dars</span>
+                      <span>{g.student_count} {t.tdStudentWord}</span>
+                      <span>{g.lesson_count} {t.tdLessonWord}</span>
                     </div>
                   </div>
                 )
               })}
               {groups.length === 0 && (
-                <div className="sm:col-span-2 p-10 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">Kurslar yo'q</div>
+                <div className="sm:col-span-2 p-10 text-center text-sm text-gray-400 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">{t.adNoCourses}</div>
               )}
             </div>
           )}
           <div className="text-center">
             <a href="/admin/courses" className="text-sm text-emerald-600 font-medium hover:underline inline-flex items-center gap-1">
-              Barcha kurslar <ChevronRight className="w-4 h-4" />
+              {t.adAllCourses} <ChevronRight className="w-4 h-4" />
             </a>
           </div>
         </div>
@@ -586,12 +596,12 @@ export default function AdminDashboardPage() {
         <div className="space-y-5">
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
             <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
-              <Activity className="w-4 h-4 text-emerald-500" /> So&apos;nggi faollik
+              <Activity className="w-4 h-4 text-emerald-500" /> {t.tdRecentActivity}
             </h2>
             {loading ? (
               <div className="space-y-3">{[1,2,3,4,5].map(i=><div key={i} className="h-12 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"/>)}</div>
             ) : activity.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">Hali faollik yo'q</p>
+              <p className="text-sm text-gray-400 text-center py-8">{t.adNoActivity}</p>
             ) : (
               <div className="space-y-3">
                 {activity.map(a => (
@@ -617,6 +627,9 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ══ SUPER ADMIN PRO (faqat super admin — komponent ichida tekshiriladi) ══ */}
+      {tab === 'superadmin' && auth.user?.id && <SuperAdminPanel currentUserId={auth.user.id} />}
     </div>
   )
 }

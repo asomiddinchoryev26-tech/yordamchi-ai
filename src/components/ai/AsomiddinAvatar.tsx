@@ -151,6 +151,8 @@ export function AsomiddinAIMenuIcon(_: { className?: string }) {
         <img
           src={AVATAR_SRC}
           alt="Asomiddin AI"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
           style={{ objectPosition: 'center 15%' }}
           onError={() => setImgOk(false)}

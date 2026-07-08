@@ -47,7 +47,7 @@ const inputCls = cn(
 
 export default function TeacherProfilePage() {
   const { profile, isLoading, isSaving, error, updateProfile, uploadAvatar, deleteAvatar, clearError } = useProfile()
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
 
   const [form, setForm] = useState({ fullName: profile?.fullName ?? '', phone: profile?.phone ?? '', bio: profile?.bio ?? '' })
   const [formDirty, setFormDirty] = useState(false)
@@ -78,15 +78,15 @@ export default function TeacherProfilePage() {
   async function handleDeleteAvatar() { await deleteAvatar(); setDeleteConfirm(false) }
 
   async function handlePwChange() {
-    if (pwForm.newPw.length < 8) { setPwError("Parol kamida 8 ta belgidan iborat bo'lishi kerak"); return }
-    if (pwForm.newPw !== pwForm.confirmPw) { setPwError('Parollar mos kelmadi'); return }
+    if (pwForm.newPw.length < 8) { setPwError(t.pfPwMin); return }
+    if (pwForm.newPw !== pwForm.confirmPw) { setPwError(t.pfPwMismatch); return }
     setPwSaving(true); setPwError(null)
     try {
       const { error: e } = await supabase.auth.updateUser({ password: pwForm.newPw })
       if (e) throw e
       setPwForm({ newPw: '', confirmPw: '' }); setShowPw(false); setPwSaved(true)
       setTimeout(() => setPwSaved(false), 4000)
-    } catch (e) { setPwError(e instanceof Error ? e.message : 'Xatolik') }
+    } catch (e) { setPwError(e instanceof Error ? e.message : t.pfError) }
     finally { setPwSaving(false) }
   }
 
@@ -98,17 +98,17 @@ export default function TeacherProfilePage() {
     )
   }
 
-  const ROLE_LABELS: Record<string, string> = { student: 'Talaba', teacher: "O'qituvchi", admin: 'Administrator' }
+  const ROLE_LABELS: Record<string, string> = { student: t.adStudent, teacher: t.tdTeacher, admin: t.pfAdministrator }
 
   return (
     <div className="space-y-5 pb-10 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Profil</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Shaxsiy ma'lumotlar va hisob sozlamalari</p>
+        <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">{t.pfTitle}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.pfSubtitle}</p>
       </div>
 
-      {saved   && <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /><p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">Profil muvaffaqiyatli yangilandi</p></div>}
-      {pwSaved && <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /><p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">Parol muvaffaqiyatli o'zgartirildi</p></div>}
+      {saved   && <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /><p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">{t.pfUpdated}</p></div>}
+      {pwSaved && <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"><CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" /><p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">{t.pfPwChanged}</p></div>}
       {error   && <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"><AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" /><p className="text-sm text-red-700 dark:text-red-300">{error}</p></div>}
 
       {/* Avatar */}
@@ -117,12 +117,12 @@ export default function TeacherProfilePage() {
           <UserAvatar name={profile?.fullName ?? ''} avatarUrl={profile?.avatarUrl} size="xl" />
           <div className="flex-1 text-center sm:text-left">
             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-0.5">{profile?.fullName ?? '—'}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{profile?.avatarUrl ? 'Yuklangan rasm ishlatilmoqda' : 'Ismi harflari ko\'rsatilmoqda'}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{profile?.avatarUrl ? t.pfAvatarUsing : t.pfAvatarInitials}</p>
             <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
               <button type="button" onClick={() => setShowUploader(v => !v)}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-sm">
                 <Upload className="w-3.5 h-3.5" />
-                {profile?.avatarUrl ? 'Almashtirish' : 'Rasm yuklash'}
+                {profile?.avatarUrl ? t.fpReplace : t.pfUploadPhoto}
               </button>
               {profile?.avatarUrl && (
                 <button type="button" onClick={() => setDeleteConfirm(true)} disabled={isSaving}
@@ -156,39 +156,39 @@ export default function TeacherProfilePage() {
       </Section>
 
       {/* Personal info */}
-      <Section icon={User} title="Shaxsiy ma'lumotlar">
+      <Section icon={User} title={t.pfPersonalInfo}>
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="To'liq ism *">
-              <input type="text" value={form.fullName} onChange={e => setField('fullName', e.target.value)} className={inputCls} placeholder="Ism Familiya" />
+            <Field label={t.pfFullName}>
+              <input type="text" value={form.fullName} onChange={e => setField('fullName', e.target.value)} className={inputCls} placeholder={t.pfFullNamePh} />
             </Field>
-            <Field label="Email (o'zgartirib bo'lmaydi)">
+            <Field label={t.pfEmailNoChange}>
               <input type="email" value={profile?.email ?? ''} disabled className={inputCls} />
             </Field>
           </div>
-          <Field label="Telefon raqami">
+          <Field label={t.pfPhone}>
             <input type="tel" value={form.phone} onChange={e => setField('phone', e.target.value)} placeholder="+998 90 123 45 67" className={inputCls} />
           </Field>
           <Field label="Bio">
-            <textarea value={form.bio} onChange={e => setField('bio', e.target.value)} placeholder="O'zingiz haqida qisqacha..." rows={3} maxLength={300} className={cn(inputCls, 'resize-none')} />
+            <textarea value={form.bio} onChange={e => setField('bio', e.target.value)} placeholder={t.pfBioPh} rows={3} maxLength={300} className={cn(inputCls, 'resize-none')} />
             <p className="text-[11px] text-gray-400 dark:text-gray-600 mt-1 text-right">{form.bio.length}/300</p>
           </Field>
           <button type="button" onClick={handleSave} disabled={isSaving || !formDirty || !form.fullName.trim()}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
             {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-            O'zgarishlarni saqlash
+            {t.pfSaveChanges}
           </button>
         </div>
       </Section>
 
       {/* Account info */}
-      <Section icon={BookOpen} title="Hisob ma'lumotlari">
+      <Section icon={BookOpen} title={t.pfAccountInfo}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
-            { label: 'Rol',      value: ROLE_LABELS[profile?.role ?? 'teacher'] ?? profile?.role ?? '—' },
-            { label: 'Holat',    value: profile?.status === 'active' ? 'Faol' : 'Bloklangan' },
-            { label: 'Email',    value: profile?.email ?? '—' },
-            { label: 'Ro\'yxat', value: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('uz-UZ') : '—' },
+            { label: t.adRole,       value: ROLE_LABELS[profile?.role ?? 'teacher'] ?? profile?.role ?? '—' },
+            { label: t.tdColStatus,  value: profile?.status === 'active' ? t.admActive : t.pfBlocked },
+            { label: 'Email',        value: profile?.email ?? '—' },
+            { label: t.pfRegistered, value: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('uz-UZ') : '—' },
           ].map(({ label, value }) => (
             <div key={label} className="bg-gray-50 dark:bg-gray-800/50 rounded-xl px-4 py-3">
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wide mb-0.5">{label}</p>
@@ -199,7 +199,7 @@ export default function TeacherProfilePage() {
       </Section>
 
       {/* Language */}
-      <Section icon={Globe} title="Til">
+      <Section icon={Globe} title={t.pfLanguage}>
         <div className="flex flex-wrap gap-2">
           {([['uz', "O'zbek 🇺🇿"], ['ru', 'Русский 🇷🇺'], ['en', 'English 🇬🇧']] as const).map(([code, label]) => (
             <button key={code} type="button" onClick={() => setLanguage(code)}
@@ -217,47 +217,47 @@ export default function TeacherProfilePage() {
 
       {/* Bio display */}
       {profile?.bio && (
-        <Section icon={FileText} title="Haqida">
+        <Section icon={FileText} title={t.pfAbout}>
           <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{profile.bio}</p>
         </Section>
       )}
 
       {/* Security */}
-      <Section icon={Shield} title="Xavfsizlik">
+      <Section icon={Shield} title={t.pfSecurity}>
         {!showPw ? (
           <button type="button" onClick={() => setShowPw(true)} className="flex items-center gap-2 text-sm text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
-            <Shield className="w-4 h-4" /> Parolni o'zgartirish
+            <Shield className="w-4 h-4" /> {t.pfChangePw}
           </button>
         ) : (
           <div className="space-y-3">
-            <Field label="Yangi parol">
+            <Field label={t.pfNewPw}>
               <div className="relative">
-                <input type={showMask ? 'text' : 'password'} value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} placeholder="Kamida 8 ta belgi" className={cn(inputCls, 'pr-10')} />
+                <input type={showMask ? 'text' : 'password'} value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} placeholder={t.pfPwMin} className={cn(inputCls, 'pr-10')} />
                 <button type="button" onClick={() => setShowMask(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {showMask ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </Field>
-            <Field label="Parolni tasdiqlash">
-              <input type={showMask ? 'text' : 'password'} value={pwForm.confirmPw} onChange={e => setPwForm(f => ({ ...f, confirmPw: e.target.value }))} placeholder="Parolni qayta kiriting" className={inputCls} />
+            <Field label={t.pfConfirmPw}>
+              <input type={showMask ? 'text' : 'password'} value={pwForm.confirmPw} onChange={e => setPwForm(f => ({ ...f, confirmPw: e.target.value }))} placeholder={t.pfPwRepeat} className={inputCls} />
             </Field>
             {pwError && <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"><AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" /><p className="text-sm text-red-700 dark:text-red-300">{pwError}</p></div>}
             <div className="flex gap-2">
               <button type="button" onClick={handlePwChange} disabled={pwSaving}
                 className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60">
-                {pwSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Yangilash
+                {pwSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />} {t.tfRefresh}
               </button>
               <button type="button" onClick={() => { setShowPw(false); setPwError(null); setPwForm({ newPw: '', confirmPw: '' }) }}
                 className="px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                Bekor
+                {t.fpCancel}
               </button>
             </div>
           </div>
         )}
       </Section>
 
-      <Section icon={Sun} title="Ko'rinish">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Mavzu sozlamasi Navbar'dagi 🌙/☀️ tugmasi orqali o'zgartiriladi.</p>
+      <Section icon={Sun} title={t.pfAppearance}>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t.pfThemeNote}</p>
       </Section>
     </div>
   )

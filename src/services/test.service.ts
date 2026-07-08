@@ -11,7 +11,12 @@ export type TestWithDetails = TestRow & {
   results_count: number
 }
 
-export type TestForStudent = TestRow & {
+// Talabaga yuboriladigan savol — `correct_index` FAQAT topshirilgandan keyin bo'ladi
+// (server RPC topshirilmagan testda uni umuman yubormaydi). Shu sabab optional.
+export type StudentQuestion = Omit<TestQuestion, 'correct_index'> & { correct_index?: 0 | 1 | 2 | 3 }
+
+export type TestForStudent = Omit<TestRow, 'questions'> & {
+  questions: StudentQuestion[]
   group:  { id: string; name: string } | null
   result: TestResultRow | null
 }
@@ -53,42 +58,13 @@ export const testService = {
     })) as TestWithDetails[]
   },
 
-  // Talaba: guruhlariga tegishli nashr qilingan testlar
-  getForStudent: async (studentId: string): Promise<TestForStudent[]> => {
-    // 1. Talabaning guruh IDlari
-    const { data: enrollments } = await supabase
-      .from('student_groups')
-      .select('group_id')
-      .eq('student_id', studentId)
-
-    const groupIds = (enrollments ?? []).map((e: any) => e.group_id)
-    if (!groupIds.length) return []
-
-    // 2. Nashr qilingan testlar
-    const { data: tests, error } = await supabase
-      .from('tests')
-      .select('*, group:groups(id, name)')
-      .eq('is_published', true)
-      .in('group_id', groupIds)
-      .order('created_at', { ascending: false })
-
+  // Talaba: guruhlariga tegishli nashr qilingan testlar.
+  // Xavfsizlik: to'g'ridan-to'g'ri jadval o'qish o'rniga SECURITY DEFINER RPC —
+  // `correct_index` topshirilmagan testlarda mijozga UMUMAN yuborilmaydi.
+  getForStudent: async (): Promise<TestForStudent[]> => {
+    const { data, error } = await supabase.rpc('get_student_tests')
     if (error) throw new Error(error.message)
-    if (!tests?.length) return []
-
-    // 3. Talabaning natijalari
-    const { data: results } = await supabase
-      .from('test_results')
-      .select('*')
-      .eq('student_id', studentId)
-      .in('test_id', tests.map((t: any) => t.id))
-
-    const resultMap = new Map((results ?? []).map(r => [r.test_id, r]))
-
-    return tests.map((t: any) => ({
-      ...t,
-      questions: (t.questions ?? []) as TestQuestion[],
-      result:    resultMap.get(t.id) ?? null,
-    })) as TestForStudent[]
+    return (data ?? []) as unknown as TestForStudent[]
   },
 
   // Admin: barcha testlar
@@ -158,31 +134,25 @@ export const testService = {
     if (error) throw new Error(error.message)
   },
 
-  // Talaba testni topshiradi
-  submitResult: async (
-    testId:    string,
-    studentId: string,
-    answers:   Record<string, number>,
-    questions: TestQuestion[],
-  ): Promise<TestResultRow> => {
-    const score = questions.reduce((acc, q) => {
-      return answers[q.id] === q.correct_index ? acc + 1 : acc
-    }, 0)
-
-    const { data, error } = await supabase
-      .from('test_results')
-      .upsert({
-        test_id:         testId,
-        student_id:      studentId,
-        answers,
-        score,
-        total_questions: questions.length,
-        submitted_at:    new Date().toISOString(),
-      }, { onConflict: 'test_id,student_id' })
-      .select()
-      .single()
-
+  // Talaba testni topshiradi — baholash BUTUNLAY SERVERDA (submit_test RPC).
+  // Mijoz score/total yubormaydi va yoza olmaydi. RPC natija + review uchun
+  // to'liq savollarni (topshirilgandan keyin javoblar bilan) qaytaradi.
+  submitTest: async (
+    testId:  string,
+    answers: Record<string, number>,
+  ): Promise<{ result: TestResultRow; questions: TestQuestion[] }> => {
+    const { data, error } = await supabase.rpc('submit_test', {
+      p_test_id: testId,
+      p_answers: answers,
+    })
     if (error) throw new Error(error.message)
-    return data
+    return data as unknown as { result: TestResultRow; questions: TestQuestion[] }
+  },
+
+  // Talabaning o'z natijalari + test nomi (dashboard / progress uchun) — xavfsiz RPC
+  getMyResults: async (): Promise<unknown[]> => {
+    const { data, error } = await supabase.rpc('get_my_test_results')
+    if (error) throw new Error(error.message)
+    return (data ?? []) as unknown[]
   },
 }

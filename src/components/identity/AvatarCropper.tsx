@@ -7,6 +7,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { ZoomIn, ZoomOut, RotateCcw, Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const OUT_SIZE = 256   // output canvas size
 
@@ -17,6 +18,7 @@ interface AvatarCropperProps {
 }
 
 export function AvatarCropper({ imageSrc, onCrop, onCancel }: AvatarCropperProps) {
+  const { t }        = useLanguage()
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const imgRef       = useRef(new Image())
@@ -167,7 +169,7 @@ export function AvatarCropper({ imageSrc, onCrop, onCancel }: AvatarCropperProps
         <button
           type="button"
           onClick={resetCrop}
-          title="Qayta o'rnatish"
+          title={t.avReset}
           className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
         >
           <RotateCcw className="w-4 h-4" />
@@ -182,7 +184,7 @@ export function AvatarCropper({ imageSrc, onCrop, onCancel }: AvatarCropperProps
           className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           <X className="w-4 h-4" />
-          Bekor
+          {t.avCancel}
         </button>
         <button
           type="button"
@@ -190,12 +192,12 @@ export function AvatarCropper({ imageSrc, onCrop, onCancel }: AvatarCropperProps
           className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:opacity-90 text-white text-sm font-semibold shadow-md shadow-violet-500/25 transition-all active:scale-95"
         >
           <Check className="w-4 h-4" />
-          Tasdiqlash
+          {t.avConfirm}
         </button>
       </div>
 
       <p className="text-[11px] text-gray-400 dark:text-gray-600 text-center">
-        Rasmni suring va kattalashtiring • Doira ichidagi qism saqlanadi
+        {t.avCropHint}
       </p>
     </div>
   )

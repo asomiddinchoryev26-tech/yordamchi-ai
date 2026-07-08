@@ -7,16 +7,17 @@ import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { profileService } from '@/services/profile.service'
 import type { ProfileRow } from '@/types/database.types'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
 
 type RoleFilter   = 'all' | 'student' | 'teacher' | 'admin'
 type StatusFilter = 'all' | 'active' | 'inactive'
 
-const ROLE_META: Record<string, { label: string; bg: string; color: string }> = {
-  student: { label: 'Talaba',    bg: 'bg-blue-100',    color: 'text-blue-700'    },
-  teacher: { label: "O'qituvchi", bg: 'bg-indigo-100',  color: 'text-indigo-700'  },
-  admin:   { label: 'Admin',     bg: 'bg-emerald-100', color: 'text-emerald-700' },
+const ROLE_META: Record<string, { label: keyof Translations; bg: string; color: string }> = {
+  student: { label: 'adStudent', bg: 'bg-blue-100',    color: 'text-blue-700'    },
+  teacher: { label: 'tdTeacher', bg: 'bg-indigo-100',  color: 'text-indigo-700'  },
+  admin:   { label: 'adAdmin',   bg: 'bg-emerald-100', color: 'text-emerald-700' },
 }
 
 const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
@@ -48,6 +49,7 @@ function Avatar({ name, email, role }: { name: string | null; email: string | nu
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function UsersPage() {
+  const { t } = useLanguage()
   const [users,     setUsers]     = useState<ProfileRow[]>([])
   const [loading,   setLoading]   = useState(true)
   const [pageError, setPageError] = useState<string | null>(null)
@@ -73,7 +75,7 @@ export default function UsersPage() {
       if (error) throw new Error(error.message)
       setUsers((data ?? []) as ProfileRow[])
     } catch {
-      setPageError("Foydalanuvchilarni yuklashda xatolik. Sahifani yangilang.")
+      setPageError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -100,7 +102,7 @@ export default function UsersPage() {
       setUsers(prev => prev.map(u => u.id === updated.id ? updated : u))
       showSaved(user.id)
     } catch {
-      setPageError("Rolni o'zgartirishda xatolik")
+      setPageError(t.auRoleChangeErr)
     } finally {
       setUpdatingId(null)
     }
@@ -115,7 +117,7 @@ export default function UsersPage() {
       setUsers(prev => prev.map(u => u.id === updated.id ? updated : u))
       showSaved(user.id)
     } catch {
-      setPageError("Statusni o'zgartirishda xatolik")
+      setPageError(t.tcStatusErr)
     } finally {
       setUpdatingId(null)
     }
@@ -142,9 +144,9 @@ export default function UsersPage() {
 
       {/* Sarlavha */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Foydalanuvchilar</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t.adTabUsers}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {loading ? 'Yuklanmoqda...' : `${users.length} ta foydalanuvchi`}
+          {loading ? t.notifLoading : `${users.length} ${t.adUsersWord}`}
         </p>
       </div>
 
@@ -163,12 +165,12 @@ export default function UsersPage() {
       {!loading && (
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {[
-            { label: 'Jami',         value: counts.total,    bg: 'bg-white',         text: 'text-gray-900'    },
-            { label: 'Talabalar',    value: counts.student,  bg: 'bg-blue-50',       text: 'text-blue-700'    },
-            { label: "O'qituvchilar",value: counts.teacher,  bg: 'bg-indigo-50',     text: 'text-indigo-700'  },
-            { label: 'Adminlar',     value: counts.admin,    bg: 'bg-emerald-50',    text: 'text-emerald-700' },
-            { label: 'Faol',         value: counts.active,   bg: 'bg-emerald-50',    text: 'text-emerald-700' },
-            { label: 'Nofaol',       value: counts.inactive, bg: 'bg-gray-50',       text: 'text-gray-500'    },
+            { label: t.auJami,      value: counts.total,    bg: 'bg-white',         text: 'text-gray-900'    },
+            { label: t.tdStudents,  value: counts.student,  bg: 'bg-blue-50',       text: 'text-blue-700'    },
+            { label: t.adTeachers,  value: counts.teacher,  bg: 'bg-indigo-50',     text: 'text-indigo-700'  },
+            { label: t.auAdmins,    value: counts.admin,    bg: 'bg-emerald-50',    text: 'text-emerald-700' },
+            { label: t.admActive,   value: counts.active,   bg: 'bg-emerald-50',    text: 'text-emerald-700' },
+            { label: t.tdInactive,  value: counts.inactive, bg: 'bg-gray-50',       text: 'text-gray-500'    },
           ].map(s => (
             <div key={s.label} className={cn('rounded-2xl border border-gray-100 p-3 text-center', s.bg)}>
               <p className={cn('text-xl font-bold', s.text)}>{s.value}</p>
@@ -187,7 +189,7 @@ export default function UsersPage() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Ism, email yoki telefon..."
+              placeholder={t.tstSearchPh}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
             />
           </div>
@@ -206,7 +208,7 @@ export default function UsersPage() {
                     : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300',
                 )}
               >
-                {r === 'all' ? 'Barchasi' : ROLE_META[r]?.label ?? r}
+                {r === 'all' ? t.adAll : ROLE_META[r] ? t[ROLE_META[r].label] : r}
               </button>
             ))}
 
@@ -217,9 +219,9 @@ export default function UsersPage() {
                 onChange={e => setStatusFilter(e.target.value as StatusFilter)}
                 className="appearance-none pl-3 pr-7 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
               >
-                <option value="all">Barcha holat</option>
-                <option value="active">Faol</option>
-                <option value="inactive">Nofaol</option>
+                <option value="all">{t.auAllStatuses}</option>
+                <option value="active">{t.admActive}</option>
+                <option value="inactive">{t.tdInactive}</option>
               </select>
               <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
             </div>
@@ -248,14 +250,14 @@ export default function UsersPage() {
       {!loading && users.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Foydalanuvchilar yo'q</p>
+          <p className="text-sm text-gray-400">{t.auEmpty}</p>
         </div>
       )}
 
       {/* Filtr bo'yicha natija yo'q */}
       {!loading && users.length > 0 && filtered.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">Filtr bo'yicha foydalanuvchi topilmadi</p>
+          <p className="text-sm text-gray-500">{t.auNotFound}</p>
         </div>
       )}
 
@@ -266,10 +268,10 @@ export default function UsersPage() {
           {/* Sarlavha qatori */}
           <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 items-center px-5 py-3 bg-gray-50/60 border-b border-gray-100">
             <div className="w-9" />
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Foydalanuvchi</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t.adUser}</p>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-28 text-center">Rol</p>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-20 text-center">Holat</p>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-24 text-right">Qo'shilgan</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-20 text-center">{t.tdColStatus}</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-24 text-right">{t.auJoined}</p>
           </div>
 
           {/* Qatorlar */}
@@ -298,7 +300,7 @@ export default function UsersPage() {
                   {/* Ism + Email */}
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">
-                      {user.full_name ?? 'Ism kiritilmagan'}
+                      {user.full_name ?? t.taNoName}
                     </p>
                     <p className="text-xs text-gray-400 truncate">{user.email}</p>
                     {user.phone && (
@@ -321,9 +323,9 @@ export default function UsersPage() {
                           isUpdating && 'opacity-50 cursor-not-allowed',
                         )}
                       >
-                        <option value="student">Talaba</option>
-                        <option value="teacher">O'qituvchi</option>
-                        <option value="admin">Admin</option>
+                        <option value="student">{t.adStudent}</option>
+                        <option value="teacher">{t.tdTeacher}</option>
+                        <option value="admin">{t.adAdmin}</option>
                       </select>
                       <ChevronDown className={cn(
                         'absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none',
@@ -344,12 +346,12 @@ export default function UsersPage() {
                           ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
                       )}
-                      title="Bosganda holat o'zgaradi"
+                      title={t.auToggleHint}
                     >
                       {isUpdating ? (
                         <span className="inline-block w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        user.status === 'active' ? 'Faol' : 'Nofaol'
+                        user.status === 'active' ? t.admActive : t.tdInactive
                       )}
                     </button>
                   </div>

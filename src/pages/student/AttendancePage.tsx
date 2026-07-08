@@ -4,21 +4,29 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { attendanceService, STATUS_META } from '@/services/attendance.service'
 import type { AttendanceWithDetails } from '@/services/attendance.service'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
-const MONTHS = [
-  'Yanvar','Fevral','Mart','Aprel','May','Iyun',
-  'Iyul','Avgust','Sentabr','Oktyabr','Noyabr','Dekabr',
+// Oy/hafta kalitlari — render vaqtida t bilan resolve qilinadi
+const MONTH_KEYS: (keyof Translations)[] = [
+  'mJan','mFeb','mMar','mApr','mMay','mJun',
+  'mJul','mAug','mSep','mOct','mNov','mDec',
 ]
-function fmtDate(d: string) {
-  const dt = new Date(d)
-  return `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`
+const DAY_KEYS: (keyof Translations)[] = ['sdSun','sdMon','sdTue','sdWed','sdThu','sdFri','sdSat']
+// Holat teglari — servisdagi STATUS_META rang/fonini saqlab, matnni tarjima qilamiz
+const STATUS_LABEL_KEYS: Record<string, keyof Translations> = {
+  present: 'sdPresent', absent: 'sdAbsent', late: 'sdLate', excused: 'sdExcused',
 }
-function weekDay(d: string) {
-  return ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'][new Date(d).getDay()]
+function fmtDate(d: string, t: Translations) {
+  const dt = new Date(d)
+  return `${dt.getDate()} ${t[MONTH_KEYS[dt.getMonth()]]} ${dt.getFullYear()}`
+}
+function weekDay(d: string, t: Translations) {
+  return t[DAY_KEYS[new Date(d).getDay()]]
 }
 
 export default function StudentAttendancePage() {
   const auth = useAuth()
+  const { t } = useLanguage()
   const [records, setRecords] = useState<AttendanceWithDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState<string | null>(null)
@@ -34,7 +42,7 @@ export default function StudentAttendancePage() {
     try {
       setRecords(await attendanceService.getStudentAttendance(auth.user!.id))
     } catch {
-      setError("Davomatni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -59,8 +67,8 @@ export default function StudentAttendancePage() {
   return (
     <div className="space-y-5 pb-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Davomat</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Dars davomatingiz tarixi</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.achAttendance}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.stAttSubtitle}</p>
       </div>
 
       {error && (
@@ -74,7 +82,7 @@ export default function StudentAttendancePage() {
       {total > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-gray-700">Umumiy davomat</p>
+            <p className="text-sm font-semibold text-gray-700">{t.stAttOverall}</p>
             <span className={cn(
               'text-2xl font-bold',
               pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-red-600'
@@ -98,7 +106,7 @@ export default function StudentAttendancePage() {
               return (
                 <div key={key} className={cn('rounded-xl p-3 text-center', meta.bg)}>
                   <p className={cn('text-xl font-bold', meta.color)}>{value}</p>
-                  <p className={cn('text-[11px] font-medium mt-0.5', meta.color)}>{meta.label}</p>
+                  <p className={cn('text-[11px] font-medium mt-0.5', meta.color)}>{t[STATUS_LABEL_KEYS[key]]}</p>
                 </div>
               )
             })}
@@ -110,8 +118,8 @@ export default function StudentAttendancePage() {
       {!loading && total === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <CheckSquare className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Davomat yozuvlari yo'q</p>
-          <p className="text-xs text-gray-400 mt-1">O'qituvchi davomat belgilasa, bu yerda ko'rinadi</p>
+          <p className="text-sm text-gray-400">{t.sdNoAttendance}</p>
+          <p className="text-xs text-gray-400 mt-1">{t.stAttEmptyHint}</p>
         </div>
       )}
 
@@ -131,7 +139,7 @@ export default function StudentAttendancePage() {
                     {new Date(r.attended_date).getDate()}
                   </p>
                   <p className="text-[11px] text-gray-400 mt-0.5">
-                    {MONTHS[new Date(r.attended_date).getMonth()].slice(0,3)}
+                    {t[MONTH_KEYS[new Date(r.attended_date).getMonth()]].slice(0,3)}
                   </p>
                 </div>
 
@@ -141,14 +149,14 @@ export default function StudentAttendancePage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-gray-900">
-                      {(r.group as any)?.name ?? 'Guruh'}
+                      {(r.group as any)?.name ?? t.tfGroup}
                     </p>
                     <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', meta?.bg, meta?.color)}>
-                      {meta?.label}
+                      {STATUS_LABEL_KEYS[r.status] ? t[STATUS_LABEL_KEYS[r.status]] : meta?.label}
                     </span>
                   </div>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {weekDay(r.attended_date)}, {fmtDate(r.attended_date)}
+                    {weekDay(r.attended_date, t)}, {fmtDate(r.attended_date, t)}
                   </p>
                   {r.note && <p className="text-xs text-gray-500 mt-1 italic">"{r.note}"</p>}
                 </div>

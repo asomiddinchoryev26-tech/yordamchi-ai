@@ -10,6 +10,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import { PATHS } from '@/routes/paths'
+import { AIWeakStudents } from '@/components/teacher/TeacherFeatures'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -82,12 +84,12 @@ type TDScoreSnapshot = {
 
 // ─── Konstantalar ─────────────────────────────────────────────────────────────
 
-const TABS: TabDef[] = [
-  { key:'students',     label:'Talabalarim', icon: Users       },
-  { key:'courses',      label:'Guruhlarim',  icon: BookOpen    },
-  { key:'attendance',   label:'Davomat',     icon: CheckSquare },
-  { key:'reports',      label:'Hisobotlar',  icon: BarChart2   },
-  { key:'achievements', label:'Yutuqlar',    icon: Award       },
+const TABS: { key: TeacherTab; label: keyof Translations; icon: TabDef['icon'] }[] = [
+  { key:'students',     label:'tdTabStudents',     icon: Users       },
+  { key:'courses',      label:'tdTabCourses',      icon: BookOpen    },
+  { key:'attendance',   label:'achAttendance',     icon: CheckSquare },
+  { key:'reports',      label:'tdTabReports',      icon: BarChart2   },
+  { key:'achievements', label:'tdTabAchievements', icon: Award       },
 ]
 
 const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
@@ -108,13 +110,13 @@ function scoreBarColor(n: number) {
 function tierStyle(tier: string) {
   switch (tier) {
     case 'gold':
-      return { bg:'bg-amber-50 dark:bg-amber-900/20', border:'border-amber-200 dark:border-amber-700', iconBg:'bg-amber-100 dark:bg-amber-900/40', text:'text-amber-700 dark:text-amber-300', badge:'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', bar:'bg-amber-400', label:'Oltin' }
+      return { bg:'bg-amber-50 dark:bg-amber-900/20', border:'border-amber-200 dark:border-amber-700', iconBg:'bg-amber-100 dark:bg-amber-900/40', text:'text-amber-700 dark:text-amber-300', badge:'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', bar:'bg-amber-400', label:'tdGold' as keyof Translations }
     case 'silver':
-      return { bg:'bg-slate-50 dark:bg-slate-800/40', border:'border-slate-200 dark:border-slate-600', iconBg:'bg-slate-100 dark:bg-slate-700', text:'text-slate-600 dark:text-slate-300', badge:'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300', bar:'bg-slate-400', label:'Kumush' }
+      return { bg:'bg-slate-50 dark:bg-slate-800/40', border:'border-slate-200 dark:border-slate-600', iconBg:'bg-slate-100 dark:bg-slate-700', text:'text-slate-600 dark:text-slate-300', badge:'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300', bar:'bg-slate-400', label:'tdSilver' as keyof Translations }
     case 'bronze':
-      return { bg:'bg-orange-50 dark:bg-orange-900/20', border:'border-orange-200 dark:border-orange-700', iconBg:'bg-orange-100 dark:bg-orange-900/40', text:'text-orange-700 dark:text-orange-300', badge:'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300', bar:'bg-orange-400', label:'Bronza' }
+      return { bg:'bg-orange-50 dark:bg-orange-900/20', border:'border-orange-200 dark:border-orange-700', iconBg:'bg-orange-100 dark:bg-orange-900/40', text:'text-orange-700 dark:text-orange-300', badge:'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300', bar:'bg-orange-400', label:'tdBronze' as keyof Translations }
     default:
-      return { bg:'bg-violet-50 dark:bg-violet-900/20', border:'border-violet-200 dark:border-violet-700', iconBg:'bg-violet-100 dark:bg-violet-900/40', text:'text-violet-700 dark:text-violet-300', badge:'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300', bar:'bg-violet-400', label:'Maxsus' }
+      return { bg:'bg-violet-50 dark:bg-violet-900/20', border:'border-violet-200 dark:border-violet-700', iconBg:'bg-violet-100 dark:bg-violet-900/40', text:'text-violet-700 dark:text-violet-300', badge:'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300', bar:'bg-violet-400', label:'tdSpecial' as keyof Translations }
   }
 }
 
@@ -143,6 +145,7 @@ function achDesc(def: EarnedAchievement['def']): string {
 export default function TeacherDashboardPage() {
   const auth     = useAuth()
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   const [tab,     setTab]     = useState<TeacherTab>('students')
   const [loading, setLoading] = useState(true)
@@ -366,16 +369,16 @@ export default function TeacherDashboardPage() {
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">O&apos;qituvchi Dashboardi</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tdDashboardTitle}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            {auth.user?.name ?? 'O\'qituvchi'} • Real ma&apos;lumotlar
+            {auth.user?.name ?? t.tdTeacher} • {t.tdRealData}
           </p>
         </div>
         <div className="flex gap-3">
           {[
-            { l:'Talabalar', v: loading ? '...' : String(totalStudents) },
-            { l:'Guruhlar',  v: loading ? '...' : String(totalGroups)   },
-            { l:'Darslar',   v: loading ? '...' : String(totalLessons)  },
+            { l: t.tdStudents, v: loading ? '...' : String(totalStudents) },
+            { l: t.tdGroups,   v: loading ? '...' : String(totalGroups)   },
+            { l: t.tdLessons,  v: loading ? '...' : String(totalLessons)  },
           ].map(s => (
             <div key={s.l} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 px-4 py-2.5 text-center min-w-[72px]">
               <p className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-none">{s.v}</p>
@@ -385,21 +388,24 @@ export default function TeacherDashboardPage() {
         </div>
       </div>
 
+      {/* AI o'quvchi tahlili (Premium) — additiv, mavjud dizaynga tegmasdan */}
+      {auth.user?.id && <AIWeakStudents teacherId={auth.user.id} />}
+
       {/* ── Tabs ── */}
       <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-x-auto">
-        {TABS.map(t => {
-          const Icon = t.icon
-          const active = tab === t.key
+        {TABS.map(ti => {
+          const Icon = ti.icon
+          const active = tab === ti.key
           return (
-            <button key={t.key} type="button" onClick={() => setTab(t.key)}
+            <button key={ti.key} type="button" onClick={() => setTab(ti.key)}
               className={cn(
                 'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0',
                 active ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-700/60',
               )}
             >
               <Icon className="w-4 h-4" />
-              {t.label}
-              {t.key === 'achievements' && achievements.length > 0 && (
+              {t[ti.label]}
+              {ti.key === 'achievements' && achievements.length > 0 && (
                 <span className="ml-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
                   {achievements.length}
                 </span>
@@ -416,11 +422,11 @@ export default function TeacherDashboardPage() {
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input type="text" value={search} onChange={e=>setSearch(e.target.value)}
-                placeholder="Talaba ism yoki guruh..."
+                placeholder={t.tdSearchStudent}
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
-            <span className="text-sm text-gray-500">{filtered.length} ta</span>
+            <span className="text-sm text-gray-500">{filtered.length} {t.tdCount}</span>
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden">
@@ -428,14 +434,14 @@ export default function TeacherDashboardPage() {
               <div className="p-6 space-y-3">{[1,2,3,4].map(i=><div key={i} className="h-10 bg-gray-100 rounded-xl animate-pulse"/>)}</div>
             ) : filtered.length === 0 ? (
               <div className="p-12 text-center text-sm text-gray-400">
-                {students.length === 0 ? 'Guruhlarda talabalar yo\'q' : 'Talaba topilmadi'}
+                {students.length === 0 ? t.tdNoStudents : t.tdStudentNotFound}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-[440px]">
                   <thead>
                     <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50">
-                      {['#','Talaba','Guruh','Davomat','Holat'].map(h=>(
+                      {['#', t.tdColStudent, t.tdColGroup, t.achAttendance, t.tdColStatus].map(h=>(
                         <th key={h} className="text-left text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide py-3 px-4 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -469,7 +475,7 @@ export default function TeacherDashboardPage() {
                             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full',
                               s.status==='active'?'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400':'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
-                              {s.status==='active'?'Faol':'Nofaol'}
+                              {s.status==='active'?t.admActive:t.tdInactive}
                             </span>
                           </td>
                         </tr>
@@ -482,7 +488,7 @@ export default function TeacherDashboardPage() {
           </div>
           <div className="text-center">
             <button onClick={() => navigate(PATHS.TEACHER.STUDENTS)} className="text-sm text-indigo-600 font-medium hover:underline inline-flex items-center gap-1">
-              To&apos;liq talabalar sahifasi <ChevronRight className="w-4 h-4" />
+              {t.tdFullStudents} <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -491,14 +497,14 @@ export default function TeacherDashboardPage() {
       {/* ══ GURUHLARIM ══ */}
       {tab === 'courses' && (
         <div className="space-y-5">
-          <p className="text-sm text-gray-500">{loading ? '...' : `${groups.length} ta guruh`}</p>
+          <p className="text-sm text-gray-500">{loading ? '...' : `${groups.length} ${t.tdGroupWord}`}</p>
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[1,2,3,4].map(i=><div key={i} className="h-36 bg-gray-100 rounded-2xl animate-pulse"/>)}
             </div>
           ) : groups.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center text-sm text-gray-400">
-              Guruh biriktirilmagan
+              {t.tdNoGroups}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -510,19 +516,19 @@ export default function TeacherDashboardPage() {
                       <h3 className="font-bold text-gray-900 dark:text-gray-100">{g.name}</h3>
                       {g.subject && <p className="text-xs mt-0.5 font-medium" style={{color:g.subject.color}}>{g.subject.name}</p>}
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {g.student_count} talaba • {g.lesson_count} dars
+                        {g.student_count} {t.tdStudentWord} • {g.lesson_count} {t.tdLessonWord}
                       </p>
                     </div>
                     <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0',
                       g.status==='active'?'bg-emerald-100 text-emerald-700':g.status==='completed'?'bg-blue-100 text-blue-700':'bg-gray-100 text-gray-500'
                     )}>
-                      {g.status==='active'?'Faol':g.status==='completed'?'Tugatilgan':'Nofaol'}
+                      {g.status==='active'?t.admActive:g.status==='completed'?t.tdCompleted:t.tdInactive}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">{g.student_count} / {g.student_count} talaba</span>
+                    <span className="text-xs text-gray-400">{g.student_count} / {g.student_count} {t.tdStudentWord}</span>
                     <button onClick={()=>navigate(PATHS.TEACHER.GROUPS)} className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1">
-                      Ko&apos;rish <ChevronRight className="w-3.5 h-3.5" />
+                      {t.tdView} <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -539,12 +545,12 @@ export default function TeacherDashboardPage() {
             <div className="space-y-3">{[1,2,3].map(i=><div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse"/>)}</div>
           ) : attSummary.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center text-sm text-gray-400">
-              Davomat ma&apos;lumoti yo&apos;q
+              {t.sdNoAttendance}
             </div>
           ) : (
             <>
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-5">Guruh bo&apos;yicha davomat xulosa</h2>
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-5">{t.tdAttSummary}</h2>
                 <div className="space-y-4">
                   {attSummary.map(a => {
                     const pct = a.total > 0 ? Math.round((a.present/a.total)*100) : 0
@@ -553,9 +559,9 @@ export default function TeacherDashboardPage() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="font-medium text-gray-800 dark:text-gray-200">{a.group_name}</span>
                           <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span>{a.total} qatnashish</span>
+                            <span>{a.total} {t.tdParticipations}</span>
                             <span className={cn('font-bold', pct>=80?'text-emerald-600':pct>=60?'text-amber-600':'text-red-600')}>
-                              {pct}% kelgan
+                              {pct}% {t.tdPresentPct}
                             </span>
                           </div>
                         </div>
@@ -573,7 +579,7 @@ export default function TeacherDashboardPage() {
               </div>
               <div className="text-center">
                 <button onClick={()=>navigate(PATHS.TEACHER.ATTENDANCE)} className="text-sm text-indigo-600 font-medium hover:underline inline-flex items-center gap-1">
-                  Davomat belgilash sahifasiga o&apos;tish <ChevronRight className="w-4 h-4" />
+                  {t.tdGoToAttendance} <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </>
@@ -588,10 +594,10 @@ export default function TeacherDashboardPage() {
             {loading ? (
               [1,2,3,4].map(i=><div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse"/>)
             ) : [
-              { l:'Talabalar',      v: totalStudents,              e:'👥', bg:'bg-indigo-50'  },
-              { l:'Guruhlar',       v: totalGroups,                e:'🏫', bg:'bg-blue-50'    },
-              { l:'Darslar',        v: totalLessons,               e:'📖', bg:'bg-emerald-50' },
-              { l:'Test natijalari',v: topStudents.length>0?'✓':'—',e:'📝', bg:'bg-amber-50'  },
+              { l: t.tdStudents,    v: totalStudents,              e:'👥', bg:'bg-indigo-50'  },
+              { l: t.tdGroups,      v: totalGroups,                e:'🏫', bg:'bg-blue-50'    },
+              { l: t.tdLessons,     v: totalLessons,               e:'📖', bg:'bg-emerald-50' },
+              { l: t.tdTestResults, v: topStudents.length>0?'✓':'—',e:'📝', bg:'bg-amber-50'  },
             ].map(s=>(
               <div key={s.l} className={cn('rounded-2xl border border-gray-100 dark:border-gray-700 p-5',s.bg)}>
                 <span className="text-2xl">{s.e}</span>
@@ -605,7 +611,7 @@ export default function TeacherDashboardPage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
               <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
                 <TrendingUp className="w-4 h-4 text-emerald-500" />
-                Top talabalar (test natijalari)
+                {t.tdTopStudents}
               </h2>
               <div className="space-y-3">
                 {topStudents.map((s, i) => {
@@ -634,7 +640,7 @@ export default function TeacherDashboardPage() {
 
           {topStudents.length === 0 && !loading && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center text-sm text-gray-400">
-              Test natijalari yo&apos;q — testlarni nashr qilib, talabalar topshirgach hisobot paydo bo&apos;ladi
+              {t.tdNoTestResults}
             </div>
           )}
         </div>
@@ -661,18 +667,18 @@ export default function TeacherDashboardPage() {
               {/* ── 1. Tier statistikasi ── */}
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                 {[
-                  { tier:'gold',    label:'Oltin',  emoji:'🥇', count: goldCount,    bg:'bg-amber-50 dark:bg-amber-900/20',   border:'border-amber-200 dark:border-amber-700',  text:'text-amber-600 dark:text-amber-400'  },
-                  { tier:'silver',  label:'Kumush', emoji:'🥈', count: silverCount,  bg:'bg-slate-50 dark:bg-slate-800/40',   border:'border-slate-200 dark:border-slate-600',  text:'text-slate-500 dark:text-slate-400'  },
-                  { tier:'bronze',  label:'Bronza', emoji:'🥉', count: bronzeCount,  bg:'bg-orange-50 dark:bg-orange-900/20', border:'border-orange-200 dark:border-orange-700', text:'text-orange-600 dark:text-orange-400' },
-                  { tier:'special', label:'Maxsus', emoji:'⭐', count: specialCount, bg:'bg-violet-50 dark:bg-violet-900/20', border:'border-violet-200 dark:border-violet-700', text:'text-violet-600 dark:text-violet-400' },
+                  { tier:'gold',    label:t.tdGold,    emoji:'🥇', count: goldCount,    bg:'bg-amber-50 dark:bg-amber-900/20',   border:'border-amber-200 dark:border-amber-700',  text:'text-amber-600 dark:text-amber-400'  },
+                  { tier:'silver',  label:t.tdSilver,  emoji:'🥈', count: silverCount,  bg:'bg-slate-50 dark:bg-slate-800/40',   border:'border-slate-200 dark:border-slate-600',  text:'text-slate-500 dark:text-slate-400'  },
+                  { tier:'bronze',  label:t.tdBronze,  emoji:'🥉', count: bronzeCount,  bg:'bg-orange-50 dark:bg-orange-900/20', border:'border-orange-200 dark:border-orange-700', text:'text-orange-600 dark:text-orange-400' },
+                  { tier:'special', label:t.tdSpecial, emoji:'⭐', count: specialCount, bg:'bg-violet-50 dark:bg-violet-900/20', border:'border-violet-200 dark:border-violet-700', text:'text-violet-600 dark:text-violet-400' },
                 ].map(s => (
                   <div key={s.tier} className={cn('rounded-2xl border p-4 flex flex-col items-center text-center', s.bg, s.border)}>
                     <span className="text-2xl mb-1">{s.emoji}</span>
                     <p className={cn('text-2xl font-bold', s.text)}>{s.count}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label} yutuq</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label} {t.tdAchWord}</p>
                     {s.count > 0 && (
                       <span className="mt-1.5 inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle className="w-3 h-3" /> Erishildi
+                        <CheckCircle className="w-3 h-3" /> {t.tdAchieved}
                       </span>
                     )}
                   </div>
@@ -685,7 +691,7 @@ export default function TeacherDashboardPage() {
                   <div className="flex items-center justify-between mb-5">
                     <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                       <Star className="w-4 h-4 text-amber-500" />
-                      Ballar taqsimoti
+                      {t.tdScoreDistribution}
                     </h2>
                     <div className="flex items-center gap-2">
                       {latestSnap.group_name && (
@@ -708,12 +714,12 @@ export default function TeacherDashboardPage() {
                       {latestSnap.total_score}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Umumiy ball</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{t.tdTotalScore}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {latestSnap.total_score >= 90 ? '🥇 Oltin darajaga erishgansiz!' :
-                         latestSnap.total_score >= 75 ? '🥈 Kumush darajada!' :
-                         latestSnap.total_score >= 60 ? '🥉 Bronza darajada!' :
-                         'Hali sertifikat darajasiga yetmadingiz'}
+                        {latestSnap.total_score >= 90 ? t.tdGoldMsg :
+                         latestSnap.total_score >= 75 ? t.tdSilverMsg :
+                         latestSnap.total_score >= 60 ? t.tdBronzeMsg :
+                         t.tdNoCertYet}
                       </p>
                     </div>
                     <div className="ml-auto text-right flex-shrink-0">
@@ -723,19 +729,19 @@ export default function TeacherDashboardPage() {
                         latestSnap.total_score >= 60 ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
                         'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                       )}>
-                        {latestSnap.total_score >= 90 ? 'Oltin' :
-                         latestSnap.total_score >= 75 ? 'Kumush' :
-                         latestSnap.total_score >= 60 ? 'Bronza' : '< Bronza'}
+                        {latestSnap.total_score >= 90 ? t.tdGold :
+                         latestSnap.total_score >= 75 ? t.tdSilver :
+                         latestSnap.total_score >= 60 ? t.tdBronze : t.tdBelowBronze}
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     {[
-                      { label:'Davomat',   value: latestSnap.attendance_score,  weight:'×40%', icon:'📅' },
-                      { label:'Test bali', value: latestSnap.test_score,        weight:'×40%', icon:'📝' },
-                      { label:'Izchillik', value: latestSnap.consistency_score, weight:'×20%', icon:'🔁' },
-                      { label:'Faollik',   value: latestSnap.activity_score,    weight:'—',    icon:'⚡' },
+                      { label:t.achAttendance,     value: latestSnap.attendance_score,  weight:'×40%', icon:'📅' },
+                      { label:t.tdScoreTest,        value: latestSnap.test_score,        weight:'×40%', icon:'📝' },
+                      { label:t.tdScoreConsistency, value: latestSnap.consistency_score, weight:'×20%', icon:'🔁' },
+                      { label:t.tdScoreActivity,    value: latestSnap.activity_score,    weight:'—',    icon:'⚡' },
                     ].map(({ label, value, weight, icon }) => (
                       <div key={label}>
                         <div className="flex items-center justify-between mb-1">
@@ -763,10 +769,10 @@ export default function TeacherDashboardPage() {
                     <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         {latestSnap.total_score < 60
-                          ? `Bronza uchun: ${60 - latestSnap.total_score} ball kerak`
+                          ? `${t.tdForBronze} ${60 - latestSnap.total_score} ${t.tdScoreNeeded}`
                           : latestSnap.total_score < 75
-                          ? `Kumush uchun: ${75 - latestSnap.total_score} ball kerak`
-                          : `Oltin uchun: ${90 - latestSnap.total_score} ball kerak`}
+                          ? `${t.tdForSilver} ${75 - latestSnap.total_score} ${t.tdScoreNeeded}`
+                          : `${t.tdForGold} ${90 - latestSnap.total_score} ${t.tdScoreNeeded}`}
                       </p>
                       <div className="mt-1.5 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div className={cn('h-full rounded-full', scoreBarColor(latestSnap.total_score))} style={{ width: `${latestSnap.total_score}%` }} />
@@ -781,8 +787,8 @@ export default function TeacherDashboardPage() {
                 <div className="space-y-4">
                   <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-amber-500" />
-                    Erishilgan yutuqlar
-                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500">({achievements.length} ta)</span>
+                    {t.tdAchievedTitle}
+                    <span className="text-xs font-normal text-gray-400 dark:text-gray-500">({achievements.length} {t.tdCount})</span>
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {achievements.map(a => {
@@ -794,9 +800,9 @@ export default function TeacherDashboardPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', st.badge)}>{st.label}</span>
+                              <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', st.badge)}>{t[st.label]}</span>
                               {a.total_score !== null && (
-                                <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">{a.total_score} ball</span>
+                                <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400">{a.total_score} {t.tdBall}</span>
                               )}
                             </div>
                             <h3 className={cn('text-sm font-bold truncate', st.text)}>{achName(a.def)}</h3>
@@ -823,15 +829,15 @@ export default function TeacherDashboardPage() {
                   <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-3xl mx-auto mb-4">
                     🏆
                   </div>
-                  <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-2">Hali yutuqlar yo&apos;q</h3>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-2">{t.tdNoAchYet}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-sm mx-auto">
-                    Oylik hisob-kitob tugagandan so&apos;ng yutuqlaringiz bu yerda ko&apos;rinadi.
+                    {t.tdAchEmptyDesc}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto text-left">
                     {[
-                      { emoji:'🥉', title:'Bronza', desc:"60+ ball to'pla", bg:'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' },
-                      { emoji:'🥈', title:'Kumush', desc:"75+ ball to'pla", bg:'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-600'    },
-                      { emoji:'🥇', title:'Oltin',  desc:"90+ ball to'pla", bg:'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'     },
+                      { emoji:'🥉', title:t.tdBronze, desc:t.tdBronzeGoal, bg:'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' },
+                      { emoji:'🥈', title:t.tdSilver, desc:t.tdSilverGoal, bg:'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-600'    },
+                      { emoji:'🥇', title:t.tdGold,   desc:t.tdGoldGoal,   bg:'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'     },
                     ].map(g => (
                       <div key={g.title} className={cn('rounded-xl border p-3', g.bg)}>
                         <span className="text-xl">{g.emoji}</span>
@@ -847,7 +853,7 @@ export default function TeacherDashboardPage() {
               {achievements.length > 0 && (
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
                   <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-5">
-                    <Medal className="w-4 h-4 text-blue-500" /> So&apos;nggi faollik
+                    <Medal className="w-4 h-4 text-blue-500" /> {t.tdRecentActivity}
                   </h2>
                   <div className="relative">
                     <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-100 dark:bg-gray-700" />
@@ -893,7 +899,7 @@ export default function TeacherDashboardPage() {
                   </div>
                   {achievements.length > 5 && (
                     <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-4">
-                      + yana {achievements.length - 5} ta yutuq
+                      + {achievements.length - 5} {t.tdMoreAchievements}
                     </p>
                   )}
                 </div>

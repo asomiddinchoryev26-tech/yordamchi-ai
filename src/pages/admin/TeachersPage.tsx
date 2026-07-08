@@ -4,6 +4,7 @@ import {
   GraduationCap, Search, BookOpen, Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { teacherService } from '@/services/teacher.service'
 import { subjectService  } from '@/services/subject.service'
 import type { Teacher, CreateTeacherPayload, UpdateTeacherPayload } from '@/services/teacher.service'
@@ -35,6 +36,7 @@ function InitialAvatar({ name, email }: { name: string | null; email: string | n
 }
 
 function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
+  const { t } = useLanguage()
   return (
     <span className={cn(
       'text-[11px] font-semibold px-2 py-0.5 rounded-full',
@@ -42,7 +44,7 @@ function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
         ? 'bg-emerald-100 text-emerald-700'
         : 'bg-gray-100 text-gray-500',
     )}>
-      {status === 'active' ? 'Faol' : 'Nofaol'}
+      {status === 'active' ? t.admActive : t.tdInactive}
     </span>
   )
 }
@@ -52,6 +54,7 @@ function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function TeachersPage() {
+  const { t } = useLanguage()
   const [teachers,    setTeachers]    = useState<Teacher[]>([])
   const [subjects,    setSubjects]    = useState<SubjectRow[]>([])
   const [loading,     setLoading]     = useState(true)
@@ -145,12 +148,12 @@ export default function TeachersPage() {
   // ── Saqlash ───────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!form.full_name.trim()) {
-      setFormError("Ism va familiya majburiy")
+      setFormError(t.thNameRequired)
       return
     }
     if (!editingId) {
       if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-        setFormError("To'g'ri email manzil kiriting")
+        setFormError(t.thEmailInvalid)
         return
       }
       if (form.password.length < 8) {
@@ -186,7 +189,7 @@ export default function TeachersPage() {
       await loadData()
       closeForm()
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Xatolik yuz berdi")
+      setFormError(err instanceof Error ? err.message : t.pfError)
     } finally {
       setFormLoading(false)
     }
@@ -216,9 +219,9 @@ export default function TeachersPage() {
       {/* ── Sarlavha ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">O'qituvchilar</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.adTeachers}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {loading ? 'Yuklanmoqda...' : `${teachers.length} ta o'qituvchi`}
+            {loading ? t.tcUploading : `${teachers.length} ${t.adTeachersCount}`}
           </p>
         </div>
         {!showForm && (
@@ -228,7 +231,7 @@ export default function TeachersPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Yangi o'qituvchi
+            {t.thNewTeacher}
           </button>
         )}
       </div>
@@ -237,15 +240,15 @@ export default function TeachersPage() {
       {!loading && teachers.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Jami</p>
+            <p className="text-xs text-gray-400 font-medium">{t.thTotal}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{teachers.length}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Faol</p>
+            <p className="text-xs text-gray-400 font-medium">{t.admActive}</p>
             <p className="text-2xl font-bold text-emerald-600 mt-1">{activeCount}</p>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 font-medium">Nofaol</p>
+            <p className="text-xs text-gray-400 font-medium">{t.tdInactive}</p>
             <p className="text-2xl font-bold text-gray-400 mt-1">{inactiveCount}</p>
           </div>
         </div>
@@ -267,7 +270,7 @@ export default function TeachersPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-gray-900">
-              {editingId ? "O'qituvchini tahrirlash" : "Yangi o'qituvchi qo'shish"}
+              {editingId ? t.thEditTeacher : t.thAddTeacher}
             </h2>
             <button
               type="button"
@@ -283,13 +286,13 @@ export default function TeachersPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Ism va familiya <span className="text-red-500">*</span>
+                  {t.thFullName} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={form.full_name}
                   onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
-                  placeholder="Abdullayev Abror"
+                  placeholder={t.thNamePh}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                 />
               </div>
@@ -310,20 +313,20 @@ export default function TeachersPage() {
                   )}
                 />
                 {editingId && (
-                  <p className="text-xs text-gray-400 mt-1">Email tahrirlash uchun Supabase Dashboard'dan foydalaning</p>
+                  <p className="text-xs text-gray-400 mt-1">{t.thEmailEditHint}</p>
                 )}
               </div>
 
               {!editingId && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Vaqtinchalik parol <span className="text-red-500">*</span>
+                    {t.thTempPassword} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="password"
                     value={form.password}
                     onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                    placeholder="Kamida 8 ta belgi"
+                    placeholder={t.pfPwMin}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                   />
                 </div>
@@ -331,7 +334,7 @@ export default function TeachersPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Telefon
+                  {t.thPhone}
                 </label>
                 <input
                   type="tel"
@@ -344,12 +347,12 @@ export default function TeachersPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Bio / Qisqacha ma'lumot
+                  {t.thBioLabel}
                 </label>
                 <textarea
                   value={form.bio}
                   onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                  placeholder="O'qituvchi haqida qisqacha..."
+                  placeholder={t.thBioPh}
                   rows={3}
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors resize-none"
                 />
@@ -360,13 +363,13 @@ export default function TeachersPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  O'qitiladigan fanlar
+                  {t.thTeachSubjects}
                 </label>
                 {subjects.length === 0 ? (
                   <div className="p-4 rounded-xl border border-dashed border-gray-200 text-center">
                     <BookOpen className="w-6 h-6 text-gray-300 mx-auto mb-2" />
                     <p className="text-xs text-gray-400">
-                      Fan qo'shilmagan. Avval <strong>Fanlar</strong> moduliga o'ting.
+                      {t.thNoSubjectsA} <strong>{t.sbTitle}</strong> {t.thNoSubjectsB}
                     </p>
                   </div>
                 ) : (
@@ -398,15 +401,15 @@ export default function TeachersPage() {
               {editingId && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Holat
+                    {t.tdColStatus}
                   </label>
                   <select
                     value={form.status}
                     onChange={e => setForm(f => ({ ...f, status: e.target.value as typeof f.status }))}
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                   >
-                    <option value="active">Faol</option>
-                    <option value="inactive">Nofaol</option>
+                    <option value="active">{t.admActive}</option>
+                    <option value="inactive">{t.tdInactive}</option>
                   </select>
                 </div>
               )}
@@ -431,7 +434,7 @@ export default function TeachersPage() {
             >
               {formLoading
                 ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : editingId ? 'Saqlash' : "Qo'shish"
+                : editingId ? t.admSave : t.tcAdd
               }
             </button>
             <button
@@ -440,7 +443,7 @@ export default function TeachersPage() {
               disabled={formLoading}
               className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
             >
-              Bekor
+              {t.fpCancel}
             </button>
           </div>
         </div>
@@ -455,7 +458,7 @@ export default function TeachersPage() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Ism, email yoki telefon..."
+              placeholder={t.tstSearchPh}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
             />
           </div>
@@ -472,7 +475,7 @@ export default function TeachersPage() {
                     : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300',
                 )}
               >
-                {s === 'all' ? 'Barchasi' : s === 'active' ? 'Faol' : 'Nofaol'}
+                {s === 'all' ? t.adAll : s === 'active' ? t.admActive : t.tdInactive}
               </button>
             ))}
           </div>
@@ -504,10 +507,10 @@ export default function TeachersPage() {
             <GraduationCap className="w-7 h-7 text-indigo-600" />
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-1">
-            O'qituvchilar yo'q
+            {t.adNoTeachers}
           </h3>
           <p className="text-sm text-gray-400 mb-5">
-            Hali hech qanday o'qituvchi qo'shilmagan
+            {t.thEmptyHint}
           </p>
           <button
             type="button"
@@ -515,7 +518,7 @@ export default function TeachersPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Birinchi o'qituvchini qo'shing
+            {t.thAddFirst}
           </button>
         </div>
       )}
@@ -525,8 +528,8 @@ export default function TeachersPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
           <p className="text-sm text-gray-500">
             {search
-              ? <>"<span className="font-medium">{search}</span>" bo'yicha o'qituvchi topilmadi</>
-              : "Tanlangan filtr bo'yicha natija yo'q"
+              ? <>"<span className="font-medium">{search}</span>" {t.thSearchNotFoundSuffix}</>
+              : t.thFilterNoResult
             }
           </p>
         </div>
@@ -547,13 +550,13 @@ export default function TeachersPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-gray-900 truncate">
-                      {teacher.full_name ?? 'Ism kiritilmagan'}
+                      {teacher.full_name ?? t.taNoName}
                     </span>
                     <StatusBadge status={teacher.status} />
                     {teacher.group_count > 0 && (
                       <span className="flex items-center gap-1 text-xs text-gray-400">
                         <Users className="w-3 h-3" />
-                        {teacher.group_count} guruh
+                        {teacher.group_count} {t.thGroupWord}
                       </span>
                     )}
                   </div>
@@ -594,7 +597,7 @@ export default function TeachersPage() {
                 <div className="flex-shrink-0">
                   {deletingId === teacher.id ? (
                     <div className="flex flex-col gap-2 items-end">
-                      <p className="text-xs text-red-600 font-medium">O'chirilsinmi?</p>
+                      <p className="text-xs text-red-600 font-medium">{t.thDeleteQ}</p>
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -604,7 +607,7 @@ export default function TeachersPage() {
                         >
                           {deleteLoading
                             ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            : "Ha, o'chir"
+                            : t.pfYesDelete
                           }
                         </button>
                         <button
@@ -612,7 +615,7 @@ export default function TeachersPage() {
                           onClick={() => setDeletingId(null)}
                           className="px-3 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                         >
-                          Bekor
+                          {t.fpCancel}
                         </button>
                       </div>
                     </div>
@@ -622,7 +625,7 @@ export default function TeachersPage() {
                         type="button"
                         onClick={() => openEdit(teacher)}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                        title="Tahrirlash"
+                        title={t.tcEditT}
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
@@ -630,7 +633,7 @@ export default function TeachersPage() {
                         type="button"
                         onClick={() => setDeletingId(teacher.id)}
                         className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                        title="O'chirish"
+                        title={t.admDisable}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

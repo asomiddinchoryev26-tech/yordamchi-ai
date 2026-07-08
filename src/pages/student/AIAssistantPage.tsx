@@ -25,7 +25,7 @@ import { buildVisionChatPrompt }      from '@/ai-brain/vision/promptBuilder'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 import { aiChatService }                  from '@/services/ai-chat.service'
 import { aiProvider, loadStudentContext } from '@/services/ai-provider.service'
 import { intelligenceService }            from '@/ai-brain/services/intelligence-service'
@@ -186,11 +186,11 @@ function fmtTime(iso: string) {
   const d = new Date(iso)
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
 }
-function fmtDate(iso: string) {
+function fmtDate(iso: string, t: Translations) {
   const d   = new Date(iso)
   const now = new Date()
   if (d.toDateString() === now.toDateString()) return fmtTime(iso)
-  if (d.toDateString() === new Date(Date.now() - 86400000).toDateString()) return 'Kecha'
+  if (d.toDateString() === new Date(Date.now() - 86400000).toDateString()) return t.aiYesterday
   return `${d.getDate()} ${MONTHS[d.getMonth()]}`
 }
 
@@ -209,13 +209,13 @@ function groupConversations(convs: AiConversationRow[]) {
 
 // ─── Quick action data ────────────────────────────────────────────────────────
 
-const QUICK_ACTIONS = [
-  { icon: '📐', label: 'Matematika',    desc: 'Tenglamalar, formulalar',     grad: 'from-blue-500 to-cyan-400',    prompt: '2x + 5 = 15 ni yeching' },
-  { icon: '💻', label: 'Dasturlash',   desc: 'Kod, debugging',               grad: 'from-violet-500 to-purple-400', prompt: "Python'da try/except ni tushuntiring" },
-  { icon: '🌍', label: 'Tarjima',      desc: "Ko'p tilli",                   grad: 'from-emerald-500 to-teal-400',  prompt: "Bu matnni inglizchaga tarjima qiling:\n" },
-  { icon: '📄', label: 'PDF tahlili',  desc: 'Hujjat tahlili',              grad: 'from-orange-500 to-amber-400',  prompt: 'Ushbu PDFni tahlil qiling' },
-  { icon: '✍️', label: 'Insho',        desc: 'Yozish, tahrir',              grad: 'from-pink-500 to-rose-400',     prompt: "Mavzuga insho yozing:\n" },
-  { icon: '📝', label: 'Test yaratish',desc: 'Savollar generatsiyasi',       grad: 'from-indigo-500 to-blue-500',   prompt: 'Bu mavzu bo\'yicha 5 ta test savoli yarating:\n' },
+const QUICK_ACTIONS: { icon: string; label: keyof Translations; desc: keyof Translations; grad: string; prompt: string }[] = [
+  { icon: '📐', label: 'aiQaMath',      desc: 'aiQaMathD',      grad: 'from-blue-500 to-cyan-400',    prompt: '2x + 5 = 15 ni yeching' },
+  { icon: '💻', label: 'aiQaCode',      desc: 'aiQaCodeD',      grad: 'from-violet-500 to-purple-400', prompt: "Python'da try/except ni tushuntiring" },
+  { icon: '🌍', label: 'aiQaTranslate', desc: 'aiQaTranslateD', grad: 'from-emerald-500 to-teal-400',  prompt: "Bu matnni inglizchaga tarjima qiling:\n" },
+  { icon: '📄', label: 'aiQaPdf',       desc: 'aiQaPdfD',       grad: 'from-orange-500 to-amber-400',  prompt: 'Ushbu PDFni tahlil qiling' },
+  { icon: '✍️', label: 'aiQaEssay',     desc: 'aiQaEssayD',     grad: 'from-pink-500 to-rose-400',     prompt: "Mavzuga insho yozing:\n" },
+  { icon: '📝', label: 'aiQaTest',      desc: 'aiQaTestD',      grad: 'from-indigo-500 to-blue-500',   prompt: 'Bu mavzu bo\'yicha 5 ta test savoli yarating:\n' },
 ]
 
 // ─── Voice Waveform ───────────────────────────────────────────────────────────
@@ -247,6 +247,7 @@ function EmptyState({
   onAction: (prompt: string) => void
   language: string
 }) {
+  const { t } = useLanguage()
   const greeting = language === 'ru'
     ? 'Чем я могу помочь сегодня?'
     : language === 'en'
@@ -339,8 +340,8 @@ function EmptyState({
             }}
           >
             <span className="text-xl mb-2.5" aria-hidden="true">{icon}</span>
-            <p className="text-[12.5px] font-bold text-white/80 mb-0.5">{label}</p>
-            <p className="text-[11px] text-white/35 leading-snug">{desc}</p>
+            <p className="text-[12.5px] font-bold text-white/80 mb-0.5">{t[label]}</p>
+            <p className="text-[11px] text-white/35 leading-snug">{t[desc]}</p>
           </motion.button>
         ))}
       </motion.div>
@@ -386,6 +387,7 @@ const MessageBubble = memo(function MessageBubble({
   onStreamComplete?: () => void
   isLastAi?:         boolean
 }) {
+  const { t } = useLanguage()
   const shouldReduce = useReducedMotion()
   const [copied,     setCopied]     = useState(false)
   const [liked,      setLiked]      = useState(false)
@@ -427,7 +429,7 @@ const MessageBubble = memo(function MessageBubble({
               <button
                 type="button"
                 onClick={handleCopy}
-                title="Nusxalash"
+                title={t.aiCopy}
                 className="w-7 h-7 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.08] transition-all active:scale-90"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -475,7 +477,7 @@ const MessageBubble = memo(function MessageBubble({
           {/* Content — thinking state → cursor → rendered markdown */}
           {isStreaming && !streamDone && msg.content === '' ? (
             /* Thinking state: before first token */
-            <div className="flex items-center gap-2.5 py-1" aria-live="polite" aria-label="AI o'ylayapti">
+            <div className="flex items-center gap-2.5 py-1" aria-live="polite" aria-label={t.aiThinking}>
               <div className="flex gap-1">
                 {[0,1,2].map(i => (
                   <motion.span
@@ -506,17 +508,17 @@ const MessageBubble = memo(function MessageBubble({
 
         {/* Action bar — hover reveal */}
         <div className="flex items-center gap-0.5 mt-1.5 opacity-0 group-hover/card:opacity-100 transition-all duration-200 translate-y-0.5 group-hover/card:translate-y-0">
-          <ActionBtn onClick={handleCopy} title="Nusxalash">
+          <ActionBtn onClick={handleCopy} title={t.aiCopy}>
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
           </ActionBtn>
-          <ActionBtn onClick={handleLike}    title="Yaxshi"           active={liked}>    <ThumbsUp   className="w-3.5 h-3.5" /></ActionBtn>
-          <ActionBtn onClick={handleDislike} title="Yomon"            active={disliked}> <ThumbsDown className="w-3.5 h-3.5" /></ActionBtn>
+          <ActionBtn onClick={handleLike}    title={t.aiLike}    active={liked}>    <ThumbsUp   className="w-3.5 h-3.5" /></ActionBtn>
+          <ActionBtn onClick={handleDislike} title={t.aiDislike} active={disliked}> <ThumbsDown className="w-3.5 h-3.5" /></ActionBtn>
           {onRegenerate && (
-            <ActionBtn onClick={onRegenerate} title="Qaytadan yaratish"><RefreshCw className="w-3.5 h-3.5" /></ActionBtn>
+            <ActionBtn onClick={onRegenerate} title={t.aiRegenerate}><RefreshCw className="w-3.5 h-3.5" /></ActionBtn>
           )}
           {/* Continue generation — only on last AI message, not while streaming */}
           {isLastAi && !isStreaming && onContinue && (
-            <ActionBtn onClick={onContinue} title="Davom etish">
+            <ActionBtn onClick={onContinue} title={t.aiContinue}>
               <ChevronRight className="w-3.5 h-3.5" />
             </ActionBtn>
           )}
@@ -542,6 +544,7 @@ function ConvItem({
   onSelect: () => void; onDelete: (e: React.MouseEvent) => void
   onPin: (e: React.MouseEvent) => void; onRename: (e: React.MouseEvent) => void
 }) {
+  const { t } = useLanguage()
   return (
     <motion.div variants={CONV_ITEM} layout>
       <button
@@ -566,20 +569,20 @@ function ConvItem({
         )}
         <span className="flex-1 text-[12.5px] font-medium truncate pr-16">{conv.title}</span>
         <span className="text-[10px] text-white/25 flex-shrink-0 group-hover:opacity-0 transition-opacity absolute right-9">
-          {fmtDate(conv.updated_at)}
+          {fmtDate(conv.updated_at, t)}
         </span>
         {/* Action buttons — reveal on hover */}
         <div className="absolute right-1 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
-          <button type="button" onClick={onRename} aria-label="Nomini o'zgartirish"
+          <button type="button" onClick={onRename} aria-label={t.aiRename}
             className="w-6 h-6 flex items-center justify-center rounded-md text-white/20 hover:text-white/60 hover:bg-white/[0.07] transition-all">
             <Pencil className="w-3 h-3" />
           </button>
-          <button type="button" onClick={onPin} aria-label={pinned ? 'Pinni olib tashlash' : 'Pinlash'}
+          <button type="button" onClick={onPin} aria-label={pinned ? t.aiUnpin : t.aiPin}
             className={cn('w-6 h-6 flex items-center justify-center rounded-md transition-all',
               pinned ? 'text-amber-400 hover:bg-amber-500/12' : 'text-white/20 hover:text-amber-400 hover:bg-white/[0.07]')}>
             {pinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
           </button>
-          <button type="button" onClick={onDelete} disabled={deleting} aria-label="O'chirish"
+          <button type="button" onClick={onDelete} disabled={deleting} aria-label={t.admDisable}
             className="w-6 h-6 flex items-center justify-center rounded-md text-white/20 hover:text-red-400 hover:bg-red-500/12 transition-all disabled:opacity-30">
             {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
           </button>
@@ -603,7 +606,7 @@ function GroupLabel({ label }: { label: string }) {
 
 export default function AIAssistantPage() {
   const auth         = useAuth()
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const shouldReduce = useReducedMotion()
 
   // ── Core state (PRESERVED UNCHANGED) ─────────────────────────────────────
@@ -669,7 +672,7 @@ export default function AIAssistantPage() {
   const pdfInputRef     = useRef<HTMLInputElement>(null)
   const anyFileInputRef = useRef<HTMLInputElement>(null)
   const studentId        = auth.user?.id        ?? ''
-  const studentName      = auth.user?.name      ?? 'Talaba'
+  const studentName      = auth.user?.name      ?? t.adStudent
   const studentAvatarUrl = auth.user?.avatarUrl ?? null
 
   // ── All effects + handlers ────────────────────────────────────────────────
@@ -694,14 +697,14 @@ export default function AIAssistantPage() {
       const serverPinned = new Set(convs.filter(c => c.is_pinned).map(c => c.id))
       setPinnedIds(serverPinned); setFallbackPinned(serverPinned)
       if (convs.length > 0) await selectConversation(convs[0].id)
-    } catch { setError("Ma'lumotlarni yuklashda xatolik") }
+    } catch { setError(t.mpLoadErr) }
     finally  { setConvLoading(false) }
   }
 
   const selectConversation = useCallback(async (id: string) => {
     setActiveConvId(id); setMsgLoading(true); setMessages([]); setStreamingId(null)
     try   { setMessages(await aiChatService.getMessages(id)) }
-    catch { setError("Xabarlarni yuklashda xatolik") }
+    catch { setError(t.aiMsgsLoadErr) }
     finally { setMsgLoading(false) }
   }, [])
 
@@ -713,7 +716,7 @@ export default function AIAssistantPage() {
       setConversations(prev => [conv, ...prev])
       setActiveConvId(conv.id); setMessages([])
       setTimeout(() => inputRef.current?.focus(), 80)
-    } catch { setError("Yangi suhbat yaratishda xatolik") }
+    } catch { setError(t.aiNewChatErr) }
   }
 
   // ── Extended file handler (all types) ────────────────────────────────────
@@ -877,7 +880,7 @@ export default function AIAssistantPage() {
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') aborted = true
-      else { setError('Davom etishda xatolik'); setMessages(prev => prev.map(m => m.id === lastAiMsgId ? { ...m, content: originalContent } : m)) }
+      else { setError(t.aiContinueErr); setMessages(prev => prev.map(m => m.id === lastAiMsgId ? { ...m, content: originalContent } : m)) }
     } finally {
       abortRef.current = null; setIsStreaming(false); setStreamingMsgId(null); setIsTyping(false)
     }
@@ -906,17 +909,17 @@ export default function AIAssistantPage() {
 
   function exportMarkdown() {
     const conv = getActiveConv()
-    downloadBlob(buildMarkdown(conv?.title ?? 'Suhbat', messages), 'text/markdown', `suhbat-${Date.now()}.md`)
+    downloadBlob(buildMarkdown(conv?.title ?? t.aiChatWord, messages), 'text/markdown', `suhbat-${Date.now()}.md`)
     setShowExportMenu(false)
   }
   function exportTxt() {
     const conv = getActiveConv()
-    downloadBlob(buildTxt(conv?.title ?? 'Suhbat', messages), 'text/plain', `suhbat-${Date.now()}.txt`)
+    downloadBlob(buildTxt(conv?.title ?? t.aiChatWord, messages), 'text/plain', `suhbat-${Date.now()}.txt`)
     setShowExportMenu(false)
   }
   function exportPdf() {
     const conv  = getActiveConv()
-    const html  = buildHtmlDoc(conv?.title ?? 'Suhbat', messages)
+    const html  = buildHtmlDoc(conv?.title ?? t.aiChatWord, messages)
     const win   = window.open('', '_blank')
     if (!win) return
     win.document.write(html + '<script>window.onload=()=>setTimeout(()=>window.print(),200)</script>')
@@ -925,7 +928,7 @@ export default function AIAssistantPage() {
   }
   function exportDoc() {
     const conv = getActiveConv()
-    const html = buildHtmlDoc(conv?.title ?? 'Suhbat', messages)
+    const html = buildHtmlDoc(conv?.title ?? t.aiChatWord, messages)
     downloadBlob(html, 'application/msword', `suhbat-${Date.now()}.doc`)
     setShowExportMenu(false)
   }
@@ -982,7 +985,7 @@ export default function AIAssistantPage() {
       const savedUser = await aiChatService.addMessage(activeConvId, 'user', displayContent)
 
       if (messages.filter(m => m.role === 'user').length === 0) {
-        const titleBase = text || file?.name || 'Yangi suhbat'
+        const titleBase = text || file?.name || t.aiNewChat
         const title = titleBase.slice(0, 40) + (titleBase.length > 40 ? '…' : '')
         void aiChatService.updateTitle(activeConvId, title)
         setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, title } : c))
@@ -1160,7 +1163,7 @@ export default function AIAssistantPage() {
       } else {
         setMessages(prev => prev.slice(0, aiIdx))
       }
-    } catch { setError("Qaytadan yaratishda xatolik") }
+    } catch { setError(t.aiRegenErr) }
     finally   { setIsTyping(false) }
   }
 
@@ -1174,7 +1177,7 @@ export default function AIAssistantPage() {
         setActiveConvId(null); setMessages([])
         if (rest.length > 0) await selectConversation(rest[0].id)
       }
-    } catch { setError("O'chirishda xatolik") }
+    } catch { setError(t.aiDeleteErr) }
     finally   { setDeletingId(null) }
   }
 
@@ -1224,7 +1227,7 @@ export default function AIAssistantPage() {
             }}
             className="w-full px-3 py-2 rounded-xl text-[12.5px] font-medium text-white/85 outline-none"
             style={{ background: 'rgba(91,127,255,0.18)', border: '1px solid rgba(91,127,255,0.45)' }}
-            aria-label="Nomini tahrirlash"
+            aria-label={t.aiRenameEdit}
           />
         </motion.div>
       )
@@ -1276,7 +1279,7 @@ export default function AIAssistantPage() {
             : 'max-md:w-[272px] max-md:-translate-x-full md:w-0 md:overflow-hidden',
         )}
         style={{ background: 'rgba(13,18,37,0.95)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', borderRight: '1px solid rgba(255,255,255,0.06)' }}
-        aria-label="Chat history"
+        aria-label={t.aiHistory}
       >
         {/* Brand + New Chat */}
         <div className="p-4 flex-shrink-0 space-y-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -1297,7 +1300,7 @@ export default function AIAssistantPage() {
             style={{ background: 'linear-gradient(135deg, #5B5CF6 0%, #7C3AED 100%)', boxShadow: '0 4px 14px rgba(91,92,246,0.38)' }}
           >
             <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-            Yangi suhbat
+            {t.aiNewChat}
           </motion.button>
         </div>
 
@@ -1309,7 +1312,7 @@ export default function AIAssistantPage() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Qidirish..."
+              placeholder={t.aiSearchPh}
               className="w-full pl-9 pr-3 py-2 text-xs text-white/70 placeholder:text-white/25 outline-none transition-all rounded-xl"
               style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}
             />
@@ -1334,7 +1337,7 @@ export default function AIAssistantPage() {
                 <MessageSquare className="w-4 h-4 text-white/20" aria-hidden="true" />
               </div>
               <p className="text-[11px] text-white/25 leading-relaxed">
-                {search ? `"${search}" topilmadi` : "Hali suhbat yo'q"}
+                {search ? `"${search}" ${t.aiSearchNotFound}` : t.aiNoConvs}
               </p>
             </div>
           ) : (
@@ -1345,17 +1348,17 @@ export default function AIAssistantPage() {
             >
               {/* Pinned conversations */}
               {pinnedConvs.length > 0 && (
-                <><GroupLabel label="📌 Pinlangan" />
+                <><GroupLabel label={t.aiPinned} />
                 {pinnedConvs.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
               )}
               {grouped.today.length > 0 && (
-                <><GroupLabel label="Bugun" />{grouped.today.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
+                <><GroupLabel label={t.sdToday} />{grouped.today.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
               )}
               {grouped.yesterday.length > 0 && (
-                <><GroupLabel label="Kecha" />{grouped.yesterday.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
+                <><GroupLabel label={t.aiYesterday} />{grouped.yesterday.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
               )}
               {grouped.older.length > 0 && (
-                <><GroupLabel label="Oldingi" />{grouped.older.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
+                <><GroupLabel label={t.aiOlder} />{grouped.older.map(c => <ConvItemWrapper key={c.id} c={c} />)}</>
               )}
             </motion.div>
           )}
@@ -1367,7 +1370,7 @@ export default function AIAssistantPage() {
             <UserAvatar name={studentName} avatarUrl={studentAvatarUrl} showStatus />
             <div className="min-w-0 flex-1">
               <p className="text-[12px] font-semibold text-white/70 truncate leading-none mb-0.5">{studentName}</p>
-              <p className="text-[9px] text-brand-light/50 font-medium truncate">Student</p>
+              <p className="text-[9px] text-brand-light/50 font-medium truncate">{t.adStudent}</p>
             </div>
           </div>
         </div>
@@ -1391,7 +1394,7 @@ export default function AIAssistantPage() {
             type="button"
             onClick={() => setSidebarOpen(o => !o)}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-            aria-label={sidebarOpen ? 'Yopish' : 'Ochish'}
+            aria-label={sidebarOpen ? t.fpClose : t.aiOpen}
           >
             {sidebarOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
@@ -1423,7 +1426,7 @@ export default function AIAssistantPage() {
               type="button"
               onClick={() => setRightOpen(o => !o)}
               className="hidden xl:flex w-8 h-8 items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-              aria-label="Kontekst paneli"
+              aria-label={t.aiContextPanel}
             >
               {rightOpen ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
             </button>
@@ -1434,7 +1437,7 @@ export default function AIAssistantPage() {
                   type="button"
                   onClick={() => setShowExportMenu(v => !v)}
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-                  aria-label="Eksport"
+                  aria-label={t.aiExport}
                 >
                   <Download className="w-4 h-4" aria-hidden="true" />
                 </button>
@@ -1468,7 +1471,7 @@ export default function AIAssistantPage() {
               type="button"
               onClick={handleNewConversation}
               className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-              aria-label="Yangi suhbat"
+              aria-label={t.aiNewChat}
             >
               <Plus className="w-4 h-4" aria-hidden="true" />
             </button>
@@ -1558,7 +1561,7 @@ export default function AIAssistantPage() {
               aria-hidden="true"
             >
               <Upload className="w-10 h-10 text-brand-light mb-3" />
-              <p className="text-base font-bold text-brand-light">Faylni bu yerga tashlang</p>
+              <p className="text-base font-bold text-brand-light">{t.aiDropFile}</p>
               <p className="text-[12px] text-brand-light/60 mt-1">Rasm, PDF, DOCX, TXT, Audio</p>
             </motion.div>
           )}
@@ -1600,7 +1603,7 @@ export default function AIAssistantPage() {
                     onClick={clearFile}
                     className="w-6 h-6 rounded-full flex items-center justify-center text-white/40 hover:text-red-400 hover:bg-red-500/15 transition-all"
                     style={{ background: 'rgba(255,255,255,0.06)' }}
-                    aria-label="Faylni olib tashlash"
+                    aria-label={t.aiRemoveFile}
                   >
                     <XIcon className="w-3 h-3" />
                   </button>
@@ -1629,7 +1632,7 @@ export default function AIAssistantPage() {
                     </span>
                     {uploadProgress < 100 && (
                       <button type="button" onClick={cancelUpload}
-                        className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0" aria-label="Bekor qilish">
+                        className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0" aria-label={t.aiCancel}>
                         <XIcon className="w-3.5 h-3.5" />
                       </button>
                     )}
@@ -1653,7 +1656,7 @@ export default function AIAssistantPage() {
                       Qayta
                     </button>
                     <button type="button" onClick={() => setNetError(null)}
-                      className="text-white/25 hover:text-white/55 transition-colors flex-shrink-0" aria-label="Yopish">
+                      className="text-white/25 hover:text-white/55 transition-colors flex-shrink-0" aria-label={t.fpClose}>
                       <XIcon className="w-3.5 h-3.5" />
                     </button>
                   </motion.div>
@@ -1710,7 +1713,7 @@ export default function AIAssistantPage() {
                     rows={1}
                     disabled={isTyping}
                     className="flex-1 bg-transparent text-sm text-white placeholder:text-white/25 resize-none outline-none leading-6 max-h-36 disabled:opacity-50 py-0.5"
-                    aria-label="AI ga savol yozing"
+                    aria-label={t.sdAiAsk}
                   />
 
                   {/* Voice button */}
@@ -1718,7 +1721,7 @@ export default function AIAssistantPage() {
                     type="button"
                     onClick={toggleVoice}
                     disabled={isTyping || !voiceSupported}
-                    title={!voiceSupported ? 'Qo\'llab-quvvatlanmaydi' : isListening ? 'To\'xtatish' : 'Ovoz bilan yozish'}
+                    title={!voiceSupported ? t.aiVoiceUnsupported : isListening ? t.aiVoiceStop : t.aiVoiceWrite}
                     className={cn(
                       'w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 mb-0.5 transition-all duration-150',
                       isListening
@@ -1727,7 +1730,7 @@ export default function AIAssistantPage() {
                           ? 'text-white/30 hover:text-white/60 hover:bg-white/[0.07] cursor-pointer'
                           : 'text-white/15 cursor-not-allowed',
                     )}
-                    aria-label={isListening ? 'Ovozni to\'xtatish' : 'Ovoz bilan yozish'}
+                    aria-label={isListening ? t.aiVoiceStop : t.aiVoiceWrite}
                   >
                     <Mic className="w-4 h-4" aria-hidden="true" />
                   </button>
@@ -1750,7 +1753,7 @@ export default function AIAssistantPage() {
                     } : {
                       background: 'rgba(255,255,255,0.06)',
                     }}
-                    aria-label={isTyping ? 'Javob kutilyapti' : 'Yuborish'}
+                    aria-label={isTyping ? t.aiWaiting : t.saSend}
                   >
                     {isTyping
                       ? <Loader2 className="w-4 h-4 text-white/50 animate-spin" aria-hidden="true" />

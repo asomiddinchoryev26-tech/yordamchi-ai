@@ -2,7 +2,8 @@
 // Deploy: supabase functions deploy ai-chat
 // Streaming + File attachments supported.
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve }        from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? "";
 const GEMINI_MODEL   = "gemini-2.5-flash";
@@ -15,6 +16,42 @@ const CORS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+// ─── Caller authentication ────────────────────────────────────────────────────
+// Verifies the request comes from a logged-in user (not just the public anon
+// key). Prevents anonymous abuse of the paid Gemini API.
+async function getCallerId(req: Request): Promise<string | null> {
+  const authHeader = req.headers.get("Authorization") ?? "";
+  if (!authHeader || authHeader === `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`) return null;
+  try {
+    const client = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } },
+    );
+    const { data: { user } } = await client.auth.getUser();
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Basic in-memory rate limiting (per user, per warm isolate) ───────────────
+// Throttles bursts from a single user. Best-effort (isolates are ephemeral);
+// for strict distributed limits, enforce via the ai_usage table.
+const RATE_LIMIT     = 20;        // max requests …
+const RATE_WINDOW_MS = 60_000;    // … per 60 seconds
+const rateHits = new Map<string, number[]>();
+function isRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const recent = (rateHits.get(userId) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  recent.push(now);
+  rateHits.set(userId, recent);
+  if (rateHits.size > 5000) {
+    for (const [k, v] of rateHits) if (v.every((t) => now - t >= RATE_WINDOW_MS)) rateHits.delete(k);
+  }
+  return recent.length > RATE_LIMIT;
+}
 
 function jsonResp(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -188,7 +225,8 @@ async function streamGemini(systemPrompt, messages) {
           }
         }
       } catch (err) {
-        ctrl.enqueue(enc.encode(`data: ${JSON.stringify({ error: String(err) })}\n\n`));
+        console.error("[ai-chat stream]", err instanceof Error ? err.message : String(err));
+        ctrl.enqueue(enc.encode(`data: ${JSON.stringify({ error: "AI javob oqimida xatolik." })}\n\n`));
       } finally {
         ctrl.enqueue(enc.encode("data: [DONE]\n\n"));
         ctrl.close();
@@ -201,6 +239,15 @@ async function streamGemini(systemPrompt, messages) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (!GEMINI_API_KEY) return jsonResp({ error: "AI xizmati sozlanmagan." }, 503);
+
+  // ── Require an authenticated user (blocks anonymous Gemini abuse) ──
+  const callerId = await getCallerId(req);
+  if (!callerId) return jsonResp({ error: "Avtorizatsiya talab qilinadi." }, 401);
+
+  // ── Rate protection ──
+  if (isRateLimited(callerId)) {
+    return jsonResp({ error: "Juda ko'p so'rov. Bir daqiqadan so'ng qayta urinib ko'ring." }, 429);
+  }
 
   try {
     const body       = await req.json();
@@ -222,8 +269,13 @@ serve(async (req) => {
     return jsonResp({ response: text });
 
   } catch (err) {
+    // Log full detail server-side; return a generic message so raw Gemini/API
+    // errors never reach the client.
     const message = err instanceof Error ? err.message : String(err);
     console.error("[ai-chat]", message);
-    return jsonResp({ error: message }, 500);
+    if (message.includes("429") || message.includes("quota")) {
+      return jsonResp({ error: "AI xizmati hozir band. Birozdan so'ng urinib ko'ring." }, 503);
+    }
+    return jsonResp({ error: "AI javob bera olmadi. Qayta urinib ko'ring." }, 500);
   }
 });

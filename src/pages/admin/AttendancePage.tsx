@@ -5,14 +5,21 @@ import { attendanceService, STATUS_META } from '@/services/attendance.service'
 import { groupService } from '@/services/group.service'
 import type { AttendanceWithDetails } from '@/services/attendance.service'
 import type { GroupWithRelations } from '@/services/group.service'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
-const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
-function fmtDate(d: string) {
+const MONTH_KEYS: (keyof Translations)[] = [
+  'mJan','mFeb','mMar','mApr','mMay','mJun','mJul','mAug','mSep','mOct','mNov','mDec',
+]
+const ATT_STATUS_KEYS: Record<string, keyof Translations> = {
+  present: 'sdPresent', absent: 'sdAbsent', late: 'sdLate', excused: 'sdExcused',
+}
+function fmtDate(d: string, t: Translations) {
   const dt = new Date(d)
-  return `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`
+  return `${dt.getDate()} ${t[MONTH_KEYS[dt.getMonth()]].slice(0,3)} ${dt.getFullYear()}`
 }
 
 export default function AdminAttendancePage() {
+  const { t } = useLanguage()
   const [records, setRecords] = useState<AttendanceWithDetails[]>([])
   const [groups,  setGroups]  = useState<GroupWithRelations[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,7 +43,7 @@ export default function AdminAttendancePage() {
       setRecords(recs)
       setGroups(grps)
     } catch {
-      setError("Ma'lumotlarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -70,8 +77,8 @@ export default function AdminAttendancePage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Davomat</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Barcha talabalar davomati</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.achAttendance}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.aatSubtitle}</p>
       </div>
 
       {error && (
@@ -90,7 +97,7 @@ export default function AdminAttendancePage() {
               onChange={e => setGroupId(e.target.value)}
               className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             >
-              <option value="">Barcha guruhlar</option>
+              <option value="">{t.tstAllGroups}</option>
               {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -99,7 +106,7 @@ export default function AdminAttendancePage() {
             type="date"
             value={dateFrom}
             onChange={e => setDateFrom(e.target.value)}
-            placeholder="Boshlanish"
+            placeholder={t.aatFrom}
             className="px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
           <input
@@ -113,7 +120,7 @@ export default function AdminAttendancePage() {
             onClick={applyFilters}
             className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
-            Filtrlash
+            {t.aatFilter}
           </button>
         </div>
       </div>
@@ -126,7 +133,7 @@ export default function AdminAttendancePage() {
             return (
               <div key={k} className={cn('rounded-2xl p-4', m.bg)}>
                 <p className={cn('text-2xl font-bold', m.color)}>{v}</p>
-                <p className={cn('text-xs font-medium mt-0.5', m.color)}>{m.label}</p>
+                <p className={cn('text-xs font-medium mt-0.5', m.color)}>{ATT_STATUS_KEYS[k] ? t[ATT_STATUS_KEYS[k]] : m.label}</p>
               </div>
             )
           })}
@@ -141,7 +148,7 @@ export default function AdminAttendancePage() {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Talaba yoki guruh..."
+            placeholder={t.aatSearchPh}
             className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
         </div>
@@ -160,21 +167,22 @@ export default function AdminAttendancePage() {
       {!loading && records.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <CheckSquare className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Davomat yozuvlari topilmadi</p>
+          <p className="text-sm text-gray-400">{t.aatNotFound}</p>
         </div>
       )}
 
       {/* Jadval */}
       {!loading && filtered.length > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[560px]">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Talaba</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Guruh</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Sana</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Holat</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">Izoh</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tdColStudent}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tfGroup}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tcDate}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tdColStatus}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.aatNote}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -189,10 +197,10 @@ export default function AdminAttendancePage() {
                       <p className="text-xs text-gray-400">{(r.student as any)?.email}</p>
                     </td>
                     <td className="px-5 py-3 text-gray-700">{(r.group as any)?.name ?? '—'}</td>
-                    <td className="px-5 py-3 text-gray-600 whitespace-nowrap">{fmtDate(r.attended_date)}</td>
+                    <td className="px-5 py-3 text-gray-600 whitespace-nowrap">{fmtDate(r.attended_date, t)}</td>
                     <td className="px-5 py-3">
                       <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', meta?.bg, meta?.color)}>
-                        {meta?.label}
+                        {ATT_STATUS_KEYS[r.status] ? t[ATT_STATUS_KEYS[r.status]] : meta?.label}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-gray-500 text-xs">{r.note ?? '—'}</td>
@@ -201,9 +209,10 @@ export default function AdminAttendancePage() {
               })}
             </tbody>
           </table>
+          </div>
           {filtered.length > 100 && (
             <div className="px-5 py-3 border-t border-gray-100 text-xs text-gray-400">
-              Faqat 100 ta yozuv ko'rsatilmoqda ({filtered.length} tadan)
+              {t.aatLimitPrefix}{filtered.length} {t.aatLimitSuffix}
             </div>
           )}
         </div>

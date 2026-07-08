@@ -10,15 +10,17 @@
  *   • estimateReadTime() — pure computation from content.length
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   BookOpen, AlertCircle, Search, ChevronDown, Download, Loader2, Paperclip,
   Sparkles, Bookmark, BookmarkCheck, Clock, FileText, Film, Zap,
-  ChevronRight, Star, Brain, Globe, ListChecks,
+  ChevronRight, Brain, Globe, ListChecks, Eye,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { IllustrationImage, ILLUS } from '@/components/illustration'
 import { useAuth } from '@/hooks/useAuth'
+import { PATHS } from '@/routes/paths'
 import { lessonService } from '@/services/lesson.service'
 import {
   attachmentService,
@@ -26,8 +28,19 @@ import {
   getVideoEmbedUrl,
   getMimeIcon,
 } from '@/services/attachment.service'
-import type { AttachmentRow } from '@/services/attachment.service'
+import type { AttachmentRow, AttachmentWithMeta } from '@/services/attachment.service'
+import { FilePreviewModal } from '@/components/materials'
 import type { LessonWithDetails } from '@/services/lesson.service'
+import { courseService, buildLearningStats, lessonStatus } from '@/services/course.service'
+import type { StudentCourse, StudentLearningStats } from '@/services/course.service'
+import { assignmentService } from '@/services/assignment.service'
+import type { StudentAssignment } from '@/services/assignment.service'
+import {
+  LessonsHeader, LessonsToolbar, CoursesSection, TodayLessonsSection,
+  AnalyticsSection, HomeworkSection,
+} from '@/components/student/LessonsSections'
+import type { StatusFilter, LessonStatusItem } from '@/components/student/LessonsSections'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Animation constants ──────────────────────────────────────────────────────
 
@@ -79,12 +92,13 @@ function LessonSkeleton({ i }: { i: number }) {
 // ─── Visual-only: AI Sidebar Panel (no AI calls, placeholders only) ───────────
 
 function AISidebar({ lesson }: { lesson: LessonWithDetails }) {
-  const AI_ACTIONS = [
-    { icon: Brain,     label: 'Darsni umumlashtirish',   color: '#6366F1' },
-    { icon: Sparkles,  label: 'Osonroq tushuntirish',    color: '#8B5CF6' },
-    { icon: ListChecks,label: 'Quiz yaratish',            color: '#22C55E' },
-    { icon: Globe,     label: 'Tarjima qilish',          color: '#3B82F6' },
-    { icon: Zap,       label: 'AI ga savol berish',      color: '#F59E0B' },
+  const { t } = useLanguage()
+  const AI_ACTIONS: { icon: typeof Brain; label: keyof Translations; color: string }[] = [
+    { icon: Brain,     label: 'lpSummarize',    color: '#6366F1' },
+    { icon: Sparkles,  label: 'lpExplainEasier', color: '#8B5CF6' },
+    { icon: ListChecks,label: 'lpMakeQuiz',      color: '#22C55E' },
+    { icon: Globe,     label: 'lpTranslate',     color: '#3B82F6' },
+    { icon: Zap,       label: 'lpAskAIQ',        color: '#F59E0B' },
   ]
 
   return (
@@ -106,7 +120,7 @@ function AISidebar({ lesson }: { lesson: LessonWithDetails }) {
           <Brain className="w-3.5 h-3.5 text-white" aria-hidden="true" />
         </div>
         <div>
-          <p className="text-[12px] font-black text-white/80 tracking-tight">AI Yordam</p>
+          <p className="text-[12px] font-black text-white/80 tracking-tight">{t.lpAIHelp}</p>
           <p className="text-[9px] text-white/30">Gemini 2.5 Flash</p>
         </div>
         <span
@@ -120,7 +134,7 @@ function AISidebar({ lesson }: { lesson: LessonWithDetails }) {
       {/* Context note */}
       <div className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <p className="text-[11px] text-white/35 leading-snug">
-          <span className="text-brand-light/60 font-semibold">{lesson.title}</span> darsi kontekstida yordam beradi
+          <span className="text-brand-light/60 font-semibold">{lesson.title}</span> {t.lpContextNote}
         </p>
       </div>
 
@@ -133,7 +147,7 @@ function AISidebar({ lesson }: { lesson: LessonWithDetails }) {
             disabled
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all cursor-not-allowed opacity-60"
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
-            title="Tez orada ishga tushadi"
+            title={t.lpComingSoon}
           >
             <div
               className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -141,7 +155,7 @@ function AISidebar({ lesson }: { lesson: LessonWithDetails }) {
             >
               <Icon className="w-3 h-3" style={{ color }} aria-hidden="true" />
             </div>
-            <span className="text-[12px] font-medium text-white/50">{label}</span>
+            <span className="text-[12px] font-medium text-white/50">{t[label]}</span>
             <ChevronRight className="w-3 h-3 text-white/20 ml-auto" aria-hidden="true" />
           </button>
         ))}
@@ -201,24 +215,30 @@ function VideoPlayer({ embedUrl, title }: { embedUrl: string; title: string }) {
 // ─── Visual-only: Premium attachment card ─────────────────────────────────────
 
 function AttachmentCard({
-  att, downloading, onDownload,
+  att, downloading, onDownload, onPreview,
 }: {
   att: AttachmentRow
   downloading: boolean
   onDownload: () => void
+  onPreview: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <motion.div
       whileHover={{ y: -2, scale: 1.01 }}
-      whileTap={{ scale: 0.985 }}
       transition={{ type: 'spring', stiffness: 360, damping: 26 }}
-      className="flex items-center gap-3 px-4 py-3 rounded-[16px]"
+      className="flex items-center gap-3 px-4 py-3 rounded-[16px] cursor-pointer group"
       style={{
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.08)',
         boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         willChange: 'transform',
       }}
+      onClick={onPreview}
+      role="button"
+      tabIndex={0}
+      aria-label={`${att.file_name} — ko'rish`}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPreview() } }}
     >
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
@@ -232,24 +252,36 @@ function AttachmentCard({
           <p className="text-[11px] text-white/30 mt-0.5">{formatFileSize(att.file_size)}</p>
         )}
       </div>
+      {/* Ko'rish (preview) */}
+      <button
+        type="button"
+        onClick={e => { e.stopPropagation(); onPreview() }}
+        className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold rounded-xl flex-shrink-0 text-white/70 hover:text-white transition-colors"
+        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}
+        aria-label={t.tdView}
+      >
+        <Eye className="w-3.5 h-3.5" aria-hidden="true" /> {t.tdView}
+      </button>
+      {/* Yuklab olish (download) */}
       <motion.button
         type="button"
         disabled={downloading}
-        onClick={onDownload}
+        onClick={e => { e.stopPropagation(); onDownload() }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold rounded-xl transition-opacity disabled:opacity-50 flex-shrink-0"
+        className="flex items-center justify-center w-9 h-9 rounded-xl transition-opacity disabled:opacity-50 flex-shrink-0"
         style={{
           background: 'linear-gradient(135deg,#5B5CF6,#7C3AED)',
           boxShadow: '0 4px 12px rgba(91,92,246,0.35)',
           color: 'white',
         }}
+        aria-label={t.achDownload}
+        title={t.achDownload}
       >
         {downloading
           ? <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
           : <Download className="w-3.5 h-3.5" aria-hidden="true" />
         }
-        Yuklab olish
       </motion.button>
     </motion.div>
   )
@@ -260,27 +292,39 @@ function AttachmentCard({
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function StudentLessonsPage() {
-  const auth = useAuth()
+  const auth     = useAuth()
+  const navigate = useNavigate()
+  const { t } = useLanguage()
+  const lessonsListRef = useRef<HTMLDivElement>(null)
 
   // ── Original state (PRESERVED EXACTLY) ───────────────────────────────────
   const [lessons,     setLessons]     = useState<LessonWithDetails[]>([])
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState<string | null>(null)
   const [search,      setSearch]      = useState('')
-  const [groupFilter, setGroupFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [expandedId,  setExpandedId]  = useState<string | null>(null)
-  const [attachments,       setAttachments]       = useState<Record<string, AttachmentRow[]>>({})
+  const [attachments,       setAttachments]       = useState<Record<string, AttachmentWithMeta[]>>({})
   const [attachmentsLoaded, setAttachmentsLoaded] = useState<Set<string>>(new Set())
   const [downloadingId,     setDownloadingId]     = useState<string | null>(null)
+  const [previewAtt,        setPreviewAtt]        = useState<AttachmentWithMeta | null>(null)
+  const [previewLessonId,   setPreviewLessonId]   = useState<string | null>(null)
 
   // ── Visual-only state ─────────────────────────────────────────────────────
   const [bookmarked, setBookmarked] = useState<Set<string>>(new Set())
+
+  // ── LMS bo'limlari (kurslar / topshiriqlar / statistika) ─────────────────
+  const [courses,     setCourses]     = useState<StudentCourse[]>([])
+  const [assignments, setAssignments] = useState<StudentAssignment[]>([])
+  const [stats,       setStats]       = useState<StudentLearningStats | null>(null)
+  const [sectionsLoading, setSectionsLoading] = useState(true)
 
   // ── Original effects + handlers (PRESERVED EXACTLY) ──────────────────────
 
   useEffect(() => {
     if (!auth.user?.id) return
     void load()
+    void loadSections()
   }, [auth.user?.id])
 
   async function load() {
@@ -295,18 +339,45 @@ export default function StudentLessonsPage() {
     }
   }
 
+  // Kurslar + topshiriqlar + o'quv statistikasi (mavjud Supabase jadvallaridan)
+  async function loadSections() {
+    setSectionsLoading(true)
+    try {
+      const [courseList, assignmentList] = await Promise.all([
+        courseService.getStudentCourses(auth.user!.id),
+        assignmentService.getStudentAssignments().catch(() => [] as StudentAssignment[]),
+      ])
+      setCourses(courseList)
+      setAssignments(assignmentList)
+      setStats(buildLearningStats(courseList))
+    } catch {
+      // Bo'limlar yuklanmasa — asosiy dars ro'yxati baribir ishlaydi
+      setStats(buildLearningStats([]))
+    } finally {
+      setSectionsLoading(false)
+    }
+  }
+
   async function handleExpand(lessonId: string) {
     setExpandedId(prev => prev === lessonId ? null : lessonId)
     if (!attachmentsLoaded.has(lessonId)) {
-      try {
-        const data = await attachmentService.getForLesson(lessonId)
-        setAttachments(prev => ({ ...prev, [lessonId]: data }))
-        setAttachmentsLoaded(prev => new Set(prev).add(lessonId))
-      } catch {
-        setAttachments(prev => ({ ...prev, [lessonId]: [] }))
-        setAttachmentsLoaded(prev => new Set(prev).add(lessonId))
-      }
+      await reloadAttachments(lessonId)
+      setAttachmentsLoaded(prev => new Set(prev).add(lessonId))
     }
+  }
+
+  async function reloadAttachments(lessonId: string) {
+    try {
+      const data = await attachmentService.getForLessonWithMeta(lessonId)
+      setAttachments(prev => ({ ...prev, [lessonId]: data }))
+    } catch {
+      setAttachments(prev => ({ ...prev, [lessonId]: prev[lessonId] ?? [] }))
+    }
+  }
+
+  function openPreview(lessonId: string, att: AttachmentWithMeta) {
+    setPreviewLessonId(lessonId)
+    setPreviewAtt(att)
   }
 
   async function handleDownload(att: AttachmentRow) {
@@ -326,23 +397,60 @@ export default function StudentLessonsPage() {
     }
   }
 
-  // ── Original computed values (PRESERVED EXACTLY) ──────────────────────────
+  // ── Derived: status filtering + section data + navigation helpers ─────────
 
-  const uniqueGroupsMap = new Map<string, string>()
-  lessons.forEach(l => {
-    const grp = l.group as any
-    if (grp?.id) uniqueGroupsMap.set(grp.id as string, (grp.name ?? grp.id) as string)
-  })
-  const uniqueGroups = Array.from(uniqueGroupsMap.entries()).map(([id, name]) => ({ id, name }))
+  const FILTER_TO_STATUS = { all: null, active: 'in_progress', completed: 'completed', locked: 'locked' } as const
 
   const filtered = lessons.filter(l => {
     const q = search.toLowerCase()
     const matchSearch = !search
       || l.title.toLowerCase().includes(q)
       || (l.content ?? '').toLowerCase().includes(q)
-    const matchGroup = groupFilter === 'all' || (l.group as any)?.id === groupFilter
-    return matchSearch && matchGroup
+    const want = FILTER_TO_STATUS[statusFilter]
+    const matchStatus = want === null || lessonStatus(l.lesson_date) === want
+    return matchSearch && matchStatus
   })
+
+  const statusItems: LessonStatusItem[] = lessons.map(l => {
+    const subj = l.subject as any
+    const grp  = l.group  as any
+    return {
+      id: l.id, title: l.title,
+      subjectName: subj?.name ?? grp?.name ?? null,
+      color: subj?.color ?? '#5B7FFF',
+      icon:  subj?.icon  ?? '📘',
+      status: lessonStatus(l.lesson_date),
+      dateLabel: l.lesson_date ? fmtDate(l.lesson_date) : 'Sanasi belgilanmagan',
+    }
+  })
+
+  const STATUS_ORDER = { in_progress: 0, locked: 1, completed: 2 } as const
+  const todayItems = [...statusItems].sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]).slice(0, 8)
+  const continueItem =
+    statusItems.find(s => s.status === 'in_progress')
+    ?? statusItems.find(s => s.status === 'completed')
+    ?? statusItems.find(s => s.status === 'locked')
+    ?? null
+
+  // Darsni ochib, ro'yxatdagi joyiga scroll qiladi (kurs / dars kartalaridan)
+  async function openLesson(lessonId: string) {
+    setExpandedId(lessonId)
+    if (!attachmentsLoaded.has(lessonId)) {
+      await reloadAttachments(lessonId)
+      setAttachmentsLoaded(prev => new Set(prev).add(lessonId))
+    }
+    requestAnimationFrame(() => {
+      document.getElementById(`lesson-${lessonId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
+  // Kurs "Davom etish" — shu guruhning eng dolzarb darsini ochadi
+  function continueCourse(courseId: string) {
+    const inGroup = lessons.filter(l => (l.group as any)?.id === courseId)
+    const target  = inGroup.find(l => lessonStatus(l.lesson_date) === 'in_progress') ?? inGroup[0]
+    if (target) void openLesson(target.id)
+    else lessonsListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   // ── Visual-only: bookmark toggle ──────────────────────────────────────────
   function toggleBookmark(id: string) {
@@ -356,7 +464,7 @@ export default function StudentLessonsPage() {
   // ── RENDER — Premium dark design ─────────────────────────────────────────
 
   if (loading) return (
-    <div className="space-y-4 pb-8 max-w-3xl">
+    <div className="space-y-4 pb-8">
       {/* Header skeleton */}
       <div className="space-y-2">
         <div className="h-8 rounded-xl animate-pulse" style={{ width: '180px', background: 'rgba(255,255,255,0.07)' }} />
@@ -367,44 +475,10 @@ export default function StudentLessonsPage() {
   )
 
   return (
-    <div className="space-y-5 pb-8 max-w-3xl">
+    <div className="space-y-5 pb-8">
 
-      {/* Page header */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: EASE }}
-        className="flex items-start justify-between gap-4"
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg,#5B5CF6,#7C3AED)', boxShadow: '0 0 20px rgba(91,92,246,0.4)' }}
-          >
-            <BookOpen className="w-5 h-5 text-white" aria-hidden="true" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-white tracking-tight">Darslarim</h1>
-            <p className="text-[12px] text-white/35 mt-0.5">
-              {`${lessons.length} ta dars`}
-              {bookmarked.size > 0 && <span className="ml-2 text-brand-light/60">· {bookmarked.size} ta xatcho'p</span>}
-            </p>
-          </div>
-        </div>
-
-        {/* Stats badges (visual only) */}
-        {lessons.length > 0 && (
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold"
-              style={{ background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.2)', color: '#86efac' }}
-            >
-              <Star className="w-3 h-3" aria-hidden="true" />
-              {filtered.length}
-            </div>
-          </div>
-        )}
-      </motion.div>
+      {/* 1. Header — title + subtitle + live Tashkent date/time */}
+      <LessonsHeader />
 
       {/* Error */}
       {error && (
@@ -419,51 +493,35 @@ export default function StudentLessonsPage() {
         </motion.div>
       )}
 
-      {/* Search + filter (original logic, premium dark UI) */}
-      {lessons.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.35, ease: EASE }}
-          className="flex flex-col sm:flex-row gap-3"
-        >
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" aria-hidden="true" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Dars nomi bo'yicha qidirish..."
-              className="w-full pl-9 pr-4 py-2.5 text-sm text-white/70 placeholder:text-white/25 outline-none transition-all rounded-xl"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-              onFocus={e => { e.currentTarget.style.border = '1px solid rgba(91,92,246,0.45)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(91,92,246,0.12)' }}
-              onBlur={e => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none' }}
-            />
-          </div>
+      {/* 2. My Courses — progress, teacher, completed/total, "Davom etish" */}
+      <CoursesSection courses={courses} loading={sectionsLoading} onContinue={continueCourse} />
 
-          {uniqueGroups.length > 1 && (
-            <div className="relative">
-              <select
-                value={groupFilter}
-                onChange={e => setGroupFilter(e.target.value)}
-                className="appearance-none px-3 py-2.5 pr-9 rounded-xl text-sm text-white/60 outline-none transition-all"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-              >
-                <option value="all">Barcha guruhlar</option>
-                {uniqueGroups.map(g => (
-                  <option key={g.id} value={g.id}>{g.name}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" aria-hidden="true" />
+      {/* 3. Today's Lessons — status: Bajarildi / Jarayonda / Qulflangan */}
+      <TodayLessonsSection items={todayItems} continueItem={continueItem} onOpen={id => void openLesson(id)} />
+
+      {/* 4. Learning Analytics — haftalik faollik, ketma-ket kunlar, darslar, soatlar */}
+      <AnalyticsSection stats={stats} loading={sectionsLoading} />
+
+      {/* 5. Homework — topshiriqlar, muddat, holat */}
+      <HomeworkSection
+        assignments={assignments}
+        loading={sectionsLoading}
+        onViewAll={() => navigate(PATHS.STUDENT.ASSIGNMENTS)}
+      />
+
+      {/* 6. All lessons — search + status filter tabs (list/detail below) */}
+      {lessons.length > 0 && (
+        <div className="pt-1 space-y-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-[9px] flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.25)' }}>
+              <BookOpen className="w-4 h-4 text-[#C4B5FD]" aria-hidden="true" />
             </div>
-          )}
-        </motion.div>
+            <h2 className="text-[15px] font-bold text-white/85 tracking-tight">{t.lpAllLessons}</h2>
+            <span className="ml-auto text-[11px] font-semibold text-white/35">{filtered.length} / {lessons.length}</span>
+          </div>
+          <LessonsToolbar search={search} onSearch={setSearch} filter={statusFilter} onFilter={setStatusFilter} />
+        </div>
       )}
 
       {/* Empty state — no lessons */}
@@ -509,13 +567,13 @@ export default function StudentLessonsPage() {
           style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
         >
           <Search className="w-7 h-7 text-white/20 mx-auto mb-3" aria-hidden="true" />
-          <p className="text-sm text-white/35">Qidiruv natijalari topilmadi</p>
+          <p className="text-sm text-white/35">{t.lpNoResults}</p>
         </motion.div>
       )}
 
       {/* Lesson list */}
       {filtered.length > 0 && (
-        <div className="space-y-3">
+        <div ref={lessonsListRef} className="space-y-3 scroll-mt-4">
           {filtered.map((lesson, idx) => {
             const isExpanded = expandedId === lesson.id
             const subj       = lesson.subject as any
@@ -529,10 +587,11 @@ export default function StudentLessonsPage() {
             return (
               <motion.div
                 key={lesson.id}
+                id={`lesson-${lesson.id}`}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(idx * 0.05, 0.35), duration: 0.35, ease: EASE }}
-                className="rounded-[22px] overflow-hidden"
+                className="rounded-[22px] overflow-hidden scroll-mt-4"
                 style={{
                   background: 'rgba(255,255,255,0.04)',
                   backdropFilter: 'blur(16px)',
@@ -667,7 +726,7 @@ export default function StudentLessonsPage() {
                                 {/* Content header */}
                                 <div className="flex items-center gap-2 mb-3">
                                   <FileText className="w-3.5 h-3.5 text-white/30" aria-hidden="true" />
-                                  <span className="text-[10px] font-bold text-white/25 uppercase tracking-wider">Dars matni</span>
+                                  <span className="text-[10px] font-bold text-white/25 uppercase tracking-wider">{t.lpLessonText}</span>
                                   <div
                                     className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full"
                                     style={{ background: 'rgba(99,102,241,0.12)', color: '#C4B5FD' }}
@@ -707,6 +766,7 @@ export default function StudentLessonsPage() {
                                       att={att}
                                       downloading={downloadingId === att.id}
                                       onDownload={() => void handleDownload(att)}
+                                      onPreview={() => openPreview(lesson.id, att)}
                                     />
                                   ))}
                                 </div>
@@ -743,6 +803,17 @@ export default function StudentLessonsPage() {
           })}
         </div>
       )}
+
+      {/* Lesson Materials Center — instant preview (student: view-only) */}
+      <AnimatePresence>
+        {previewAtt && (
+          <FilePreviewModal
+            attachment={previewAtt}
+            onClose={() => { setPreviewAtt(null); setPreviewLessonId(null) }}
+            onChanged={() => { if (previewLessonId) void reloadAttachments(previewLessonId) }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

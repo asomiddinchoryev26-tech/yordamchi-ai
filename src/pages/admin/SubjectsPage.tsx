@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Pencil, Trash2, X, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { subjectService } from '@/services/subject.service'
 import type { SubjectRow } from '@/services/subject.service'
 
@@ -24,6 +25,7 @@ const EMPTY_FORM = { name: '', description: '', color: '#3b82f6', icon: '📚' }
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function SubjectsPage() {
+  const { t } = useLanguage()
   const [subjects,   setSubjects]   = useState<SubjectRow[]>([])
   const [loading,    setLoading]    = useState(true)
   const [pageError,  setPageError]  = useState<string | null>(null)
@@ -84,7 +86,7 @@ export default function SubjectsPage() {
   // ── Saqlash ───────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!form.name.trim()) {
-      setFormError("Fan nomi bo'sh bo'lishi mumkin emas")
+      setFormError(t.sbNameRequired)
       return
     }
     setFormLoading(true)
@@ -134,9 +136,9 @@ export default function SubjectsPage() {
       {/* ── Sarlavha ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Fanlar</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t.sbTitle}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {subjects.length} ta fan
+            {subjects.length} {t.sbCount}
           </p>
         </div>
         {!showForm && (
@@ -146,7 +148,7 @@ export default function SubjectsPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Yangi fan
+            {t.sbNewSubject}
           </button>
         )}
       </div>
@@ -164,7 +166,7 @@ export default function SubjectsPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-gray-900">
-              {editingId ? 'Fanni tahrirlash' : 'Yangi fan qo\'shish'}
+              {editingId ? t.sbEditSubject : t.sbAddSubject}
             </h2>
             <button
               type="button"
@@ -179,13 +181,13 @@ export default function SubjectsPage() {
             {/* Nom */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Fan nomi <span className="text-red-500">*</span>
+                {t.sbNameLabel} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="Masalan: Matematika"
+                placeholder={t.sbNamePh}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
               />
             </div>
@@ -193,12 +195,12 @@ export default function SubjectsPage() {
             {/* Tavsif */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Tavsif
+                {t.sbDescription}
               </label>
               <textarea
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Fan haqida qisqacha ma'lumot..."
+                placeholder={t.sbDescPh}
                 rows={2}
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors resize-none"
               />
@@ -208,7 +210,7 @@ export default function SubjectsPage() {
               {/* Rang */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rang
+                  {t.sbColor}
                 </label>
                 <div className="flex gap-2 flex-wrap">
                   {PRESET_COLORS.map(color => (
@@ -229,7 +231,7 @@ export default function SubjectsPage() {
               {/* Ikonka */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ikonka
+                  {t.sbIcon}
                 </label>
                 <div className="flex gap-1.5 flex-wrap">
                   {PRESET_ICONS.map(icon => (
@@ -259,10 +261,10 @@ export default function SubjectsPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900">
-                  {form.name || 'Fan nomi'}
+                  {form.name || t.sbNamePreview}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {form.description || 'Tavsif...'}
+                  {form.description || t.sbDescPreview}
                 </p>
               </div>
             </div>
@@ -285,7 +287,7 @@ export default function SubjectsPage() {
               >
                 {formLoading
                   ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : editingId ? 'Saqlash' : "Qo'shish"
+                  : editingId ? t.admSave : t.tcAdd
                 }
               </button>
               <button
@@ -293,7 +295,7 @@ export default function SubjectsPage() {
                 onClick={closeForm}
                 className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
               >
-                Bekor
+                {t.fpCancel}
               </button>
             </div>
           </div>
@@ -317,9 +319,9 @@ export default function SubjectsPage() {
       {!loading && subjects.length === 0 && !pageError && (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
           <div className="text-4xl mb-3">📚</div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">Fanlar yo'q</h3>
+          <h3 className="text-base font-semibold text-gray-900 mb-1">{t.sbEmpty}</h3>
           <p className="text-sm text-gray-400 mb-5">
-            Hali hech qanday fan qo'shilmagan
+            {t.sbEmptyHint}
           </p>
           <button
             type="button"
@@ -327,7 +329,7 @@ export default function SubjectsPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Plus className="w-4 h-4" />
-            Birinchi fanni qo'shing
+            {t.sbAddFirst}
           </button>
         </div>
       )}
@@ -353,7 +355,7 @@ export default function SubjectsPage() {
                 {subject.name}
               </h3>
               <p className="text-sm text-gray-400 line-clamp-2 min-h-[2.5rem]">
-                {subject.description ?? 'Tavsif yo\'q'}
+                {subject.description ?? t.sbNoDesc}
               </p>
 
               {/* Rang indikatori */}
@@ -373,14 +375,14 @@ export default function SubjectsPage() {
                     onClick={() => void handleDelete(subject.id)}
                     className="flex-1 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                   >
-                    O'chirish
+                    {t.admDisable}
                   </button>
                   <button
                     type="button"
                     onClick={() => setDeletingId(null)}
                     className="flex-1 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                   >
-                    Bekor
+                    {t.fpCancel}
                   </button>
                 </div>
               ) : (
@@ -391,7 +393,7 @@ export default function SubjectsPage() {
                     className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
                   >
                     <Pencil className="w-3 h-3" />
-                    Tahrirlash
+                    {t.tcEditT}
                   </button>
                   <button
                     type="button"

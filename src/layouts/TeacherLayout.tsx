@@ -1,8 +1,9 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, Suspense } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
+import PageLoader from '@/components/common/PageLoader'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  Home, GraduationCap, Users, BookOpen, CheckSquare, FileText, User, Award,
+  Home, GraduationCap, Users, BookOpen, CheckSquare, FileText, User, Award, ClipboardList,
 } from 'lucide-react'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Navbar } from '@/components/layout/Navbar'
@@ -44,6 +45,7 @@ export default function TeacherLayout() {
         { label: t.students,   to: PATHS.TEACHER.STUDENTS,   icon: GraduationCap },
         { label: t.groups,     to: PATHS.TEACHER.GROUPS,     icon: Users         },
         { label: t.lessons,    to: PATHS.TEACHER.COURSES,    icon: BookOpen      },
+        { label: 'Topshiriqlar', to: PATHS.TEACHER.ASSIGNMENTS, icon: ClipboardList },
         { label: t.attendance, to: PATHS.TEACHER.ATTENDANCE, icon: CheckSquare   },
         { label: t.tests,      to: PATHS.TEACHER.TESTS,      icon: FileText      },
       ],
@@ -144,7 +146,9 @@ export default function TeacherLayout() {
           avatarNode={avatarEl}
         />
         <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden page-enter">
-          <Outlet />
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

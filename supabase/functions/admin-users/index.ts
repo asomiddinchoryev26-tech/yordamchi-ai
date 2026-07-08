@@ -79,8 +79,10 @@ serve(async (req: Request) => {
         return json({ error: msg }, 400)
       }
 
-      // Profil trigger tomonidan yaratilgan — phone/bio/status bilan yangilash
-      await adminClient.from('profiles').upsert({
+      // Profil trigger tomonidan yaratilgan — phone/bio/status bilan yangilash.
+      // Xatolik bo'lsa: yetim (orphaned) auth foydalanuvchi qolmasligi uchun
+      // yangi yaratilgan auth yozuvini bekor qilamiz (rollback).
+      const { error: profileErr } = await adminClient.from('profiles').upsert({
         id:        newUser.user.id,
         full_name: full_name.trim(),
         email:     email.trim().toLowerCase(),
@@ -89,6 +91,11 @@ serve(async (req: Request) => {
         bio:       bio?.trim()   || null,
         status:    'active',
       }, { onConflict: 'id' })
+
+      if (profileErr) {
+        await adminClient.auth.admin.deleteUser(newUser.user.id)
+        return json({ error: "Profil yaratishda xatolik: " + profileErr.message }, 500)
+      }
 
       return json({ userId: newUser.user.id })
     }
@@ -111,6 +118,9 @@ serve(async (req: Request) => {
     return json({ error: "Noto'g'ri action. 'create' yoki 'delete' bo'lishi kerak" }, 400)
 
   } catch (err) {
-    return json({ error: String(err) }, 500)
+    // Log full detail server-side (Edge Function logs); return a generic
+    // message so internal error details never reach the client.
+    console.error('[admin-users] unhandled error:', err)
+    return json({ error: "Server xatosi. Keyinroq qayta urinib ko'ring." }, 500)
   }
 })

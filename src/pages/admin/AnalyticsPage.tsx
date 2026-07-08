@@ -2,26 +2,30 @@ import { useState, useEffect } from 'react'
 import { AlertCircle, TrendingUp, Users, CheckSquare, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
-type MonthData = { key: string; label: string; students: number; teachers: number }
+type MonthData = { key: string; monthKey: keyof Translations; year: number; students: number; teachers: number }
 type AttDist   = { present: number; absent: number; late: number; excused: number; total: number }
 type TestDist  = { passed: number; failed: number; total: number }
 type RoleCount = { students: number; teachers: number; admin: number }
 
 // ─── Yordamchi ────────────────────────────────────────────────────────────────
 
-const MONTHS_UZ = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
+const MONTH_ABBR_KEYS: (keyof Translations)[] = [
+  'mJan','mFeb','mMar','mApr','mMay','mJun','mJul','mAug','mSep','mOct','mNov','mDec',
+]
 
-function getLast6Months(): { key: string; label: string }[] {
+function getLast6Months(): { key: string; monthKey: keyof Translations; year: number }[] {
   const now = new Date()
   const result = []
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     result.push({
-      key:   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
-      label: `${MONTHS_UZ[d.getMonth()]} ${d.getFullYear()}`,
+      key:      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      monthKey: MONTH_ABBR_KEYS[d.getMonth()],
+      year:     d.getFullYear(),
     })
   }
   return result
@@ -72,6 +76,7 @@ function DonutSlice({ pct, color, offset }: { pct: number; color: string; offset
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function AdminAnalyticsPage() {
+  const { t } = useLanguage()
   const [months,    setMonths]    = useState<MonthData[]>([])
   const [attDist,   setAttDist]   = useState<AttDist | null>(null)
   const [testDist,  setTestDist]  = useState<TestDist | null>(null)
@@ -133,7 +138,7 @@ export default function AdminAnalyticsPage() {
       }
       setTestDist({ passed, failed: (testRes.data?.length ?? 0) - passed, total: testRes.data?.length ?? 0 })
     } catch {
-      setError("Analitika ma'lumotlarini yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -156,8 +161,8 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="space-y-6 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Analitika</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Platforma ishlash ko'rsatkichlari</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.anTitle}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.anSubtitle}</p>
       </div>
 
       {error && (
@@ -171,9 +176,9 @@ export default function AdminAnalyticsPage() {
       {roleCounts && (
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Talabalar',    value: roleCounts.students, color: 'bg-blue-600',   icon: Users   },
-            { label: "O'qituvchilar",value: roleCounts.teachers, color: 'bg-indigo-600', icon: Users   },
-            { label: 'Adminlar',     value: roleCounts.admin,    color: 'bg-emerald-600',icon: TrendingUp },
+            { label: t.tdStudents,   value: roleCounts.students, color: 'bg-blue-600',   icon: Users   },
+            { label: t.adTeachers,   value: roleCounts.teachers, color: 'bg-indigo-600', icon: Users   },
+            { label: t.anAdmins,     value: roleCounts.admin,    color: 'bg-emerald-600',icon: TrendingUp },
           ].map(s => {
             const Icon = s.icon
             return (
@@ -196,20 +201,20 @@ export default function AdminAnalyticsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <Users className="w-4 h-4 text-blue-600" />
-            <h2 className="text-base font-bold text-gray-900">Oylik talabalar (so'nggi 6 oy)</h2>
+            <h2 className="text-base font-bold text-gray-900">{t.anMonthlyStudents}</h2>
           </div>
           {months.every(m => m.students === 0) ? (
-            <p className="text-sm text-gray-400 italic text-center py-6">Ma'lumot yo'q</p>
+            <p className="text-sm text-gray-400 italic text-center py-6">{t.anNoData}</p>
           ) : (
             <div className="space-y-3">
               {months.map(m => (
                 <HBar
                   key={m.key}
-                  label={m.label}
+                  label={`${t[m.monthKey]} ${m.year}`}
                   value={m.students}
                   max={maxMonthStudents}
                   color="bg-blue-500"
-                  subLabel={`${m.students} ta`}
+                  subLabel={`${m.students} ${t.anCount}`}
                 />
               ))}
             </div>
@@ -220,20 +225,20 @@ export default function AdminAnalyticsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="w-4 h-4 text-indigo-600" />
-            <h2 className="text-base font-bold text-gray-900">Oylik o'qituvchilar (so'nggi 6 oy)</h2>
+            <h2 className="text-base font-bold text-gray-900">{t.anMonthlyTeachers}</h2>
           </div>
           {months.every(m => m.teachers === 0) ? (
-            <p className="text-sm text-gray-400 italic text-center py-6">Ma'lumot yo'q</p>
+            <p className="text-sm text-gray-400 italic text-center py-6">{t.anNoData}</p>
           ) : (
             <div className="space-y-3">
               {months.map(m => (
                 <HBar
                   key={m.key}
-                  label={m.label}
+                  label={`${t[m.monthKey]} ${m.year}`}
                   value={m.teachers}
                   max={maxMonthTeachers}
                   color="bg-indigo-500"
-                  subLabel={`${m.teachers} ta`}
+                  subLabel={`${m.teachers} ${t.anCount}`}
                 />
               ))}
             </div>
@@ -244,10 +249,10 @@ export default function AdminAnalyticsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <CheckSquare className="w-4 h-4 text-emerald-600" />
-            <h2 className="text-base font-bold text-gray-900">Davomat holatlari</h2>
+            <h2 className="text-base font-bold text-gray-900">{t.anAttStates}</h2>
           </div>
           {!attDist || attDist.total === 0 ? (
-            <p className="text-sm text-gray-400 italic text-center py-6">Davomat ma'lumoti yo'q</p>
+            <p className="text-sm text-gray-400 italic text-center py-6">{t.sdNoAttendance}</p>
           ) : (
             <div className="flex items-center gap-6">
               {/* Donut SVG */}
@@ -286,10 +291,10 @@ export default function AdminAnalyticsPage() {
               </svg>
               <div className="flex-1 space-y-2">
                 {([
-                  { key: 'present', label: 'Kelgan',    color: attColors.present },
-                  { key: 'late',    label: 'Kechikkan', color: attColors.late    },
-                  { key: 'excused', label: 'Sababli',   color: attColors.excused },
-                  { key: 'absent',  label: 'Kelmagan',  color: attColors.absent  },
+                  { key: 'present', label: t.sdPresent, color: attColors.present },
+                  { key: 'late',    label: t.sdLate,    color: attColors.late    },
+                  { key: 'excused', label: t.sdExcused, color: attColors.excused },
+                  { key: 'absent',  label: t.sdAbsent,  color: attColors.absent  },
                 ] as const).map(s => (
                   <div key={s.key} className="flex items-center gap-2 text-xs">
                     <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
@@ -309,10 +314,10 @@ export default function AdminAnalyticsPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <FileText className="w-4 h-4 text-amber-600" />
-            <h2 className="text-base font-bold text-gray-900">Test natijalari</h2>
+            <h2 className="text-base font-bold text-gray-900">{t.tdTestResults}</h2>
           </div>
           {!testDist || testDist.total === 0 ? (
-            <p className="text-sm text-gray-400 italic text-center py-6">Test natijasi yo'q</p>
+            <p className="text-sm text-gray-400 italic text-center py-6">{t.anNoTestResults}</p>
           ) : (
             <div className="space-y-4">
               <div className="text-center py-3">
@@ -323,16 +328,16 @@ export default function AdminAnalyticsPage() {
                 )}>
                   {testDist.total > 0 ? Math.round((testDist.passed / testDist.total) * 100) : 0}%
                 </p>
-                <p className="text-sm text-gray-500 mt-1">O'tish darajasi</p>
+                <p className="text-sm text-gray-500 mt-1">{t.anPassRate}</p>
               </div>
               <div className="space-y-2">
-                <HBar label="O'tdi (≥60%)" value={testDist.passed} max={testDist.total} color="bg-emerald-500"
-                  subLabel={`${testDist.passed} ta`} />
-                <HBar label="O'tmadi (<60%)" value={testDist.failed} max={testDist.total} color="bg-red-400"
-                  subLabel={`${testDist.failed} ta`} />
+                <HBar label={t.anPassed} value={testDist.passed} max={testDist.total} color="bg-emerald-500"
+                  subLabel={`${testDist.passed} ${t.anCount}`} />
+                <HBar label={t.anFailed} value={testDist.failed} max={testDist.total} color="bg-red-400"
+                  subLabel={`${testDist.failed} ${t.anCount}`} />
               </div>
               <p className="text-center text-xs text-gray-400">
-                Jami: {testDist.total} ta topshirilgan
+                {t.adTotal} {testDist.total} {t.anCount} {t.anTotalSubmitted}
               </p>
             </div>
           )}

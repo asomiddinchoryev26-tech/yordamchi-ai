@@ -1,19 +1,22 @@
+import { lazy } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import PrivateRoute from './PrivateRoute'
 import RoleRoute from './RoleRoute'
 import AdminLayout from '@/layouts/AdminLayout'
-import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
-import UsersPage from '@/pages/admin/UsersPage'
-import TeachersPage from '@/pages/admin/TeachersPage'
-import StudentsPage from '@/pages/admin/StudentsPage'
-import GroupsPage from '@/pages/admin/GroupsPage'
-import LessonsPage from '@/pages/admin/LessonsPage'
-import AttendancePage from '@/pages/admin/AttendancePage'
-import TestsPage from '@/pages/admin/TestsPage'
-import ReportsPage from '@/pages/admin/ReportsPage'
-import SubjectsPage from '@/pages/admin/SubjectsPage'
-import SettingsPage from '@/pages/admin/SettingsPage'
-import AchievementsPage from '@/pages/admin/AchievementsPage'
+
+// Route-based code splitting — each page ships in its own chunk (React.lazy)
+const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'))
+const UsersPage          = lazy(() => import('@/pages/admin/UsersPage'))
+const TeachersPage       = lazy(() => import('@/pages/admin/TeachersPage'))
+const StudentsPage       = lazy(() => import('@/pages/admin/StudentsPage'))
+const GroupsPage         = lazy(() => import('@/pages/admin/GroupsPage'))
+const LessonsPage        = lazy(() => import('@/pages/admin/LessonsPage'))
+const AttendancePage     = lazy(() => import('@/pages/admin/AttendancePage'))
+const TestsPage          = lazy(() => import('@/pages/admin/TestsPage'))
+const ReportsPage        = lazy(() => import('@/pages/admin/ReportsPage'))
+const SubjectsPage       = lazy(() => import('@/pages/admin/SubjectsPage'))
+const SettingsPage       = lazy(() => import('@/pages/admin/SettingsPage'))
+const AchievementsPage   = lazy(() => import('@/pages/admin/AchievementsPage'))
 
 export const adminRoutes: RouteObject[] = [
   {

@@ -9,6 +9,7 @@ import { Camera, Upload, Trash2, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AvatarCropper } from './AvatarCropper'
 import { UserAvatar } from './UserAvatar'
+import { useLanguage } from '@/contexts/LanguageContext'
 import type { UserProfile } from '@/types/profile.types'
 
 const VALID_TYPES  = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
@@ -23,6 +24,7 @@ interface AvatarUploaderProps {
 }
 
 export function AvatarUploader({ profile, onUpload, onDelete, isUploading }: AvatarUploaderProps) {
+  const { t }             = useLanguage()
   const inputRef          = useRef<HTMLInputElement>(null)
   const [preview, setPreview]     = useState<string | null>(null)   // object URL for cropper
   const [cropError, setCropError] = useState<string | null>(null)
@@ -40,11 +42,11 @@ export function AvatarUploader({ profile, onUpload, onDelete, isUploading }: Ava
 
     // Validate
     if (!VALID_TYPES.includes(file.type)) {
-      setCropError(`Format qo'llab-quvvatlanmaydi. JPG, PNG yoki WebP yuklang.`)
+      setCropError(t.avErrFormat)
       return
     }
     if (file.size > MAX_BYTES) {
-      setCropError(`Fayl 5 MB dan kichik bo'lishi kerak.`)
+      setCropError(t.avErrSize)
       return
     }
 
@@ -71,8 +73,8 @@ export function AvatarUploader({ profile, onUpload, onDelete, isUploading }: Ava
       <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Rasmni kesish</p>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">Doira ichidagi qism profil rasmingiz bo'ladi</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{t.avCropTitle}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{t.avCropDesc}</p>
           </div>
           <AvatarCropper imageSrc={preview} onCrop={handleCrop} onCancel={handleCancelCrop} />
         </div>
@@ -101,7 +103,7 @@ export function AvatarUploader({ profile, onUpload, onDelete, isUploading }: Ava
           {isUploading
             ? <Loader2 className="w-6 h-6 text-white animate-spin" />
             : <Camera className="w-6 h-6 text-white" />}
-          {!isUploading && <span className="text-[10px] text-white font-medium">O'zgartirish</span>}
+          {!isUploading && <span className="text-[10px] text-white font-medium">{t.avChangePhoto}</span>}
         </button>
       </div>
 
@@ -116,7 +118,7 @@ export function AvatarUploader({ profile, onUpload, onDelete, isUploading }: Ava
           {isUploading
             ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
             : <Upload className="w-3.5 h-3.5" />}
-          {isUploading ? 'Yuklanmoqda…' : 'Rasm yuklash'}
+          {isUploading ? t.avUploading : t.avUploadPhoto}
         </button>
 
         {profile.avatarUrl && onDelete && (
@@ -127,13 +129,13 @@ export function AvatarUploader({ profile, onUpload, onDelete, isUploading }: Ava
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-semibold hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors disabled:opacity-50"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            O'chirish
+            {t.avDelete}
           </button>
         )}
       </div>
 
       <p className="text-[11px] text-gray-400 dark:text-gray-600 text-center leading-relaxed">
-        JPG, PNG yoki WebP · Maksimal hajm 5 MB
+        {t.avFormatHint}
       </p>
 
       {/* Error */}

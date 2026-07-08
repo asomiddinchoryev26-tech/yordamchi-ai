@@ -23,6 +23,9 @@ interface NavbarProps {
   avatarGradient?:    string
   searchPlaceholder?: string
   avatarNode?:        React.ReactNode
+  /** Ixtiyoriy: bildirishnoma tugmasi o'rniga (masalan real NotificationsBell).
+   *  Berilmasa — mavjud statik qo'ng'iroq ko'rsatiladi (teacher/admin o'zgarmaydi). */
+  notificationsSlot?: React.ReactNode
 }
 
 const LANG_OPTIONS: { code: Language; label: string; flag: string; short: string }[] = [
@@ -105,6 +108,7 @@ export function Navbar({
   avatarGradient = 'bg-gradient-to-br from-blue-500 to-indigo-600',
   searchPlaceholder,
   avatarNode,
+  notificationsSlot,
 }: NavbarProps) {
   const { theme, setTheme }          = useTheme()
   const { language, setLanguage, t } = useLanguage()
@@ -286,22 +290,24 @@ export function Navbar({
           </DropdownPortal>
         </div>
 
-        {/* Notifications */}
-        <button
-          type="button"
-          className={cn(glassBtn, 'w-8 h-8 sm:w-9 sm:h-9 relative')}
-          aria-label={t.notifications}
-        >
-          <Bell className="w-[15px] h-[15px]" aria-hidden="true" />
-          {notificationCount > 0 && (
-            <span
-              className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-white text-[9px] font-black flex items-center justify-center leading-none"
-              style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: '0 0 8px rgba(239,68,68,0.5)' }}
-            >
-              {notificationCount > 9 ? '9+' : notificationCount}
-            </span>
-          )}
-        </button>
+        {/* Notifications — real slot (NotificationsBell) yoki statik qo'ng'iroq */}
+        {notificationsSlot ?? (
+          <button
+            type="button"
+            className={cn(glassBtn, 'w-8 h-8 sm:w-9 sm:h-9 relative')}
+            aria-label={t.notifications}
+          >
+            <Bell className="w-[15px] h-[15px]" aria-hidden="true" />
+            {notificationCount > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-white text-[9px] font-black flex items-center justify-center leading-none"
+                style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', boxShadow: '0 0 8px rgba(239,68,68,0.5)' }}
+              >
+                {notificationCount > 9 ? '9+' : notificationCount}
+              </span>
+            )}
+          </button>
+        )}
 
         {/* User avatar */}
         {avatarNode ?? (

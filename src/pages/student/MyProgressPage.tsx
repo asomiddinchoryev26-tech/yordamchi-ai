@@ -3,6 +3,7 @@ import { AlertCircle, TrendingUp, CheckSquare, FileText, BookOpen } from 'lucide
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,7 @@ function StatCard({
 
 export default function MyProgressPage() {
   const auth = useAuth()
+  const { t } = useLanguage()
 
   const [attStats,       setAttStats]       = useState<AttStats | null>(null)
   const [testResults,    setTestResults]    = useState<TestResult[]>([])
@@ -70,13 +72,8 @@ export default function MyProgressPage() {
           .select('status')
           .eq('student_id', auth.user.id),
 
-        // Test natijalari + test nomi
-        supabase
-          .from('test_results')
-          .select('score, total_questions, submitted_at, test:tests(title)')
-          .eq('student_id', auth.user.id)
-          .not('submitted_at', 'is', null)
-          .order('submitted_at', { ascending: false }),
+        // Test natijalari + test nomi — xavfsiz RPC (talaba `tests` jadvalini o'qimaydi)
+        supabase.rpc('get_my_test_results'),
 
         // Guruhlar + darslar soni
         supabase
@@ -140,7 +137,7 @@ export default function MyProgressPage() {
           .filter(Boolean) as GroupProgress[]
       )
     } catch {
-      setError("Ma'lumotlarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -168,8 +165,8 @@ export default function MyProgressPage() {
   return (
     <div className="space-y-5 pb-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Mening natijalarim</h1>
-        <p className="text-sm text-gray-500 mt-0.5">O'quv jarayoni statistikasi</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t.mpTitle}</h1>
+        <p className="text-sm text-gray-500 mt-0.5">{t.mpSubtitle}</p>
       </div>
 
       {error && (
@@ -183,28 +180,28 @@ export default function MyProgressPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
           icon={CheckSquare}
-          label="Davomat"
+          label={t.achAttendance}
           value={attPct !== null ? `${attPct}%` : '—'}
           color={attPct === null ? 'text-gray-400' : attPct >= 80 ? 'text-emerald-600' : attPct >= 60 ? 'text-amber-600' : 'text-red-600'}
           bg={attPct === null ? 'bg-gray-50' : attPct >= 80 ? 'bg-emerald-50' : attPct >= 60 ? 'bg-amber-50' : 'bg-red-50'}
         />
         <StatCard
           icon={FileText}
-          label="Test o'rtacha"
+          label={t.mpTestAvg}
           value={totalTests > 0 ? `${avgScore}%` : '—'}
           color={avgScore >= 80 ? 'text-emerald-600' : avgScore >= 60 ? 'text-amber-600' : 'text-gray-400'}
           bg={avgScore >= 80 ? 'bg-emerald-50' : avgScore >= 60 ? 'bg-amber-50' : 'bg-gray-50'}
         />
         <StatCard
           icon={TrendingUp}
-          label="O'tgan test"
+          label={t.mpPassedTests}
           value={totalTests > 0 ? `${passedTests}/${totalTests}` : '—'}
           color="text-indigo-600"
           bg="bg-indigo-50"
         />
         <StatCard
           icon={BookOpen}
-          label="Darslar"
+          label={t.tdLessons}
           value={groupProgress.reduce((a, g) => a + g.lesson_count, 0)}
           color="text-blue-600"
           bg="bg-blue-50"
@@ -216,14 +213,14 @@ export default function MyProgressPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
             <CheckSquare className="w-4 h-4 text-emerald-600" />
-            Davomat tafsiloti
+            {t.mpAttDetail}
           </h2>
           <div className="space-y-2.5">
             {([
-              { key: 'present', label: 'Kelgan',    color: 'bg-emerald-500' },
-              { key: 'late',    label: 'Kechikkan', color: 'bg-amber-500'   },
-              { key: 'excused', label: 'Sababli',   color: 'bg-blue-500'   },
-              { key: 'absent',  label: 'Kelmagan',  color: 'bg-red-400'    },
+              { key: 'present', label: t.sdPresent, color: 'bg-emerald-500' },
+              { key: 'late',    label: t.sdLate,    color: 'bg-amber-500'   },
+              { key: 'excused', label: t.sdExcused, color: 'bg-blue-500'   },
+              { key: 'absent',  label: t.sdAbsent,  color: 'bg-red-400'    },
             ] as const).map(({ key, label, color }) => {
               const val = attStats[key]
               const pct = Math.round((val / attStats.total) * 100)
@@ -245,7 +242,7 @@ export default function MyProgressPage() {
               )
             })}
           </div>
-          <p className="text-xs text-gray-400 mt-3 text-right">Jami: {attStats.total} ta qatnashish</p>
+          <p className="text-xs text-gray-400 mt-3 text-right">{t.adTotal} {attStats.total} {t.tdParticipations}</p>
         </div>
       )}
 
@@ -254,7 +251,7 @@ export default function MyProgressPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-blue-600" />
-            Guruh bo'yicha
+            {t.mpByGroup}
           </h2>
           <div className="space-y-4">
             {groupProgress.map(g => {
@@ -272,13 +269,13 @@ export default function MyProgressPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <span>{g.lesson_count} dars</span>
+                      <span>{g.lesson_count} {t.tdLessonWord}</span>
                       {gPct !== null && (
                         <span className={cn(
                           'font-bold',
                           gPct >= 80 ? 'text-emerald-600' : gPct >= 60 ? 'text-amber-600' : 'text-red-600'
                         )}>
-                          {gPct}% davomat
+                          {gPct}% {t.achAttendance.toLowerCase()}
                         </span>
                       )}
                     </div>
@@ -306,7 +303,7 @@ export default function MyProgressPage() {
         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
           <h2 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
             <FileText className="w-4 h-4 text-amber-600" />
-            Test natijalari
+            {t.tdTestResults}
           </h2>
           <div className="space-y-2">
             {testResults.map((r, i) => {
@@ -335,7 +332,7 @@ export default function MyProgressPage() {
                       'text-[11px] font-semibold',
                       passed ? 'text-emerald-600' : 'text-red-600'
                     )}>
-                      {passed ? "O'tdi" : "O'tmadi"}
+                      {passed ? t.mpPassed : t.mpFailed}
                     </p>
                   </div>
                 </div>
@@ -349,9 +346,9 @@ export default function MyProgressPage() {
       {(!attStats || attStats.total === 0) && testResults.length === 0 && groupProgress.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <TrendingUp className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Hali natijalar yo'q</p>
+          <p className="text-sm text-gray-400">{t.mpNoResults}</p>
           <p className="text-xs text-gray-400 mt-1">
-            Darslarga qatnashib, testlarni topshirgan sari bu yerda ko'rinadi
+            {t.mpNoResultsHint}
           </p>
         </div>
       )}

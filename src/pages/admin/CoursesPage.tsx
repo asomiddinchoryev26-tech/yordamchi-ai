@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BookOpen, AlertCircle, Search, Users, ChevronDown, GraduationCap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -21,21 +22,24 @@ type CourseOverview = {
 
 type StatusFilter = 'all' | 'active' | 'inactive' | 'completed'
 
-const STATUS_META: Record<string, { label: string; bg: string; color: string }> = {
-  active:    { label: 'Faol',        bg: 'bg-emerald-100', color: 'text-emerald-700' },
-  inactive:  { label: 'Nofaol',     bg: 'bg-gray-100',    color: 'text-gray-600'    },
-  completed: { label: 'Tugatilgan', bg: 'bg-blue-100',    color: 'text-blue-700'    },
+const STATUS_META: Record<string, { label: keyof Translations; bg: string; color: string }> = {
+  active:    { label: 'admActive',   bg: 'bg-emerald-100', color: 'text-emerald-700' },
+  inactive:  { label: 'tdInactive',  bg: 'bg-gray-100',    color: 'text-gray-600'    },
+  completed: { label: 'tdCompleted', bg: 'bg-blue-100',    color: 'text-blue-700'    },
 }
 
-const MONTHS = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']
-function fmtDate(d: string) {
+const MONTH_KEYS: (keyof Translations)[] = [
+  'mJan','mFeb','mMar','mApr','mMay','mJun','mJul','mAug','mSep','mOct','mNov','mDec',
+]
+function fmtDate(d: string, t: Translations) {
   const dt = new Date(d)
-  return `${dt.getDate()} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`
+  return `${dt.getDate()} ${t[MONTH_KEYS[dt.getMonth()]].slice(0,3)} ${dt.getFullYear()}`
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
 
 export default function AdminCoursesPage() {
+  const { t } = useLanguage()
   const [courses,      setCourses]      = useState<CourseOverview[]>([])
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState<string | null>(null)
@@ -92,7 +96,7 @@ export default function AdminCoursesPage() {
         test_count:    testCountMap.get(g.id) ?? 0,
       })))
     } catch {
-      setError("Kurslarni yuklashda xatolik")
+      setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
@@ -128,9 +132,9 @@ export default function AdminCoursesPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Kurslar</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t.adCourses}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {loading ? 'Yuklanmoqda...' : `${courses.length} ta kurs (guruh)`}
+          {loading ? t.tcUploading : `${courses.length} ${t.adCoursesCount}`}
         </p>
       </div>
 
@@ -145,10 +149,10 @@ export default function AdminCoursesPage() {
       {!loading && courses.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Faol kurs',   value: counts.active,    color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: 'Tugatilgan', value: counts.completed,  color: 'text-blue-600',    bg: 'bg-blue-50'    },
-            { label: 'Talabalar',  value: counts.students,   color: 'text-indigo-600',  bg: 'bg-indigo-50'  },
-            { label: 'Darslar',    value: counts.lessons,    color: 'text-amber-600',   bg: 'bg-amber-50'   },
+            { label: t.ccActiveCourses, value: counts.active,    color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: t.tdCompleted,     value: counts.completed,  color: 'text-blue-600',    bg: 'bg-blue-50'    },
+            { label: t.tdStudents,      value: counts.students,   color: 'text-indigo-600',  bg: 'bg-indigo-50'  },
+            { label: t.tdLessons,       value: counts.lessons,    color: 'text-amber-600',   bg: 'bg-amber-50'   },
           ].map(s => (
             <div key={s.label} className={cn('rounded-2xl border border-gray-100 p-4', s.bg)}>
               <p className={cn('text-2xl font-bold', s.color)}>{s.value}</p>
@@ -167,7 +171,7 @@ export default function AdminCoursesPage() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Kurs, o'qituvchi yoki fan..."
+              placeholder={t.acSearchPh}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
@@ -184,7 +188,7 @@ export default function AdminCoursesPage() {
                     : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300',
                 )}
               >
-                {s === 'all' ? 'Barchasi' : STATUS_META[s]?.label ?? s}
+                {s === 'all' ? t.adAll : STATUS_META[s] ? t[STATUS_META[s].label] : s}
               </button>
             ))}
             {uniqueSubjects.length > 1 && (
@@ -194,7 +198,7 @@ export default function AdminCoursesPage() {
                   onChange={e => setSubjectFilter(e.target.value)}
                   className="appearance-none pl-3 pr-8 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                 >
-                  <option value="all">Barcha fanlar</option>
+                  <option value="all">{t.asgpAllSubjects}</option>
                   {uniqueSubjects.map(s => (
                     <option key={s.id} value={s.id}>{s.icon} {s.name}</option>
                   ))}
@@ -225,16 +229,16 @@ export default function AdminCoursesPage() {
       {!loading && courses.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
           <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Kurslar yo'q</p>
+          <p className="text-sm text-gray-400">{t.adNoCourses}</p>
           <p className="text-xs text-gray-400 mt-1">
-            Guruhlar modulidan guruh yarating — ular bu yerda kurs sifatida ko'rinadi
+            {t.acEmptyHint}
           </p>
         </div>
       )}
 
       {!loading && courses.length > 0 && filtered.length === 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">Filtr bo'yicha kurs topilmadi</p>
+          <p className="text-sm text-gray-500">{t.acFilterNotFound}</p>
         </div>
       )}
 
@@ -263,7 +267,7 @@ export default function AdminCoursesPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold text-gray-900">{c.name}</h3>
                       <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', st.bg, st.color)}>
-                        {st.label}
+                        {t[st.label]}
                       </span>
                     </div>
 
@@ -284,9 +288,9 @@ export default function AdminCoursesPage() {
                     {/* Sanalar */}
                     {(c.start_date || c.end_date) && (
                       <p className="text-xs text-gray-400 mt-1">
-                        {c.start_date && fmtDate(c.start_date)}
+                        {c.start_date && fmtDate(c.start_date, t)}
                         {c.start_date && c.end_date && ' → '}
-                        {c.end_date && fmtDate(c.end_date)}
+                        {c.end_date && fmtDate(c.end_date, t)}
                       </p>
                     )}
 
@@ -294,13 +298,13 @@ export default function AdminCoursesPage() {
                     <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 flex-wrap">
                       <span className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
-                        {c.student_count}/{c.capacity} talaba
+                        {c.student_count}/{c.capacity} {t.tdStudentWord}
                       </span>
                       <span className="flex items-center gap-1">
                         <BookOpen className="w-3 h-3" />
-                        {c.lesson_count} dars
+                        {c.lesson_count} {t.tdLessonWord}
                       </span>
-                      <span>{c.test_count} test</span>
+                      <span>{c.test_count} {t.acTestWord}</span>
                     </div>
 
                     {/* To'lganlik */}
@@ -314,7 +318,7 @@ export default function AdminCoursesPage() {
                           style={{ width: `${fillPct}%` }}
                         />
                       </div>
-                      <span className="text-[11px] text-gray-400">{fillPct}% to'lgan</span>
+                      <span className="text-[11px] text-gray-400">{fillPct}% {t.acFilledSuffix}</span>
                     </div>
                   </div>
                 </div>

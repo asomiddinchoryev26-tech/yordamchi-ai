@@ -97,7 +97,8 @@ export default function LoginPage() {
     if (user) {
       type LocState = { from?: { pathname: string } }
       const from = (location.state as LocState | null)?.from?.pathname
-      navigate(from ?? ROLE_PATH[user.role], { replace: true })
+      // Premium xush kelibsiz ekrani orqali → rolga mos dashboard (yoki so'ralgan sahifa)
+      navigate(PATHS.WELCOME, { replace: true, state: { to: from ?? ROLE_PATH[user.role] } })
     }
     setFormLoading(false)
   }
@@ -276,7 +277,7 @@ export default function LoginPage() {
                       onChange={e => { setEmail(e.target.value); auth.clearError() }}
                       onFocus={() => setFocusedField('email')}
                       onBlur={() => setFocusedField(null)}
-                      placeholder="sizning@email.com"
+                      placeholder={t.emailPlaceholder}
                       autoComplete="email"
                       style={{ ...fi('email'), paddingLeft: 40, paddingRight: 14, paddingTop: 10, paddingBottom: 10, fontSize: 14 }}
                     />
