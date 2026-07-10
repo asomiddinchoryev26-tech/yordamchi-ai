@@ -54,6 +54,7 @@ export default function OnboardingPage() {
 
   const [mode,    setMode]    = useState<'create' | 'join'>(user?.role === 'admin' ? 'create' : 'join')
   const [orgName, setOrgName] = useState('')
+  const [orgType, setOrgType] = useState<'school' | 'institute' | 'center'>('school')
   const [code,    setCode]    = useState('')
   const [joinRole,setJoinRole]= useState<'student' | 'teacher'>(user?.role === 'teacher' ? 'teacher' : 'student')
   const [busy,    setBusy]    = useState(false)
@@ -67,7 +68,7 @@ export default function OnboardingPage() {
   async function handleCreate(e: { preventDefault(): void }) {
     e.preventDefault()
     setBusy(true); setError(null)
-    const { data, error: rpcErr } = await sbRpc.rpc('create_organization', { p_name: orgName.trim() })
+    const { data, error: rpcErr } = await sbRpc.rpc('create_organization', { p_name: orgName.trim(), p_type: orgType })
     if (rpcErr) { setError(mapError(rpcErr.message)); setBusy(false); return }
     // Show the join code so the admin can share it, then continue on their action.
     setCreatedCode((data as { join_code?: string } | null)?.join_code ?? '—')
@@ -161,6 +162,23 @@ export default function OnboardingPage() {
                 <input value={orgName} onChange={e => { setOrgName(e.target.value); setError(null) }}
                   placeholder="Masalan: 1-son maktab" style={INPUT} autoFocus />
                 <p className="text-[11.5px] text-white/30 mt-1.5">Siz bu tashkilotning administratori bo'lasiz.</p>
+              </div>
+              <div>
+                <label className="block text-[11.5px] font-bold text-white/40 uppercase tracking-[0.12em] mb-1.5">Tashkilot turi</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([['school','🏫','Maktab'],['institute','🎓','Institut'],['center','🏢','Markaz']] as const).map(([ty, icon, label]) => {
+                    const active = orgType === ty
+                    return (
+                      <button key={ty} type="button" onClick={() => setOrgType(ty)}
+                        className="py-2.5 rounded-xl text-[12.5px] font-semibold flex flex-col items-center gap-0.5 transition-all"
+                        style={active
+                          ? { background: 'linear-gradient(135deg,rgba(91,127,255,0.28),rgba(124,58,237,0.28))', border: '1px solid rgba(147,187,255,0.5)', color: '#fff' }
+                          : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
+                        <span className="text-[16px] leading-none">{icon}</span>{label}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
               {error && <ErrorBox msg={error} />}
               <SubmitBtn busy={busy} disabled={!orgName.trim()} label="Tashkilot yaratish" />

@@ -13,7 +13,7 @@ import {
   Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet, Trash2, UserPlus,
 } from 'lucide-react'
 import { systemHealthService, type SystemHealth } from '@/services/systemHealth.service'
-import { platformService, type PlatformStats, type OrgRow, type OrgPlan, type PlatformUser } from '@/services/platform.service'
+import { platformService, type PlatformStats, type OrgRow, type OrgPlan, type OrgType, type PlatformUser } from '@/services/platform.service'
 import { paymentAdminService, type PaymentStats, type PaymentRow, type PaymentRecord } from '@/services/paymentAdmin.service'
 import { announcementService, ANNOUNCEMENT_TARGETS, type AnnouncementTarget } from '@/services/announcement.service'
 import { promoCodeService, type PromoCodeRow, type PromoDiscountType } from '@/services/promoCode.service'
@@ -74,6 +74,11 @@ const PLAN_STYLE: Record<OrgPlan, string> = {
   premium: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300',
   pro:     'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-300',
 }
+const TYPE_META: Record<OrgType, { label: string; cls: string }> = {
+  school:    { label: '🏫 Maktab',   cls: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' },
+  institute: { label: '🎓 Institut', cls: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300' },
+  center:    { label: '🏢 Markaz',   cls: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-300' },
+}
 
 function OrganizationsManager() {
   const { t } = useLanguage()
@@ -82,6 +87,7 @@ function OrganizationsManager() {
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('')
   const [newPlan, setNewPlan] = useState<OrgPlan>('free')
+  const [newType, setNewType] = useState<OrgType>('school')
   const [createBusy, setCreateBusy] = useState(false)
   const load = useCallback(() => { void platformService.listOrganizations().then(setOrgs) }, [])
   useEffect(() => { load() }, [load])
@@ -100,7 +106,7 @@ function OrganizationsManager() {
   const createOrg = async () => {
     if (!newName.trim()) return
     setCreateBusy(true)
-    try { await platformService.createOrganization(newName.trim(), newPlan); setNewName(''); setCreating(false); load() }
+    try { await platformService.createOrganization(newName.trim(), newPlan, newType); setNewName(''); setCreating(false); load() }
     catch { /* */ } finally { setCreateBusy(false) }
   }
   const deleteOrg = async (o: OrgRow) => {
@@ -123,6 +129,9 @@ function OrganizationsManager() {
         <div className="mb-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 flex flex-wrap items-center gap-2">
           <input value={newName} onChange={e => setNewName(e.target.value)} placeholder={t.saOrgNamePh}
             className={`${INPUT} flex-1 min-w-[160px]`} />
+          <select value={newType} onChange={e => setNewType(e.target.value as OrgType)} className={`${INPUT} w-auto`}>
+            <option value="school">🏫 Maktab</option><option value="institute">🎓 Institut</option><option value="center">🏢 Markaz</option>
+          </select>
           <select value={newPlan} onChange={e => setNewPlan(e.target.value as OrgPlan)} className={`${INPUT} w-auto`}>
             <option value="free">Free</option><option value="premium">Premium</option><option value="pro">Pro</option>
           </select>
@@ -142,6 +151,7 @@ function OrganizationsManager() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{o.name}</p>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${TYPE_META[o.org_type]?.cls ?? TYPE_META.school.cls}`}>{TYPE_META[o.org_type]?.label ?? TYPE_META.school.label}</span>
                       <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${PLAN_STYLE[o.plan_type]}`}>{o.plan_type}</span>
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${suspended ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'}`}>
                         {suspended ? t.saSuspended : t.saActiveOrg}

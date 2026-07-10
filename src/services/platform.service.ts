@@ -26,9 +26,12 @@ export type PlatformStats = {
   pending_payments: number
 }
 
+export type OrgType = 'school' | 'institute' | 'center'
+
 export type OrgRow = {
   id:              string
   name:            string
+  org_type:        OrgType
   plan_type:       'free' | 'premium' | 'pro'
   plan_expires_at: string | null
   status:          'active' | 'suspended'
@@ -78,8 +81,8 @@ export const platformService = {
   },
 
   /** Yangi tashkilot yaratish. Qaytadi: { organization_id, join_code }. */
-  createOrganization: async (name: string, plan: OrgPlan = 'free'): Promise<{ organization_id: string; join_code: string }> => {
-    const { data, error } = await sbRpc.rpc('admin_create_organization', { p_name: name, p_plan: plan })
+  createOrganization: async (name: string, plan: OrgPlan = 'free', type: OrgType = 'school'): Promise<{ organization_id: string; join_code: string }> => {
+    const { data, error } = await sbRpc.rpc('admin_create_organization', { p_name: name, p_plan: plan, p_type: type })
     if (error) throw new Error(error.message ?? 'Tashkilot yaratishda xatolik')
     return data as { organization_id: string; join_code: string }
   },
