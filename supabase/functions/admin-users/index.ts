@@ -41,7 +41,7 @@ serve(async (req: Request) => {
 
     const { data: callerProfile } = await adminClient
       .from('profiles')
-      .select('role')
+      .select('role, organization_id, is_super_admin')
       .eq('id', caller.id)
       .single()
 
@@ -80,16 +80,19 @@ serve(async (req: Request) => {
       }
 
       // Profil trigger tomonidan yaratilgan — phone/bio/status bilan yangilash.
+      // MUHIM: yangi foydalanuvchi chaqiruvchi (admin) tashkilotiga biriktiriladi,
+      // aks holda u tashkilotsiz qolib, onboardingga tushib ketadi.
       // Xatolik bo'lsa: yetim (orphaned) auth foydalanuvchi qolmasligi uchun
       // yangi yaratilgan auth yozuvini bekor qilamiz (rollback).
       const { error: profileErr } = await adminClient.from('profiles').upsert({
-        id:        newUser.user.id,
-        full_name: full_name.trim(),
-        email:     email.trim().toLowerCase(),
+        id:              newUser.user.id,
+        full_name:       full_name.trim(),
+        email:           email.trim().toLowerCase(),
         role,
-        phone:     phone?.trim() || null,
-        bio:       bio?.trim()   || null,
-        status:    'active',
+        phone:           phone?.trim() || null,
+        bio:             bio?.trim()   || null,
+        status:          'active',
+        organization_id: callerProfile.organization_id,
       }, { onConflict: 'id' })
 
       if (profileErr) {
@@ -104,6 +107,19 @@ serve(async (req: Request) => {
     if (action === 'delete') {
       const { userId } = body
       if (!userId) return json({ error: "userId majburiy" }, 400)
+      if (userId === caller.id) return json({ error: "O'zingizni o'chira olmaysiz" }, 400)
+
+      // MUHIM: tashkilotlararo o'chirishning oldini olish. Oddiy admin faqat o'z
+      // tashkiloti a'zosini o'chira oladi; super-adminni hech kim o'chira olmaydi.
+      const { data: target } = await adminClient.from('profiles')
+        .select('organization_id, is_super_admin').eq('id', userId).single()
+      if (!target) return json({ error: 'Foydalanuvchi topilmadi' }, 404)
+      if (!callerProfile.is_super_admin) {
+        if (target.is_super_admin) return json({ error: "Ruxsat yo'q" }, 403)
+        if (target.organization_id !== callerProfile.organization_id) {
+          return json({ error: "Boshqa tashkilot foydalanuvchisini o'chira olmaysiz" }, 403)
+        }
+      }
 
       // Avval profilni o'chir (cascade bilan bog'liq ma'lumotlar ham o'chadi)
       await adminClient.from('profiles').delete().eq('id', userId)
