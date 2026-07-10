@@ -133,8 +133,9 @@ serve(async (req) => {
         return ok(id, { transaction: order.id, cancel_time, state: -1 })
       }
       if (order.provider_state === 2) {
-        // To'langandan keyin bekor — reja ochiq qoladi (scaffold; qo'lda ko'rib chiqiladi)
+        // To'langandan keyin bekor (refund) — reja bepulga qaytariladi, to'lov 'refunded'
         await sb.from('payment_orders').update({ status: 'cancelled', provider_state: -2, provider_cancel_time: cancel_time, provider_reason: Number(params.reason) || null }).eq('id', order.id)
+        await sb.rpc('revert_paid_order', { p_order: order.id })
         return ok(id, { transaction: order.id, cancel_time, state: -2 })
       }
       return ok(id, { transaction: order.id, cancel_time, state: order.provider_state })
