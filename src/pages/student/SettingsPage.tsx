@@ -17,6 +17,7 @@ import { useProfile } from '@/hooks/useProfile'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage, type Language } from '@/contexts/LanguageContext'
 import { UserAvatar } from '@/components/identity'
+import { TelegramLinkCard } from '@/components/common/TelegramLinkCard'
 import { PATHS } from '@/routes/paths'
 
 const GLASS: React.CSSProperties = {
@@ -165,6 +166,9 @@ export default function SettingsPage() {
           <Toggle on={aiUpdates} onChange={() => setAiUpdates(v => !v)} label={t.setAiUpdates} />
         </Row>
       </Section>
+
+      {/* 4b. Telegram bildirishnoma (glass — talaba dizayniga mos) */}
+      <TelegramLinkCard glass />
 
       {/* 5. Security */}
       <Section icon={<Shield className="w-4 h-4" />} tone="#34D399" title={t.setSecurity}>

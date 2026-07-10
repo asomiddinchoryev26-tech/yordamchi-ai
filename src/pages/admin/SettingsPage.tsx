@@ -3,6 +3,7 @@ import { Save, AlertCircle, CheckCircle, Settings, Lock, Loader2 } from 'lucide-
 import { settingsService } from '@/services/settings.service'
 import type { SettingsMap } from '@/services/settings.service'
 import { supabase } from '@/lib/supabase'
+import { TelegramLinkCard } from '@/components/common/TelegramLinkCard'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ── Parolni o'zgartirish (o'z-o'ziga xizmat — har qanday admin, super-admin ham) ──
@@ -215,6 +216,9 @@ export default function AdminSettingsPage() {
 
       {/* Xavfsizlik — parolni o'zgartirish */}
       <ChangePasswordCard />
+
+      {/* Telegram bildirishnoma */}
+      <TelegramLinkCard />
 
       <button
         type="button"

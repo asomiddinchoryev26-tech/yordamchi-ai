@@ -15,6 +15,7 @@ import { useProfile } from '@/hooks/useProfile'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { UserAvatar } from '@/components/identity/UserAvatar'
 import { AvatarUploader } from '@/components/identity/AvatarUploader'
+import { TelegramLinkCard } from '@/components/common/TelegramLinkCard'
 
 function Section({ icon: Icon, title, children }: { icon: React.ComponentType<{ className?: string }>; title: string; children: React.ReactNode }) {
   return (
@@ -259,6 +260,8 @@ export default function TeacherProfilePage() {
       <Section icon={Sun} title={t.pfAppearance}>
         <p className="text-sm text-gray-500 dark:text-gray-400">{t.pfThemeNote}</p>
       </Section>
+
+      <TelegramLinkCard />
     </div>
   )
 }
