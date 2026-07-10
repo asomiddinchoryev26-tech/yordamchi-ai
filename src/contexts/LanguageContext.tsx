@@ -268,6 +268,10 @@ export type Translations = {
   saAnnCenter: string; saAnnTitlePh: string; saAnnBodyPh: string; saSend: string; saSent: string; saAnnNote: string
   saPromoCodes: string; saCodePh: string; saDiscountPct: string; saFreeDays: string; saDays: string; saLimitPh: string; saCreate: string; saNoPromo: string
   saActivityLog: string; saSearchAction: string; saLogEmpty: string; saOnlySuper: string; saSuperMgmt: string
+  // Platform control (super-admin)
+  saPlatform: string; saOrgsTitle: string; saStatOrgs: string; saStatUsers: string; saStatPaid: string; saStatRevenue: string
+  saMembers: string; saStudentsShort: string; saTeachersShort: string; saSuspend: string; saActivate: string
+  saSuspended: string; saActiveOrg: string; saApplyPlan: string; saPlanMonths: string; saNoOrgs: string; saOrgSuspendedNote: string
   // Materials — file preview modal
   fpPdf: string; fpImage: string; fpVideo: string; fpAudio: string; fpDocument: string; fpText: string; fpFile: string; fpFilePrefix: string
   fpZoomOut: string; fpZoomIn: string; fpRotate: string; fpFsExit: string; fpFsEnter: string; fpClose: string
@@ -744,6 +748,9 @@ const uz: Translations = {
   saAnnCenter: "E'lonlar markazi", saAnnTitlePh: 'Sarlavha (masalan: Yangi dars 🚀)', saAnnBodyPh: 'Matn (ixtiyoriy)', saSend: 'Yuborish', saSent: 'Yuborildi', saAnnNote: "E'lon mavjud bildirishnoma tizimi orqali tarqatiladi.",
   saPromoCodes: 'Promo kodlar', saCodePh: 'KOD', saDiscountPct: 'Chegirma %', saFreeDays: 'Bepul kun', saDays: 'kun', saLimitPh: 'Limit', saCreate: 'Yaratish', saNoPromo: "Promo kodlar yo'q",
   saActivityLog: 'Faoliyat jurnali', saSearchAction: "Harakat bo'yicha qidirish…", saLogEmpty: "Jurnal bo'sh", saOnlySuper: "Bu bo'lim faqat Super Admin uchun", saSuperMgmt: 'Super Admin boshqaruvi',
+  saPlatform: 'Platforma boshqaruvi', saOrgsTitle: 'Tashkilotlar', saStatOrgs: 'Tashkilotlar', saStatUsers: 'Foydalanuvchilar', saStatPaid: "To'lovli", saStatRevenue: 'Jami daromad',
+  saMembers: "a'zo", saStudentsShort: 'oʻquvchi', saTeachersShort: 'ustoz', saSuspend: 'Bloklash', saActivate: 'Faollashtirish',
+  saSuspended: 'Bloklangan', saActiveOrg: 'Faol', saApplyPlan: "Reja o'rnatish", saPlanMonths: 'oy', saNoOrgs: 'Tashkilotlar yoʻq', saOrgSuspendedNote: 'Bloklangan tashkilot foydalanuvchilari tizimga kira olmaydi.',
   fpPdf: 'PDF', fpImage: 'Rasm', fpVideo: 'Video', fpAudio: 'Audio', fpDocument: 'Hujjat', fpText: 'Matn', fpFile: 'Fayl', fpFilePrefix: 'Fayl:',
   fpZoomOut: 'Kichraytirish', fpZoomIn: 'Kattalashtirish', fpRotate: 'Aylantirish', fpFsExit: "To'liq ekrandan chiqish", fpFsEnter: "To'liq ekran", fpClose: 'Yopish',
   fpCantPreview: "Ko'rib chiqib bo'lmadi", fpCantPreviewDl: "Ko'rib chiqib bo'lmadi — yuklab oling", fpCantPreviewType: "Bu fayl turini ko'rib bo'lmaydi",
@@ -1201,6 +1208,9 @@ const ru: Translations = {
   saAnnCenter: 'Центр объявлений', saAnnTitlePh: 'Заголовок (например: Новый урок 🚀)', saAnnBodyPh: 'Текст (необязательно)', saSend: 'Отправить', saSent: 'Отправлено', saAnnNote: 'Объявление рассылается через систему уведомлений.',
   saPromoCodes: 'Промокоды', saCodePh: 'КОД', saDiscountPct: 'Скидка %', saFreeDays: 'Бесплатные дни', saDays: 'дн', saLimitPh: 'Лимит', saCreate: 'Создать', saNoPromo: 'Промокодов нет',
   saActivityLog: 'Журнал действий', saSearchAction: 'Поиск по действию…', saLogEmpty: 'Журнал пуст', saOnlySuper: 'Этот раздел только для Супер-админа', saSuperMgmt: 'Управление Супер-админа',
+  saPlatform: 'Управление платформой', saOrgsTitle: 'Организации', saStatOrgs: 'Организации', saStatUsers: 'Пользователи', saStatPaid: 'Платные', saStatRevenue: 'Общий доход',
+  saMembers: 'участ.', saStudentsShort: 'ученик', saTeachersShort: 'учитель', saSuspend: 'Заблокировать', saActivate: 'Активировать',
+  saSuspended: 'Заблокирован', saActiveOrg: 'Активен', saApplyPlan: 'Установить план', saPlanMonths: 'мес', saNoOrgs: 'Нет организаций', saOrgSuspendedNote: 'Пользователи заблокированной организации не смогут войти.',
   fpPdf: 'PDF', fpImage: 'Изображение', fpVideo: 'Видео', fpAudio: 'Аудио', fpDocument: 'Документ', fpText: 'Текст', fpFile: 'Файл', fpFilePrefix: 'Файл:',
   fpZoomOut: 'Уменьшить', fpZoomIn: 'Увеличить', fpRotate: 'Повернуть', fpFsExit: 'Выйти из полноэкранного режима', fpFsEnter: 'Полный экран', fpClose: 'Закрыть',
   fpCantPreview: 'Не удалось открыть', fpCantPreviewDl: 'Не удалось открыть — скачайте', fpCantPreviewType: 'Этот тип файла нельзя открыть',
@@ -1658,6 +1668,9 @@ const en: Translations = {
   saAnnCenter: 'Announcement center', saAnnTitlePh: 'Title (e.g. New lesson 🚀)', saAnnBodyPh: 'Text (optional)', saSend: 'Send', saSent: 'Sent', saAnnNote: 'The announcement is delivered via the existing notification system.',
   saPromoCodes: 'Promo codes', saCodePh: 'CODE', saDiscountPct: 'Discount %', saFreeDays: 'Free days', saDays: 'days', saLimitPh: 'Limit', saCreate: 'Create', saNoPromo: 'No promo codes',
   saActivityLog: 'Activity log', saSearchAction: 'Search by action…', saLogEmpty: 'Log is empty', saOnlySuper: 'This section is for Super Admin only', saSuperMgmt: 'Super Admin management',
+  saPlatform: 'Platform control', saOrgsTitle: 'Organizations', saStatOrgs: 'Organizations', saStatUsers: 'Users', saStatPaid: 'Paid', saStatRevenue: 'Total revenue',
+  saMembers: 'members', saStudentsShort: 'students', saTeachersShort: 'teachers', saSuspend: 'Suspend', saActivate: 'Activate',
+  saSuspended: 'Suspended', saActiveOrg: 'Active', saApplyPlan: 'Set plan', saPlanMonths: 'mo', saNoOrgs: 'No organizations', saOrgSuspendedNote: 'Users of a suspended organization cannot sign in.',
   fpPdf: 'PDF', fpImage: 'Image', fpVideo: 'Video', fpAudio: 'Audio', fpDocument: 'Document', fpText: 'Text', fpFile: 'File', fpFilePrefix: 'File:',
   fpZoomOut: 'Zoom out', fpZoomIn: 'Zoom in', fpRotate: 'Rotate', fpFsExit: 'Exit fullscreen', fpFsEnter: 'Fullscreen', fpClose: 'Close',
   fpCantPreview: 'Cannot preview', fpCantPreviewDl: 'Cannot preview — download it', fpCantPreviewType: 'This file type cannot be previewed',

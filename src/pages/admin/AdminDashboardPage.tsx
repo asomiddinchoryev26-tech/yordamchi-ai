@@ -13,6 +13,7 @@ import { AdminPremiumStats } from '@/components/admin/AdminFeatures'
 import { OrgInviteCard } from '@/components/admin/OrgInviteCard'
 import { OrgBillingCard } from '@/components/admin/OrgBillingCard'
 import { SuperAdminPanel } from '@/components/admin/SuperAdminPRO'
+import { adminPermissionService } from '@/services/adminPermission.service'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
@@ -84,6 +85,14 @@ export default function AdminDashboardPage() {
 
   const [userSearch,     setUserSearch]     = useState('')
   const [userRoleFilter, setUserRoleFilter] = useState<'all'|UserRole>('all')
+
+  // "Super Admin" tabi faqat haqiqiy super-admin uchun ko'rinadi
+  const [isSuper, setIsSuper] = useState(false)
+  useEffect(() => {
+    if (!auth.user?.id) return
+    void adminPermissionService.isSuperAdmin(auth.user.id).then(setIsSuper)
+  }, [auth.user?.id])
+  const visibleTabs = isSuper ? TABS : TABS.filter(ti => ti.key !== 'superadmin')
 
   // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
@@ -235,13 +244,13 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* ── Organization invite code + billing (org management) ── */}
-      <OrgInviteCard />
-      <OrgBillingCard />
+      {/* ── Organization invite code + billing (tenant admin uchun; super-admin uchun emas) ── */}
+      {!isSuper && <OrgInviteCard />}
+      {!isSuper && <OrgBillingCard />}
 
       {/* ── Tabs ── */}
       <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-x-auto">
-        {TABS.map(ti => {
+        {visibleTabs.map(ti => {
           const Icon = ti.icon
           const active = tab === ti.key
           return (

@@ -45,12 +45,34 @@ async function resolveUser(sbUser: SupabaseUser): Promise<User | null> {
     return null
   }
 
-  // full_name + organization_id ni best-effort olamiz (SELECT policy yo'q bo'lsa ham login ishlaydi)
-  const { data: profile } = await supabase
+  // full_name + organization_id + is_super_admin ni best-effort olamiz.
+  // organizations/is_super_admin generatsiya qilingan tiplarda yo'q → loose cast.
+  const sbLoose = supabase as unknown as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (k: string, v: string) => {
+          maybeSingle: () => Promise<{ data: { full_name?: string | null; organization_id?: string | null; is_super_admin?: boolean | null; status?: string | null } | null }>
+        }
+      }
+    }
+  }
+  const { data: profile } = await sbLoose
     .from('profiles')
-    .select('full_name, organization_id')
+    .select('full_name, organization_id, is_super_admin')
     .eq('id', sbUser.id)
-    .single()
+    .maybeSingle()
+
+  // Tashkilot bloklangan bo'lsa — foydalanuvchi kira olmaydi (super-admin bundan mustasno).
+  // Xatolik bo'lsa "fail-open": hech kimni qulflab qo'ymaymiz, faqat aniq 'suspended' bloklaydi.
+  const orgId = profile?.organization_id ?? null
+  if (orgId && !profile?.is_super_admin) {
+    const { data: org } = await sbLoose.from('organizations').select('status').eq('id', orgId).maybeSingle()
+    if (org?.status === 'suspended') {
+      logger.warn('[resolveUser] organization suspended — blocking sign-in')
+      await supabase.auth.signOut()
+      return null
+    }
+  }
 
   const meta = (sbUser.user_metadata ?? {}) as Record<string, unknown>
   return {

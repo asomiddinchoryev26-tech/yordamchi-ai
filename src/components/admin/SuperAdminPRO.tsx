@@ -10,9 +10,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Activity, Crown, Megaphone, Ticket, HeartPulse, CreditCard, Loader2, Send,
-  Plus, Check, Search, X, Receipt,
+  Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet,
 } from 'lucide-react'
 import { systemHealthService, type SystemHealth } from '@/services/systemHealth.service'
+import { platformService, type PlatformStats, type OrgRow, type OrgPlan } from '@/services/platform.service'
 import { paymentAdminService, type PaymentStats, type PaymentRow, type PaymentRecord } from '@/services/paymentAdmin.service'
 import { announcementService, ANNOUNCEMENT_TARGETS, type AnnouncementTarget } from '@/services/announcement.service'
 import { promoCodeService, type PromoCodeRow, type PromoDiscountType } from '@/services/promoCode.service'
@@ -28,6 +29,117 @@ const BTN_BG = { background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)' }
 
 function Head({ Icon, title, color }: { Icon: typeof Crown; title: string; color: string }) {
   return <div className="flex items-center gap-2 mb-3"><Icon className={`w-4 h-4 ${color}`} /><h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h2></div>
+}
+
+// ═══ Platform Overview — butun tizim bo'yicha raqamlar ═══
+function PlatformOverview() {
+  const { t } = useLanguage()
+  const [s, setS] = useState<PlatformStats | null>(null)
+  useEffect(() => { void platformService.stats().then(setS) }, [])
+  const fmt = (n: number) => n.toLocaleString('uz-UZ')
+  const cards = [
+    { l: t.saStatOrgs,    v: s ? fmt(s.organizations) : '…',              Icon: Building2, c: 'text-blue-500' },
+    { l: t.saStatUsers,   v: s ? fmt(s.total_users) : '…',               Icon: Users,     c: 'text-violet-500' },
+    { l: t.saStatPaid,    v: s ? fmt(s.paid_orgs) : '…',                 Icon: Crown,     c: 'text-amber-500' },
+    { l: t.saStatRevenue, v: s ? `${fmt(s.total_revenue)} ${t.saSum}` : '…', Icon: Wallet, c: 'text-emerald-500' },
+  ]
+  return (
+    <div className={CARD} style={{ background: 'linear-gradient(135deg,#EEF2FF,#F5F3FF)' }}>
+      <Head Icon={Globe} title={t.saPlatform} color="text-indigo-500" />
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+        {cards.map(c => (
+          <div key={c.l} className="rounded-xl bg-white/80 dark:bg-gray-800/70 p-3.5">
+            <c.Icon className={`w-4 h-4 mb-1.5 ${c.c}`} />
+            <p className="text-xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{c.v}</p>
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{c.l}</p>
+          </div>
+        ))}
+      </div>
+      {s && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[11px] text-gray-500 dark:text-gray-400">
+          <span>🎓 {fmt(s.students)} {t.saStudentsShort}</span>
+          <span>👨‍🏫 {fmt(s.teachers)} {t.saTeachersShort}</span>
+          <span>🛡️ {fmt(s.admins)} admin</span>
+          {s.pending_payments > 0 && <span className="text-amber-600 dark:text-amber-400 font-semibold">⏳ {fmt(s.pending_payments)} {t.saPendingPayments}</span>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══ Organizations Manager — har bir tashkilotni boshqarish ═══
+const PLAN_STYLE: Record<OrgPlan, string> = {
+  free:    'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300',
+  premium: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300',
+  pro:     'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-300',
+}
+
+function OrganizationsManager() {
+  const { t } = useLanguage()
+  const [orgs, setOrgs] = useState<OrgRow[] | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const load = useCallback(() => { void platformService.listOrganizations().then(setOrgs) }, [])
+  useEffect(() => { load() }, [load])
+
+  const changePlan = async (o: OrgRow, plan: OrgPlan) => {
+    if (plan === o.plan_type) return
+    setBusyId(o.id)
+    try { await platformService.setOrgPlan(o.id, plan, 1); load() }
+    catch { /* holat o'zgarmaydi */ } finally { setBusyId(null) }
+  }
+  const toggleStatus = async (o: OrgRow) => {
+    setBusyId(o.id)
+    try { await platformService.setOrgStatus(o.id, o.status === 'active' ? 'suspended' : 'active'); load() }
+    catch { /* */ } finally { setBusyId(null) }
+  }
+
+  return (
+    <div className={CARD}>
+      <Head Icon={Building2} title={t.saOrgsTitle} color="text-blue-500" />
+      {orgs === null ? <div className="h-24 animate-pulse bg-gray-50 dark:bg-gray-700 rounded-xl" />
+        : orgs.length === 0 ? <p className="text-sm text-gray-400">{t.saNoOrgs}</p> : (
+        <div className="space-y-2.5">
+          {orgs.map(o => {
+            const suspended = o.status === 'suspended'
+            return (
+              <div key={o.id} className={`rounded-xl border p-3.5 ${suspended ? 'border-red-200 bg-red-50/40 dark:border-red-900/40 dark:bg-red-900/10' : 'border-gray-100 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-700/30'}`}>
+                <div className="flex items-start gap-2 mb-2.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{o.name}</p>
+                      <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${PLAN_STYLE[o.plan_type]}`}>{o.plan_type}</span>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${suspended ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300' : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'}`}>
+                        {suspended ? t.saSuspended : t.saActiveOrg}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                      <span className="font-mono">{o.join_code}</span> · {o.members} {t.saMembers} · 🎓 {o.students} · 👨‍🏫 {o.teachers}
+                      {o.plan_expires_at && <> · {new Date(o.plan_expires_at).toLocaleDateString('uz-UZ')} {t.saPlanMonths === 'oy' ? 'gacha' : ''}</>}
+                    </p>
+                  </div>
+                  <button type="button" disabled={busyId === o.id} onClick={() => void toggleStatus(o)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold disabled:opacity-50 flex-shrink-0 ${suspended ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}>
+                    {busyId === o.id ? <Loader2 className="w-3 h-3 animate-spin" /> : suspended ? <Power className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
+                    {suspended ? t.saActivate : t.saSuspend}
+                  </button>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10.5px] text-gray-400 mr-0.5">{t.saApplyPlan}:</span>
+                  {(['free', 'premium', 'pro'] as OrgPlan[]).map(pl => (
+                    <button key={pl} type="button" disabled={busyId === o.id || pl === o.plan_type} onClick={() => void changePlan(o, pl)}
+                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg capitalize disabled:opacity-40 transition-colors ${pl === o.plan_type ? PLAN_STYLE[pl] : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-blue-300'}`}>
+                      {pl}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+          <p className="text-[11px] text-gray-400 flex items-center gap-1.5 pt-1"><Ban className="w-3 h-3" /> {t.saOrgSuspendedNote}</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ═══ System Health ═══
@@ -312,6 +424,8 @@ export function SuperAdminPanel({ currentUserId }: { currentUserId: string }) {
         <Crown className="w-5 h-5 text-amber-500" />
         <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.saSuperMgmt}</h2>
       </div>
+      <PlatformOverview />
+      <OrganizationsManager />
       <AdminPremiumStats />
       <SystemHealthCard />
       <PaymentCenter />
