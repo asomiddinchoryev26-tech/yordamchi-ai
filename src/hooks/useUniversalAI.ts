@@ -229,7 +229,6 @@ export function useUniversalAI({ userId, ctx, language }: UseUniversalAIOptions)
         timestamp: new Date().toISOString(),
         isLoading: false,
       }))
-      void aiUsageService.consume(userId, feature, planRef.current)
 
     } catch (err) {
       const code = err instanceof Error ? err.message : 'processing_failed'

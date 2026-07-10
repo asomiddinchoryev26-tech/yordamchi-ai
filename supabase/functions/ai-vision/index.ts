@@ -56,6 +56,23 @@ function json(body: unknown, status = 200) {
   })
 }
 
+// ─── Server-side AI limit (chin manba — ai_usage) ─────────────────────────────
+// Atomik check+consume. Xatolikda fail-open (bloklamaymiz).
+async function checkAiLimit(userId: string, feature: string): Promise<boolean> {
+  try {
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } },
+    )
+    const { data, error } = await admin.rpc('check_and_consume_ai', { p_user: userId, p_feature: feature })
+    if (error) return true
+    return (data as { allowed?: boolean })?.allowed !== false
+  } catch {
+    return true
+  }
+}
+
 // ─── Request body ─────────────────────────────────────────────────────────────
 
 interface VisionRequest {
@@ -165,6 +182,12 @@ serve(async (req: Request) => {
     }
     if (!SUPPORTED_MIMES.has(body.mimeType)) {
       return json({ error: `Qo'llab-quvvatlanmagan fayl turi: ${body.mimeType}` }, 400)
+    }
+
+    // ── Kunlik AI limiti (server tomonda) — fayl turiga qarab funksiya ──
+    const feature = body.mimeType === 'application/pdf' ? 'pdf_analysis' : 'image_solving'
+    if (!(await checkAiLimit(callerId, feature))) {
+      return json({ error: "AI limiti tugadi. Rejani yangilang yoki keyinroq urinib ko'ring.", limit: true }, 429)
     }
     if (!body.systemInstruction || !body.userMessage) {
       return json({ error: 'systemInstruction va userMessage majburiy.' }, 400)

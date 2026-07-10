@@ -883,7 +883,6 @@ export default function AIAssistantPage() {
     if (cont && !aborted) {
       const combined = originalContent + sep + cont
       await aiChatService.updateMessageContent(lastAiMsgId, combined).catch(() => {})
-      consumeAi('ai_chat')
     } else if (aborted && cont) {
       const combined = originalContent + sep + cont + '\n\n*(to\'xtatildi)*'
       setMessages(prev => prev.map(m => m.id === lastAiMsgId ? { ...m, content: combined } : m))
@@ -971,10 +970,6 @@ export default function AIAssistantPage() {
     } catch { /* fail-open — hech kimni bloklamaymiz */ }
     return true
   }
-  /** Muvaffaqiyatli AI javobidan keyin ishlatilishni +1 qiladi. */
-  function consumeAi(feature: AIFeature) {
-    if (studentId) void aiUsageService.consume(studentId, feature, planRef.current)
-  }
 
   async function handleSend() {
     const text = input.trim()
@@ -1041,7 +1036,6 @@ export default function AIAssistantPage() {
         setStreamingId(savedAI.id)
         setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c))
         intelligenceService.recordAIResponse(activeConvId, aiResponse, displayContent, currentCtx)
-        consumeAi(feature)
         return
       }
 
@@ -1121,7 +1115,6 @@ export default function AIAssistantPage() {
         setStreamingId(savedAI.id)
         setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c))
         intelligenceService.recordAIResponse(activeConvId, finalText, displayContent, currentCtx)
-        consumeAi(feature)
       } else if (aborted) {
         setMessages(prev => prev.filter(m => m.id !== tempAI.id))
       }
@@ -1188,7 +1181,6 @@ export default function AIAssistantPage() {
         const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', fullText)
         setMessages(prev => [...prev.slice(0, aiIdx), { ...savedAI }])
         intelligenceService.recordAIResponse(activeConvId, fullText, lastUserMsg, currentCtx)
-        consumeAi('ai_chat')
       } else {
         setMessages(prev => prev.slice(0, aiIdx))
       }

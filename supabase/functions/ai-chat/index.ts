@@ -36,6 +36,24 @@ async function getCallerId(req: Request): Promise<string | null> {
   }
 }
 
+// ─── Server-side AI limit (chin manba — ai_usage kunlik cheklovi) ─────────────
+// Client tomon ham tekshiradi, lekin bu bypass'ni yopadi: har bir chaqiruv
+// atomik check+consume qiladi. Xatolikda fail-open (bloklamaymiz).
+async function checkAiLimit(userId: string, feature: string): Promise<boolean> {
+  try {
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } },
+    );
+    const { data, error } = await admin.rpc("check_and_consume_ai", { p_user: userId, p_feature: feature });
+    if (error) return true; // fail-open
+    return (data as { allowed?: boolean })?.allowed !== false;
+  } catch {
+    return true;
+  }
+}
+
 // ─── Basic in-memory rate limiting (per user, per warm isolate) ───────────────
 // Throttles bursts from a single user. Best-effort (isolates are ephemeral);
 // for strict distributed limits, enforce via the ai_usage table.
@@ -247,6 +265,11 @@ serve(async (req) => {
   // ── Rate protection ──
   if (isRateLimited(callerId)) {
     return jsonResp({ error: "Juda ko'p so'rov. Bir daqiqadan so'ng qayta urinib ko'ring." }, 429);
+  }
+
+  // ── Kunlik AI limiti (server tomonda) ──
+  if (!(await checkAiLimit(callerId, "ai_chat"))) {
+    return jsonResp({ error: "AI limiti tugadi. Rejani yangilang yoki keyinroq urinib ko'ring.", limit: true }, 429);
   }
 
   try {
