@@ -32,7 +32,7 @@ function StatusBtn({
         'px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all',
         selected
           ? `${m.bg} ${m.color} border-transparent shadow-sm`
-          : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300',
+          : 'bg-white dark:bg-gray-800 text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:border-gray-600',
       )}
     >
       {t[ATT_STATUS_KEYS[status]]}
@@ -121,8 +121,8 @@ export default function TeacherAttendancePage() {
   return (
     <div className="space-y-5 pb-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.achAttendance}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.taSubtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.achAttendance}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.taSubtitle}</p>
       </div>
 
       {savedMsg && (
@@ -139,10 +139,10 @@ export default function TeacherAttendancePage() {
       )}
 
       {/* Guruh + sana */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.tfGroup}</label>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{t.tfGroup}</label>
             {groups.length === 0 ? (
               <p className="text-sm text-gray-400 italic">{t.taNoActiveGroup}</p>
             ) : (
@@ -150,7 +150,7 @@ export default function TeacherAttendancePage() {
                 <select
                   value={groupId}
                   onChange={e => setGroupId(e.target.value)}
-                  className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
+                  className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                 >
                   {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
@@ -159,13 +159,13 @@ export default function TeacherAttendancePage() {
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">{t.tcDate}</label>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{t.tcDate}</label>
             <input
               type="date"
               value={date}
               onChange={e => setDate(e.target.value)}
               max={todayStr()}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
             />
           </div>
         </div>
@@ -181,7 +181,7 @@ export default function TeacherAttendancePage() {
       )}
 
       {groups.length === 0 && !loadingData && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.taNoActiveGroupAssigned}</p>
         </div>
@@ -190,11 +190,11 @@ export default function TeacherAttendancePage() {
       {loadingData && (
         <div className="space-y-2">
           {[1,2,3].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse flex gap-3">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 animate-pulse flex gap-3">
               <div className="w-9 h-9 bg-gray-200 rounded-xl flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-100 rounded w-1/4" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/4" />
               </div>
             </div>
           ))}
@@ -202,7 +202,7 @@ export default function TeacherAttendancePage() {
       )}
 
       {!loadingData && groupId && entries.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.tfNoStudents}</p>
         </div>
@@ -217,7 +217,7 @@ export default function TeacherAttendancePage() {
               <span className="text-gray-300">·</span>
               <span className="text-red-600 font-semibold">{absentCount} {t.sdAbsent.toLowerCase()}</span>
               <span className="text-gray-300">·</span>
-              <span className="text-gray-500">{entries.length} {t.adTotal.replace(':', '').toLowerCase()}</span>
+              <span className="text-gray-500 dark:text-gray-400">{entries.length} {t.adTotal.replace(':', '').toLowerCase()}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <span className="text-gray-400 text-xs">{t.adAll}:</span>
@@ -239,11 +239,11 @@ export default function TeacherAttendancePage() {
               <div
                 key={entry.student.id}
                 className={cn(
-                  'bg-white rounded-xl border p-4',
+                  'bg-white dark:bg-gray-800 rounded-xl border p-4',
                   entry.status === 'absent'  ? 'border-red-100 bg-red-50/30'    :
                   entry.status === 'late'    ? 'border-amber-100 bg-amber-50/30':
                   entry.status === 'excused' ? 'border-blue-100 bg-blue-50/30'  :
-                  'border-gray-100',
+                  'border-gray-100 dark:border-gray-700',
                 )}
               >
                 <div className="flex items-center gap-3 flex-wrap">
@@ -251,7 +251,7 @@ export default function TeacherAttendancePage() {
                     {idx + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {entry.student.full_name ?? t.taNoName}
                     </p>
                     <p className="text-xs text-gray-400 truncate">{entry.student.email}</p>
@@ -274,7 +274,7 @@ export default function TeacherAttendancePage() {
                       value={entry.note}
                       onChange={e => setNote(entry.student.id, e.target.value)}
                       placeholder={t.taNotePh}
-                      className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
+                      className="w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-200 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                     />
                   </div>
                 )}

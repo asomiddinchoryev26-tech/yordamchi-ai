@@ -29,7 +29,7 @@ type GroupDetail = {
 // Holat teglari — matn tarjimadan (rang/fon saqlanadi)
 const STATUS_LABELS: Record<string, { label: keyof Translations; bg: string; color: string }> = {
   active:    { label: 'admActive',   bg: 'bg-emerald-100', color: 'text-emerald-700' },
-  inactive:  { label: 'tdInactive',  bg: 'bg-gray-100',    color: 'text-gray-600'    },
+  inactive:  { label: 'tdInactive',  bg: 'bg-gray-100 dark:bg-gray-700',    color: 'text-gray-600 dark:text-gray-300'    },
   completed: { label: 'tdCompleted', bg: 'bg-blue-100',    color: 'text-blue-700'    },
 }
 
@@ -131,12 +131,12 @@ export default function TeacherGroupsPage() {
       <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
       <div className="space-y-3">
         {[1,2,3].map(i => (
-          <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse">
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse">
             <div className="flex gap-4">
               <div className="w-12 h-12 bg-gray-200 rounded-xl flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-100 rounded w-1/2" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2" />
               </div>
             </div>
           </div>
@@ -149,8 +149,8 @@ export default function TeacherGroupsPage() {
     <div className="space-y-5 pb-8">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t.tdTabCourses}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tdTabCourses}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {groups.length} {t.tdGroupWord}
           </p>
         </div>
@@ -171,7 +171,7 @@ export default function TeacherGroupsPage() {
       )}
 
       {groups.length === 0 && !error && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.tcNoGroup}</p>
           <p className="text-xs text-gray-400 mt-1">{t.tcNoGroupHint}</p>
@@ -181,17 +181,17 @@ export default function TeacherGroupsPage() {
       {/* Statistika */}
       {groups.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.tgTotalGroups}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{groups.length}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{groups.length}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.tgTotalStudents}</p>
             <p className="text-2xl font-bold text-blue-600 mt-1">
               {groups.reduce((a, g) => a + g.student_count, 0)}
             </p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.ccTotalLessons}</p>
             <p className="text-2xl font-bold text-indigo-600 mt-1">
               {groups.reduce((a, g) => a + g.lesson_count, 0)}
@@ -210,7 +210,7 @@ export default function TeacherGroupsPage() {
             : 0
 
           return (
-            <div key={group.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={group.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
               {/* Guruh sarlavhasi */}
               <button
                 type="button"
@@ -230,7 +230,7 @@ export default function TeacherGroupsPage() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-gray-900">{group.name}</span>
+                    <span className="font-bold text-gray-900 dark:text-gray-100">{group.name}</span>
                     <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', st.bg, st.color)}>
                       {t[st.label]}
                     </span>
@@ -255,7 +255,7 @@ export default function TeacherGroupsPage() {
 
                   {/* To'lganlik darajasi */}
                   <div className="mt-2 flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
                         className={cn(
                           'h-full rounded-full transition-all',
@@ -276,32 +276,32 @@ export default function TeacherGroupsPage() {
 
               {/* Kengaytirish: talabalar ro'yxati */}
               {isOpen && (
-                <div className="border-t border-gray-100 px-5 pb-4 pt-3">
+                <div className="border-t border-gray-100 dark:border-gray-700 px-5 pb-4 pt-3">
                   {group.description && (
-                    <p className="text-sm text-gray-500 mb-3 italic">{group.description}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 italic">{group.description}</p>
                   )}
                   {group.students.length === 0 ? (
                     <p className="text-sm text-gray-400 italic py-2">{t.tfNoStudents}</p>
                   ) : (
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                         {group.students.length} {t.tdStudentWord}
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {group.students.map(st => (
-                          <div key={st.id} className="flex items-center gap-2.5 py-1.5 px-3 rounded-lg bg-gray-50">
+                          <div key={st.id} className="flex items-center gap-2.5 py-1.5 px-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                               {(st.full_name ?? st.email ?? '?').charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-800 truncate">
+                              <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">
                                 {st.full_name ?? t.taNoName}
                               </p>
                               <p className="text-[11px] text-gray-400 truncate">{st.email}</p>
                             </div>
                             <span className={cn(
                               'ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0',
-                              st.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                              st.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             )}>
                               {st.status === 'active' ? t.admActive : t.tdInactive}
                             </span>
@@ -321,39 +321,39 @@ export default function TeacherGroupsPage() {
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
           onClick={() => { if (!creating) setShowCreate(false) }}>
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900">Yangi guruh yaratish</h2>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Yangi guruh yaratish</h2>
               <button type="button" onClick={() => setShowCreate(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100">
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Guruh nomi</label>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Guruh nomi</label>
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="Masalan: 10-A sinf" autoFocus
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400" />
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Fan (ixtiyoriy)</label>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Fan (ixtiyoriy)</label>
                 <select value={form.subjectId} onChange={e => setForm(f => ({ ...f, subjectId: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400">
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400">
                   <option value="">— Fan tanlanmagan —</option>
                   {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Sig'imi</label>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Sig'imi</label>
                 <input type="number" min={1} max={200} value={form.capacity}
                   onChange={e => setForm(f => ({ ...f, capacity: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400" />
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400" />
               </div>
               {createErr && <p className="text-sm text-red-600">{createErr}</p>}
               <div className="flex gap-2.5 pt-1">
                 <button type="button" onClick={() => setShowCreate(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50">Bekor</button>
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 dark:bg-gray-800/50">Bekor</button>
                 <button type="submit" disabled={creating || !form.name.trim()}
                   className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2">
                   {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Yaratish'}

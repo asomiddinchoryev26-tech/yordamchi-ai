@@ -144,11 +144,11 @@ export default function TeacherStudentsPage() {
       <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
       <div className="space-y-2">
         {[1,2,3].map(i => (
-          <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse flex gap-3">
+          <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 animate-pulse flex gap-3">
             <div className="w-10 h-10 bg-gray-200 rounded-xl flex-shrink-0" />
             <div className="flex-1 space-y-2">
               <div className="h-4 bg-gray-200 rounded w-1/3" />
-              <div className="h-3 bg-gray-100 rounded w-1/4" />
+              <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/4" />
             </div>
           </div>
         ))}
@@ -159,8 +159,8 @@ export default function TeacherStudentsPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.tdTabStudents}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tdTabStudents}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
           {students.length} {t.tdStudentWord}, {groups.length} {t.tdGroupWord}
         </p>
       </div>
@@ -173,7 +173,7 @@ export default function TeacherStudentsPage() {
       )}
 
       {groups.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
           <GraduationCap className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.tcNoGroup}</p>
         </div>
@@ -183,17 +183,17 @@ export default function TeacherStudentsPage() {
         <>
           {/* Statistika */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
               <p className="text-xs text-gray-400 font-medium">{t.tgTotalStudents}</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{students.length}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{students.length}</p>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
               <p className="text-xs text-gray-400 font-medium">{t.admActive}</p>
               <p className="text-2xl font-bold text-emerald-600 mt-1">
                 {students.filter(s => s.status === 'active').length}
               </p>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
               <p className="text-xs text-gray-400 font-medium">{t.tdGroups}</p>
               <p className="text-2xl font-bold text-indigo-600 mt-1">{groups.length}</p>
             </div>
@@ -208,14 +208,14 @@ export default function TeacherStudentsPage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder={t.tstSearchPh}
-                className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               />
             </div>
             <div className="relative">
               <select
                 value={groupFilter}
                 onChange={e => setGroupFilter(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="appearance-none pl-3 pr-8 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
               >
                 <option value="all">{t.tstAllGroups}</option>
                 {groups.map(g => <option key={g.id} value={g.id}>{g.subject_icon} {g.name}</option>)}
@@ -226,15 +226,15 @@ export default function TeacherStudentsPage() {
 
           {/* Bo'sh */}
           {students.length === 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
               <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
               <p className="text-sm text-gray-400">{t.tdNoStudents}</p>
             </div>
           )}
 
           {students.length > 0 && filtered.length === 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-              <p className="text-sm text-gray-500">{t.tstNotFound}</p>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-10 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t.tstNotFound}</p>
             </div>
           )}
 
@@ -245,7 +245,7 @@ export default function TeacherStudentsPage() {
                 const attPct = s.att_total > 0 ? Math.round((s.att_present / s.att_total) * 100) : null
                 return (
                   <div key={`${s.student_id}-${s.group_id}`}
-                    className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
                   >
                     {/* Avatar */}
                     <div
@@ -257,12 +257,12 @@ export default function TeacherStudentsPage() {
                     {/* Asosiy ma'lumot */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-gray-900 text-sm truncate">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
                           {s.full_name ?? t.taNoName}
                         </p>
                         <span className={cn(
                           'text-[11px] font-semibold px-2 py-0.5 rounded-full',
-                          s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'
+                          s.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                         )}>
                           {s.status === 'active' ? t.admActive : t.tdInactive}
                         </span>
@@ -282,7 +282,7 @@ export default function TeacherStudentsPage() {
                           {s.subject.icon} {s.subject.name}
                         </p>
                       )}
-                      <p className="text-xs text-gray-500 mt-0.5">{s.group_name}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.group_name}</p>
                       <p className="text-[11px] text-gray-400 mt-0.5">{fmtDate(s.enrolled_at)}</p>
                     </div>
 
