@@ -11,14 +11,17 @@
  * Session memory recorded via memoryEngine (Sprint 3.0).
  */
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { supabase }               from '@/lib/supabase'
 import { aiProvider }             from '@/services/ai-provider.service'
+import { subscriptionService }    from '@/services/subscription.service'
+import { aiUsageService }         from '@/services/aiUsage.service'
 import { intelligenceService }    from '@/ai-brain/services/intelligence-service'
 import { memoryEngine }           from '@/ai-brain/memory/engine'
 import { processImage }           from '@/ai-brain/vision/imageProcessor'
 import { buildVisionChatPrompt }  from '@/ai-brain/vision/promptBuilder'
 import type { StudentContext }    from '@/services/ai-provider.service'
+import type { PlanType, AIFeature } from '@/types/lms.types'
 import type { Language }          from '@/ai-brain/core/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -83,6 +86,10 @@ export function useUniversalAI({ userId, ctx, language }: UseUniversalAIOptions)
   const [isLoading,   setIsLoading]   = useState(false)
   const sessionId = useRef(makeId('vision_session'))
 
+  // Freemium AI limiti — tashkilot/foydalanuvchi rejasi bo'yicha
+  const planRef = useRef<PlanType>('free')
+  useEffect(() => { if (userId) void subscriptionService.getPlan(userId).then(p => { planRef.current = p }) }, [userId])
+
   // ── Setters ─────────────────────────────────────────────────────────────────
 
   const appendMessage = useCallback((msg: UniversalMessage) => {
@@ -129,6 +136,29 @@ export function useUniversalAI({ userId, ctx, language }: UseUniversalAIOptions)
       attachedFile,
     }
     appendMessage(userMsg)
+
+    // ── AI limiti — fayl turiga qarab funksiya; limit tugasa bloklaymiz ───────
+    const feature: AIFeature = file
+      ? (file.type.startsWith('image/') ? 'image_solving'
+         : file.type === 'application/pdf' ? 'pdf_analysis' : 'ai_chat')
+      : 'ai_chat'
+    let allowed = true
+    try { allowed = (await aiUsageService.check(userId, feature, planRef.current)).allowed }
+    catch { allowed = true /* fail-open */ }
+    if (!allowed) {
+      appendMessage({
+        id:        makeId('ai'),
+        role:      'assistant',
+        content:   language === 'ru'
+          ? 'Лимит ИИ исчерпан для вашего плана. Обновите план или попробуйте позже.'
+          : language === 'en'
+          ? 'AI limit reached for your plan. Upgrade your plan or try again later.'
+          : 'Rejangiz bo‘yicha AI limiti tugadi. Rejani yangilang yoki keyinroq urinib ko‘ring.',
+        timestamp: new Date().toISOString(),
+        isLoading: false,
+      })
+      return
+    }
 
     // ── 2. Add loading placeholder ───────────────────────────────────────────
     const loadingId = makeId('ai')
@@ -199,6 +229,7 @@ export function useUniversalAI({ userId, ctx, language }: UseUniversalAIOptions)
         timestamp: new Date().toISOString(),
         isLoading: false,
       }))
+      void aiUsageService.consume(userId, feature, planRef.current)
 
     } catch (err) {
       const code = err instanceof Error ? err.message : 'processing_failed'

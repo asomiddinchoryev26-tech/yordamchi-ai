@@ -27,7 +27,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 import { aiChatService }                  from '@/services/ai-chat.service'
 import { aiProvider, loadStudentContext } from '@/services/ai-provider.service'
+import { subscriptionService }            from '@/services/subscription.service'
+import { aiUsageService }                 from '@/services/aiUsage.service'
 import { intelligenceService }            from '@/ai-brain/services/intelligence-service'
+import type { PlanType, AIFeature }       from '@/types/lms.types'
 import {
   AsomiddinAvatar,
   AICore,
@@ -659,6 +662,9 @@ export default function AIAssistantPage() {
   const studentName      = auth.user?.name      ?? t.adStudent
   const studentAvatarUrl = auth.user?.avatarUrl ?? null
 
+  // Freemium AI limiti — foydalanuvchi (tashkilot) rejasi bo'yicha
+  const planRef = useRef<PlanType>('free')
+
   // ── All effects + handlers ────────────────────────────────────────────────
 
   // Memory cleanup on unmount
@@ -668,6 +674,9 @@ export default function AIAssistantPage() {
   }, [])  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (studentId) void init(); else setConvLoading(false) }, [studentId])  // eslint-disable-line react-hooks/exhaustive-deps -- init() runs on studentId change; unmemoized by design
+
+  // Reja (tashkilot rejasi) — AI limitini tekshirish uchun
+  useEffect(() => { if (studentId) void subscriptionService.getPlan(studentId).then(p => { planRef.current = p }) }, [studentId])
 
   async function init() {
     setConvLoading(true); setError(null)
@@ -834,6 +843,7 @@ export default function AIAssistantPage() {
     if (!activeConvId || isTyping || isStreaming) return
     const lastAI = messages.find(m => m.id === lastAiMsgId)
     if (!lastAI) return
+    if (!(await guardAi('ai_chat'))) return
 
     const history: ChatMessageWithParts[] = [
       ...messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
@@ -873,6 +883,7 @@ export default function AIAssistantPage() {
     if (cont && !aborted) {
       const combined = originalContent + sep + cont
       await aiChatService.updateMessageContent(lastAiMsgId, combined).catch(() => {})
+      consumeAi('ai_chat')
     } else if (aborted && cont) {
       const combined = originalContent + sep + cont + '\n\n*(to\'xtatildi)*'
       setMessages(prev => prev.map(m => m.id === lastAiMsgId ? { ...m, content: combined } : m))
@@ -943,10 +954,39 @@ export default function AIAssistantPage() {
     return data.response as string
   }
 
+  // ── Freemium AI limiti — tekshirish + hisoblash ──────────────────────────────
+  function aiLimitMsg(): string {
+    return language === 'ru'
+      ? 'Лимит ИI исчерпан для вашего плана. Обновите план или попробуйте позже.'
+      : language === 'en'
+      ? 'AI limit reached for your plan. Upgrade your plan or try again later.'
+      : 'Rejangiz bo‘yicha AI limiti tugadi. Rejani yangilang yoki keyinroq urinib ko‘ring.'
+  }
+  /** AI amaliga ruxsat bormi? Limit tugagan bo'lsa xabar ko'rsatadi. Xatolikda fail-open. */
+  async function guardAi(feature: AIFeature): Promise<boolean> {
+    if (!studentId) return true
+    try {
+      const res = await aiUsageService.check(studentId, feature, planRef.current)
+      if (!res.allowed) { setError(aiLimitMsg()); return false }
+    } catch { /* fail-open — hech kimni bloklamaymiz */ }
+    return true
+  }
+  /** Muvaffaqiyatli AI javobidan keyin ishlatilishni +1 qiladi. */
+  function consumeAi(feature: AIFeature) {
+    if (studentId) void aiUsageService.consume(studentId, feature, planRef.current)
+  }
+
   async function handleSend() {
     const text = input.trim()
     if (!text && !attachedFile) return
     if (!activeConvId || isTyping || isStreaming) return
+
+    // AI limiti — fayl turiga qarab tegishli funksiya
+    const feature: AIFeature = attachedFile
+      ? (attachedFile.type.startsWith('image/') ? 'image_solving'
+         : attachedFile.type === 'application/pdf' ? 'pdf_analysis' : 'ai_chat')
+      : 'ai_chat'
+    if (!(await guardAi(feature))) return
 
     setInput(''); setError(null)
     if (inputRef.current) inputRef.current.style.height = 'auto'
@@ -1001,6 +1041,7 @@ export default function AIAssistantPage() {
         setStreamingId(savedAI.id)
         setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c))
         intelligenceService.recordAIResponse(activeConvId, aiResponse, displayContent, currentCtx)
+        consumeAi(feature)
         return
       }
 
@@ -1080,6 +1121,7 @@ export default function AIAssistantPage() {
         setStreamingId(savedAI.id)
         setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, updated_at: new Date().toISOString() } : c))
         intelligenceService.recordAIResponse(activeConvId, finalText, displayContent, currentCtx)
+        consumeAi(feature)
       } else if (aborted) {
         setMessages(prev => prev.filter(m => m.id !== tempAI.id))
       }
@@ -1107,6 +1149,7 @@ export default function AIAssistantPage() {
       role: m.role as 'user' | 'assistant', content: m.content,
     }))
     if (!history.some(m => m.role === 'user')) return
+    if (!(await guardAi('ai_chat'))) return
 
     setIsTyping(true); setError(null)
     try {
@@ -1145,6 +1188,7 @@ export default function AIAssistantPage() {
         const savedAI = await aiChatService.addMessage(activeConvId, 'assistant', fullText)
         setMessages(prev => [...prev.slice(0, aiIdx), { ...savedAI }])
         intelligenceService.recordAIResponse(activeConvId, fullText, lastUserMsg, currentCtx)
+        consumeAi('ai_chat')
       } else {
         setMessages(prev => prev.slice(0, aiIdx))
       }
