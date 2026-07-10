@@ -247,11 +247,12 @@ export type Translations = {
   // Student — QR attendance
   qrError: string; qrLockedTitle: string; qrLockedDesc: string; qrTitle: string; qrSubtitle: string
   qrDone: string; qrRewarded: string; qrPlaceholder: string; qrChecking: string; qrMark: string; qrCameraSoon: string
+  qrScanBtn: string; qrScanning: string; qrOrCode: string; qrCamDenied: string
   // Teacher — features
   tfViewsSuffix: string; tfLessonViews: string; tfRefresh: string
   tfTotalStudents: string; tfViewed: string; tfCompleted: string
   tfMin: string; tfDoneWatch: string; tfWatched: string; tfNotOpened: string; tfNoStudents: string
-  tfGroup: string; tfStartSession: string; tfEnterCode: string; tfExpires: string; tfCloseSession: string; tfCameraSoon: string
+  tfGroup: string; tfStartSession: string; tfEnterCode: string; tfExpires: string; tfCloseSession: string; tfCameraSoon: string; tfShowQr: string
   tfQrLockTitle: string; tfQrLockDesc: string; tfVideoLockTitle: string; tfVideoLockDesc: string; tfVideoOpen: string; tfVideoOpenDesc: string
   tfAIStudentAnalysis: string; tfWeakStudents: string; tfAILockTitle: string; tfAILockDesc: string
   // Landing navbar
@@ -735,10 +736,11 @@ const uz: Translations = {
   anAvgScore: "O'rtacha baho", anImprovement: 'AI yaxshilanish', anWeekly: 'Haftalik',
   qrError: 'Xatolik', qrLockedTitle: 'QR Davomat Premium imkoniyat 🚀', qrLockedDesc: 'Premium bilan avtomatik davomatdan foydalaning — QR kodni skanerlab bir zumda belgilang.', qrTitle: 'QR Davomat', qrSubtitle: "O'qituvchi ko'rsatgan QR kodni kiriting",
   qrDone: 'Davomat belgilandi ✅', qrRewarded: "+XP va tangalar hisobingizga qo'shildi", qrPlaceholder: 'QR kod (masalan: A1B2C3)', qrChecking: 'Tekshirilmoqda…', qrMark: 'Davomatni belgilash', qrCameraSoon: "📷 Kamera skaneri keyingi yangilanishda qo'shiladi",
+  qrScanBtn: 'Kamera bilan skanerlash', qrScanning: 'Skanerlanmoqda…', qrOrCode: 'yoki kod kiriting', qrCamDenied: "Kameraga ruxsat berilmadi. Kodni qo'lda kiriting.",
   tfViewsSuffix: "ko'rishlar", tfLessonViews: "Dars ko'rishlari", tfRefresh: 'Yangilash',
   tfTotalStudents: "Jami o'quvchi", tfViewed: "Ko'rgan", tfCompleted: 'Tugatgan',
   tfMin: 'daq', tfDoneWatch: 'tugatildi', tfWatched: "ko'rildi", tfNotOpened: 'ochilmagan', tfNoStudents: "Guruhda o'quvchilar yo'q",
-  tfGroup: 'Guruh', tfStartSession: 'Sessiya boshlash', tfEnterCode: "O'quvchilar shu kodni kiritadi:", tfExpires: 'Amal muddati:', tfCloseSession: 'Sessiyani yopish', tfCameraSoon: '📷 QR kamera skaneri keyingi yangilanishda',
+  tfGroup: 'Guruh', tfStartSession: 'Sessiya boshlash', tfEnterCode: "Yoki shu kodni kiritadi:", tfExpires: 'Amal muddati:', tfCloseSession: 'Sessiyani yopish', tfCameraSoon: '📷 QR kamera skaneri keyingi yangilanishda', tfShowQr: "O'quvchilar QR kodni skanerlaydi:",
   tfQrLockTitle: 'QR davomat Premium funksiyasi', tfQrLockDesc: 'Premium bilan QR orqali avtomatik davomat oling.', tfVideoLockTitle: 'Video dars Premium', tfVideoLockDesc: 'Video darslar yuklash Premium/Education tarifida mavjud.', tfVideoOpen: 'Video yuklash ochiq ✅', tfVideoOpenDesc: "Darsga video biriktiring — o'quvchilar ko'radi, ko'rish statistikasi yig'iladi.",
   tfAIStudentAnalysis: "AI o'quvchi tahlili", tfWeakStudents: "O'zlashtirishi past o'quvchilar", tfAILockTitle: 'AI tahlil Premium', tfAILockDesc: "Premium bilan AI o'quvchilar zaifligini aniqlaydi.",
   nbHome: 'Bosh sahifa', nbFeatures: 'Imkoniyatlar', nbPricing: 'Narxlar', nbAbout: 'Biz haqimizda', nbFaq: 'FAQ',
@@ -1198,10 +1200,11 @@ const ru: Translations = {
   anAvgScore: 'Средний балл', anImprovement: 'Улучшение AI', anWeekly: 'За неделю',
   qrError: 'Ошибка', qrLockedTitle: 'QR-посещаемость — Premium 🚀', qrLockedDesc: 'С Premium — автоматическая посещаемость: отсканируйте QR-код и отметьтесь мгновенно.', qrTitle: 'QR-посещаемость', qrSubtitle: 'Введите QR-код, показанный учителем',
   qrDone: 'Посещение отмечено ✅', qrRewarded: '+XP и монеты добавлены на ваш счёт', qrPlaceholder: 'QR-код (например: A1B2C3)', qrChecking: 'Проверка…', qrMark: 'Отметить посещение', qrCameraSoon: '📷 Сканер камеры появится в следующем обновлении',
+  qrScanBtn: 'Сканировать камерой', qrScanning: 'Сканирование…', qrOrCode: 'или введите код', qrCamDenied: 'Нет доступа к камере. Введите код вручную.',
   tfViewsSuffix: 'просмотры', tfLessonViews: 'Просмотры урока', tfRefresh: 'Обновить',
   tfTotalStudents: 'Всего учеников', tfViewed: 'Просмотрели', tfCompleted: 'Завершили',
   tfMin: 'мин', tfDoneWatch: 'завершил', tfWatched: 'просмотрел', tfNotOpened: 'не открыл', tfNoStudents: 'В группе нет учеников',
-  tfGroup: 'Группа', tfStartSession: 'Начать сессию', tfEnterCode: 'Ученики вводят этот код:', tfExpires: 'Действует до:', tfCloseSession: 'Закрыть сессию', tfCameraSoon: '📷 Сканер QR-камеры в следующем обновлении',
+  tfGroup: 'Группа', tfStartSession: 'Начать сессию', tfEnterCode: 'Или введите этот код:', tfExpires: 'Действует до:', tfCloseSession: 'Закрыть сессию', tfCameraSoon: '📷 Сканер QR-камеры в следующем обновлении', tfShowQr: 'Ученики сканируют QR-код:',
   tfQrLockTitle: 'QR-посещаемость — Premium', tfQrLockDesc: 'С Premium — автоматическая посещаемость через QR.', tfVideoLockTitle: 'Видеоурок — Premium', tfVideoLockDesc: 'Загрузка видеоуроков доступна на тарифе Premium/Education.', tfVideoOpen: 'Загрузка видео открыта ✅', tfVideoOpenDesc: 'Прикрепите видео к уроку — ученики смотрят, собирается статистика просмотров.',
   tfAIStudentAnalysis: 'AI-анализ учеников', tfWeakStudents: 'Отстающие ученики', tfAILockTitle: 'AI-анализ — Premium', tfAILockDesc: 'С Premium AI выявляет слабые места учеников.',
   nbHome: 'Главная', nbFeatures: 'Возможности', nbPricing: 'Цены', nbAbout: 'О нас', nbFaq: 'FAQ',
@@ -1661,10 +1664,11 @@ const en: Translations = {
   anAvgScore: 'Average score', anImprovement: 'AI improvement', anWeekly: 'Weekly',
   qrError: 'Error', qrLockedTitle: 'QR Attendance — Premium 🚀', qrLockedDesc: 'With Premium — automatic attendance: scan the QR code and check in instantly.', qrTitle: 'QR Attendance', qrSubtitle: 'Enter the QR code shown by your teacher',
   qrDone: 'Attendance marked ✅', qrRewarded: '+XP and coins added to your account', qrPlaceholder: 'QR code (e.g. A1B2C3)', qrChecking: 'Checking…', qrMark: 'Mark attendance', qrCameraSoon: '📷 Camera scanner coming in the next update',
+  qrScanBtn: 'Scan with camera', qrScanning: 'Scanning…', qrOrCode: 'or enter code', qrCamDenied: 'Camera access denied. Enter the code manually.',
   tfViewsSuffix: 'views', tfLessonViews: 'Lesson views', tfRefresh: 'Refresh',
   tfTotalStudents: 'Total students', tfViewed: 'Viewed', tfCompleted: 'Completed',
   tfMin: 'min', tfDoneWatch: 'completed', tfWatched: 'watched', tfNotOpened: 'not opened', tfNoStudents: 'No students in the group',
-  tfGroup: 'Group', tfStartSession: 'Start session', tfEnterCode: 'Students enter this code:', tfExpires: 'Expires:', tfCloseSession: 'Close session', tfCameraSoon: '📷 QR camera scanner in the next update',
+  tfGroup: 'Group', tfStartSession: 'Start session', tfEnterCode: 'Or enter this code:', tfExpires: 'Expires:', tfCloseSession: 'Close session', tfCameraSoon: '📷 QR camera scanner in the next update', tfShowQr: 'Students scan the QR code:',
   tfQrLockTitle: 'QR attendance — Premium', tfQrLockDesc: 'With Premium — automatic attendance via QR.', tfVideoLockTitle: 'Video lesson — Premium', tfVideoLockDesc: 'Uploading video lessons is available on Premium/Education.', tfVideoOpen: 'Video upload unlocked ✅', tfVideoOpenDesc: 'Attach a video to the lesson — students watch it and view stats are collected.',
   tfAIStudentAnalysis: 'AI student analysis', tfWeakStudents: 'Underperforming students', tfAILockTitle: 'AI analysis — Premium', tfAILockDesc: 'With Premium, AI identifies students’ weak spots.',
   nbHome: 'Home', nbFeatures: 'Features', nbPricing: 'Pricing', nbAbout: 'About us', nbFaq: 'FAQ',

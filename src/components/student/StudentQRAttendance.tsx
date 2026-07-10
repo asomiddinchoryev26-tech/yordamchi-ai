@@ -8,9 +8,10 @@
  *   PremiumModal (AssignmentsAI). Davomat XP/tanga/badge — Achievements avtomatik.
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { QrCode, ScanLine, Lock, CheckCircle2, Loader2, AlertTriangle, Zap } from 'lucide-react'
+import { QrCode, ScanLine, Lock, CheckCircle2, Loader2, AlertTriangle, Zap, Camera, X } from 'lucide-react'
+import jsQR from 'jsqr'
 import { useAuth } from '@/hooks/useAuth'
 import { subscriptionService } from '@/services/subscription.service'
 import { qrAttendanceService } from '@/services/qrAttendance.service'
@@ -31,6 +32,11 @@ export default function StudentQRAttendance() {
   const [done, setDone]       = useState(false)
   const [error, setError]     = useState<string | null>(null)
   const [premiumOpen, setPremiumOpen] = useState(false)
+  const [scanning, setScanning] = useState(false)
+
+  const videoRef  = useRef<HTMLVideoElement | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  const rafRef    = useRef<number | null>(null)
 
   const checkPlan = useCallback(async () => {
     const uid = auth.user?.id
@@ -41,15 +47,60 @@ export default function StudentQRAttendance() {
 
   useEffect(() => { void checkPlan() }, [checkPlan])
 
-  const submit = async () => {
+  const submitCode = async (value: string) => {
     const uid = auth.user?.id
-    if (!uid || !code.trim()) return
+    const v = value.trim().toUpperCase()
+    if (!uid || !v) return
     setBusy(true); setError(null)
-    const res = await qrAttendanceService.recordScan(code.trim(), uid)
+    const res = await qrAttendanceService.recordScan(v, uid)
     if (res.ok) { setDone(true) }
     else { setError(res.error ?? t.qrError) }
     setBusy(false)
   }
+  const submit = () => void submitCode(code)
+
+  // ── Kamera skaneri (jsQR — universal, iOS'da ham) ──
+  const stopScan = useCallback(() => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
+    streamRef.current?.getTracks().forEach(tr => tr.stop())
+    streamRef.current = null
+    setScanning(false)
+  }, [])
+
+  const startScan = useCallback(async () => {
+    setError(null)
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      streamRef.current = stream
+      setScanning(true)
+      const video = videoRef.current
+      if (!video) { stopScan(); return }
+      video.srcObject = stream
+      await video.play()
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      const tick = () => {
+        if (!streamRef.current || !video.videoWidth) { rafRef.current = requestAnimationFrame(tick); return }
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight
+        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
+        const img = ctx?.getImageData(0, 0, canvas.width, canvas.height)
+        const found = img ? jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' }) : null
+        if (found?.data) {
+          stopScan()
+          setCode(found.data.trim().toUpperCase())
+          void submitCode(found.data)
+          return
+        }
+        rafRef.current = requestAnimationFrame(tick)
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    } catch {
+      setError(t.qrCamDenied)
+      stopScan()
+    }
+  }, [stopScan, t.qrCamDenied]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => () => stopScan(), [stopScan])
 
   // ── Free: qulflangan ──
   if (allowed === false) {
@@ -97,6 +148,32 @@ export default function StudentQRAttendance() {
         </motion.div>
       ) : (
         <div className="space-y-3">
+          {/* Kamera skaneri */}
+          {scanning ? (
+            <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.10)' }}>
+              <video ref={videoRef} playsInline muted className="w-full aspect-square object-cover bg-black" />
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center" aria-hidden="true">
+                <div className="w-40 h-40 rounded-2xl" style={{ border: '2px solid rgba(147,187,255,0.85)' }} />
+              </div>
+              <button type="button" onClick={stopScan} aria-label="stop"
+                className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center bg-black/55 text-white">
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+              <p className="absolute bottom-2 inset-x-0 text-center text-[12px] font-semibold text-white/85">{t.qrScanning}</p>
+            </div>
+          ) : (
+            <button type="button" onClick={() => void startScan()} disabled={busy}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white text-[14px] font-bold disabled:opacity-50 transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)', boxShadow: '0 6px 20px rgba(91,127,255,0.4)' }}>
+              <Camera className="w-4 h-4" aria-hidden="true" /> {t.qrScanBtn}
+            </button>
+          )}
+
+          <div className="flex items-center gap-2 text-[11px] text-white/30">
+            <span className="flex-1 h-px bg-white/10" /> {t.qrOrCode} <span className="flex-1 h-px bg-white/10" />
+          </div>
+
+          {/* Qo'lda kod kiritish (zaxira) */}
           <div className="relative">
             <ScanLine className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" aria-hidden="true" />
             <input
@@ -111,13 +188,12 @@ export default function StudentQRAttendance() {
               <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" /> {error}
             </p>
           )}
-          <button type="button" onClick={() => void submit()} disabled={busy || !code.trim()}
+          <button type="button" onClick={() => submit()} disabled={busy || !code.trim()}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white text-[14px] font-bold disabled:opacity-50 transition-all hover:opacity-90 active:scale-[0.98]"
-            style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)', boxShadow: '0 6px 20px rgba(91,127,255,0.4)' }}>
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}>
             {busy ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <QrCode className="w-4 h-4" aria-hidden="true" />}
             {busy ? t.qrChecking : t.qrMark}
           </button>
-          <p className="text-[10.5px] text-white/25 text-center">{t.qrCameraSoon}</p>
         </div>
       )}
     </div>

@@ -15,6 +15,7 @@ import {
   Eye, EyeOff, Users, QrCode, Lock, Loader2, RefreshCw, Brain, AlertTriangle,
   Video, Zap, CheckCircle2, Clock,
 } from 'lucide-react'
+import QRCode from 'qrcode'
 import { lessonViewService, type LessonAnalytics } from '@/services/lessonView.service'
 import { qrAttendanceService } from '@/services/qrAttendance.service'
 import { teacherInsightsService, type ClassInsight } from '@/services/teacherInsights.service'
@@ -128,8 +129,16 @@ function QRManagerInner({ teacherId, groupId, groupName, lessonId }: { teacherId
   const { t } = useLanguage()
   const [session, setSession] = useState<QrAttendanceSessionRow | null>(null)
   const [busy, setBusy] = useState(false)
+  const [qrUrl, setQrUrl] = useState<string | null>(null)
   const start = async () => { setBusy(true); setSession(await qrAttendanceService.createSession(teacherId, groupId, lessonId ?? null, 15)); setBusy(false) }
   const stop  = async () => { if (session) { await qrAttendanceService.closeSession(session.id); setSession(null) } }
+
+  // Kodni skanerlanadigan QR rasmга aylantirish (talaba kamerada o'qiydi)
+  useEffect(() => {
+    if (!session?.code) { setQrUrl(null); return }
+    QRCode.toDataURL(session.code, { width: 240, margin: 1, color: { dark: '#0B0F1C', light: '#FFFFFF' } })
+      .then(setQrUrl).catch(() => setQrUrl(null))
+  }, [session?.code])
 
   return (
     <div className="rounded-[20px] p-5" style={GLASS}>
@@ -144,11 +153,15 @@ function QRManagerInner({ teacherId, groupId, groupName, lessonId }: { teacherId
         </button>
       ) : (
         <div className="text-center">
+          <p className="text-[11px] text-white/45 mb-2">{t.tfShowQr}</p>
+          {qrUrl && (
+            <img src={qrUrl} alt="QR" width={200} height={200}
+              className="mx-auto mb-3 rounded-xl bg-white p-2" style={{ boxShadow: '0 6px 24px rgba(91,127,255,0.25)' }} />
+          )}
           <p className="text-[11px] text-white/45 mb-1">{t.tfEnterCode}</p>
-          <div className="text-[34px] font-black tracking-[0.2em] text-white py-3 rounded-xl mb-2" style={{ background: 'rgba(91,127,255,0.1)', border: '1px solid rgba(91,127,255,0.28)', textShadow: '0 0 20px rgba(147,187,255,0.5)' }}>{session.code}</div>
+          <div className="text-[28px] font-black tracking-[0.2em] text-white py-2.5 rounded-xl mb-2" style={{ background: 'rgba(91,127,255,0.1)', border: '1px solid rgba(91,127,255,0.28)', textShadow: '0 0 20px rgba(147,187,255,0.5)' }}>{session.code}</div>
           <p className="text-[11px] text-white/35 mb-3">{t.tfExpires} {fmt(session.expires_at)}</p>
           <button type="button" onClick={() => void stop()} className="w-full py-2.5 rounded-xl text-[12.5px] font-bold text-red-300" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>{t.tfCloseSession}</button>
-          <p className="text-[10px] text-white/25 mt-2">{t.tfCameraSoon}</p>
         </div>
       )}
     </div>
