@@ -41,6 +41,17 @@ export type OrgRow = {
 
 export type OrgPlan = 'free' | 'premium' | 'pro'
 
+export type PlatformUser = {
+  id:              string
+  full_name:       string | null
+  email:           string | null
+  role:            string
+  status:          string | null
+  organization_id: string | null
+  org_name:        string | null
+  created_at:      string
+}
+
 export const platformService = {
   stats: async (): Promise<PlatformStats | null> => {
     const { data, error } = await sbRpc.rpc('platform_stats')
@@ -64,5 +75,31 @@ export const platformService = {
   setOrgPlan: async (orgId: string, plan: OrgPlan, months = 1): Promise<void> => {
     const { error } = await sbRpc.rpc('set_org_plan', { p_org: orgId, p_plan: plan, p_months: months })
     if (error) throw new Error(error.message ?? 'Rejani o‘zgartirishda xatolik')
+  },
+
+  /** Yangi tashkilot yaratish. Qaytadi: { organization_id, join_code }. */
+  createOrganization: async (name: string, plan: OrgPlan = 'free'): Promise<{ organization_id: string; join_code: string }> => {
+    const { data, error } = await sbRpc.rpc('admin_create_organization', { p_name: name, p_plan: plan })
+    if (error) throw new Error(error.message ?? 'Tashkilot yaratishda xatolik')
+    return data as { organization_id: string; join_code: string }
+  },
+
+  /** Bo'sh tashkilotni o'chirish (a'zosi bor bo'lsa DB rad etadi). */
+  deleteOrganization: async (orgId: string): Promise<void> => {
+    const { error } = await sbRpc.rpc('admin_delete_organization', { p_org: orgId })
+    if (error) throw new Error(error.message ?? 'O‘chirishda xatolik')
+  },
+
+  /** Butun platforma bo'yicha foydalanuvchi qidirish (ism / email). */
+  searchUsers: async (query: string): Promise<PlatformUser[]> => {
+    const { data, error } = await sbRpc.rpc('search_users', { p_query: query })
+    if (error || !Array.isArray(data)) return []
+    return data as PlatformUser[]
+  },
+
+  /** Foydalanuvchini bloklash / faollashtirish. */
+  setUserStatus: async (userId: string, status: 'active' | 'suspended'): Promise<void> => {
+    const { error } = await sbRpc.rpc('set_user_status', { p_user: userId, p_status: status })
+    if (error) throw new Error(error.message ?? 'Holatni o‘zgartirishda xatolik')
   },
 }

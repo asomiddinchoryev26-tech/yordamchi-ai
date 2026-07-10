@@ -10,10 +10,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Activity, Crown, Megaphone, Ticket, HeartPulse, CreditCard, Loader2, Send,
-  Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet,
+  Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet, Trash2,
 } from 'lucide-react'
 import { systemHealthService, type SystemHealth } from '@/services/systemHealth.service'
-import { platformService, type PlatformStats, type OrgRow, type OrgPlan } from '@/services/platform.service'
+import { platformService, type PlatformStats, type OrgRow, type OrgPlan, type PlatformUser } from '@/services/platform.service'
 import { paymentAdminService, type PaymentStats, type PaymentRow, type PaymentRecord } from '@/services/paymentAdmin.service'
 import { announcementService, ANNOUNCEMENT_TARGETS, type AnnouncementTarget } from '@/services/announcement.service'
 import { promoCodeService, type PromoCodeRow, type PromoDiscountType } from '@/services/promoCode.service'
@@ -68,6 +68,7 @@ function PlatformOverview() {
 }
 
 // ═══ Organizations Manager — har bir tashkilotni boshqarish ═══
+const PLATFORM_ORG_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
 const PLAN_STYLE: Record<OrgPlan, string> = {
   free:    'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300',
   premium: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300',
@@ -78,6 +79,10 @@ function OrganizationsManager() {
   const { t } = useLanguage()
   const [orgs, setOrgs] = useState<OrgRow[] | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [creating, setCreating] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newPlan, setNewPlan] = useState<OrgPlan>('free')
+  const [createBusy, setCreateBusy] = useState(false)
   const load = useCallback(() => { void platformService.listOrganizations().then(setOrgs) }, [])
   useEffect(() => { load() }, [load])
 
@@ -92,10 +97,40 @@ function OrganizationsManager() {
     try { await platformService.setOrgStatus(o.id, o.status === 'active' ? 'suspended' : 'active'); load() }
     catch { /* */ } finally { setBusyId(null) }
   }
+  const createOrg = async () => {
+    if (!newName.trim()) return
+    setCreateBusy(true)
+    try { await platformService.createOrganization(newName.trim(), newPlan); setNewName(''); setCreating(false); load() }
+    catch { /* */ } finally { setCreateBusy(false) }
+  }
+  const deleteOrg = async (o: OrgRow) => {
+    if (!window.confirm(`${o.name}\n\n${t.saDeleteOrgConfirm}`)) return
+    setBusyId(o.id)
+    try { await platformService.deleteOrganization(o.id); load() }
+    catch { window.alert(t.saOrgNotEmptyErr) } finally { setBusyId(null) }
+  }
 
   return (
     <div className={CARD}>
-      <Head Icon={Building2} title={t.saOrgsTitle} color="text-blue-500" />
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <Head Icon={Building2} title={t.saOrgsTitle} color="text-blue-500" />
+        <button type="button" onClick={() => setCreating(v => !v)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-white text-[12px] font-semibold flex-shrink-0" style={BTN_BG}>
+          {creating ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />} {t.saCreateOrg}
+        </button>
+      </div>
+      {creating && (
+        <div className="mb-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40 flex flex-wrap items-center gap-2">
+          <input value={newName} onChange={e => setNewName(e.target.value)} placeholder={t.saOrgNamePh}
+            className={`${INPUT} flex-1 min-w-[160px]`} />
+          <select value={newPlan} onChange={e => setNewPlan(e.target.value as OrgPlan)} className={`${INPUT} w-auto`}>
+            <option value="free">Free</option><option value="premium">Premium</option><option value="pro">Pro</option>
+          </select>
+          <button type="button" onClick={() => void createOrg()} disabled={createBusy || !newName.trim()} className={BTN} style={BTN_BG}>
+            {createBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {t.saCreate2}
+          </button>
+        </div>
+      )}
       {orgs === null ? <div className="h-24 animate-pulse bg-gray-50 dark:bg-gray-700 rounded-xl" />
         : orgs.length === 0 ? <p className="text-sm text-gray-400">{t.saNoOrgs}</p> : (
         <div className="space-y-2.5">
@@ -117,11 +152,19 @@ function OrganizationsManager() {
                       {o.plan_expires_at && <> · {new Date(o.plan_expires_at).toLocaleDateString('uz-UZ')} {t.saPlanMonths === 'oy' ? 'gacha' : ''}</>}
                     </p>
                   </div>
-                  <button type="button" disabled={busyId === o.id} onClick={() => void toggleStatus(o)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold disabled:opacity-50 flex-shrink-0 ${suspended ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}>
-                    {busyId === o.id ? <Loader2 className="w-3 h-3 animate-spin" /> : suspended ? <Power className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
-                    {suspended ? t.saActivate : t.saSuspend}
-                  </button>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <button type="button" disabled={busyId === o.id} onClick={() => void toggleStatus(o)}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold disabled:opacity-50 ${suspended ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}>
+                      {busyId === o.id ? <Loader2 className="w-3 h-3 animate-spin" /> : suspended ? <Power className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
+                      {suspended ? t.saActivate : t.saSuspend}
+                    </button>
+                    {o.members === 0 && o.id !== PLATFORM_ORG_ID && (
+                      <button type="button" disabled={busyId === o.id} onClick={() => void deleteOrg(o)} title={t.saDelete}
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 disabled:opacity-50">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10.5px] text-gray-400 mr-0.5">{t.saApplyPlan}:</span>
@@ -136,6 +179,66 @@ function OrganizationsManager() {
             )
           })}
           <p className="text-[11px] text-gray-400 flex items-center gap-1.5 pt-1"><Ban className="w-3 h-3" /> {t.saOrgSuspendedNote}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══ Platform Users Manager — butun platforma bo'yicha qidirish + bloklash ═══
+function roleBadge(r: string): string {
+  return r === 'admin'   ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300'
+       : r === 'teacher' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
+       :                   'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300'
+}
+
+function PlatformUsersManager() {
+  const { t } = useLanguage()
+  const [q, setQ] = useState('')
+  const [users, setUsers] = useState<PlatformUser[] | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const reload = useCallback((query: string) => { void platformService.searchUsers(query).then(setUsers) }, [])
+  useEffect(() => {
+    const h = setTimeout(() => reload(q), 350)
+    return () => clearTimeout(h)
+  }, [q, reload])
+
+  const toggle = async (u: PlatformUser) => {
+    setBusyId(u.id)
+    try { await platformService.setUserStatus(u.id, u.status === 'suspended' ? 'active' : 'suspended'); reload(q) }
+    catch { /* holat o'zgarmaydi */ } finally { setBusyId(null) }
+  }
+
+  return (
+    <div className={CARD}>
+      <Head Icon={Users} title={t.saUsersTitle} color="text-violet-500" />
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder={t.saUserSearchPh} className={`${INPUT} pl-9`} />
+      </div>
+      {users === null ? <div className="h-20 animate-pulse bg-gray-50 dark:bg-gray-700 rounded-xl" />
+        : users.length === 0 ? <p className="text-sm text-gray-400">{t.saNoUsers}</p> : (
+        <div className="space-y-1.5 max-h-96 overflow-y-auto">
+          {users.map(u => {
+            const suspended = u.status === 'suspended'
+            return (
+              <div key={u.id} className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/40">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                    {u.full_name || u.email}
+                    <span className={`ml-1.5 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${roleBadge(u.role)}`}>{u.role}</span>
+                    {suspended && <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300">{t.saSuspended}</span>}
+                  </p>
+                  <p className="text-[10.5px] text-gray-400 truncate">{u.email} · 🏢 {u.org_name || '—'}</p>
+                </div>
+                <button type="button" disabled={busyId === u.id} onClick={() => void toggle(u)}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold disabled:opacity-50 flex-shrink-0 ${suspended ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}>
+                  {busyId === u.id ? <Loader2 className="w-3 h-3 animate-spin" /> : suspended ? <Power className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
+                  {suspended ? t.saActivate : t.saSuspend}
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
@@ -426,6 +529,7 @@ export function SuperAdminPanel({ currentUserId }: { currentUserId: string }) {
       </div>
       <PlatformOverview />
       <OrganizationsManager />
+      <PlatformUsersManager />
       <AdminPremiumStats />
       <SystemHealthCard />
       <PaymentCenter />
