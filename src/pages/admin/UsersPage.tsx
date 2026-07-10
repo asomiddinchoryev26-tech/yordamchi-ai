@@ -145,8 +145,8 @@ export default function UsersPage() {
 
       {/* Sarlavha */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.adTabUsers}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.adTabUsers}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
           {loading ? t.notifLoading : `${users.length} ${t.adUsersWord}`}
         </p>
       </div>
@@ -166,14 +166,14 @@ export default function UsersPage() {
       {!loading && (
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {[
-            { label: t.auJami,      value: counts.total,    bg: 'bg-white',         text: 'text-gray-900'    },
+            { label: t.auJami,      value: counts.total,    bg: 'bg-white dark:bg-gray-800',         text: 'text-gray-900 dark:text-gray-100'    },
             { label: t.tdStudents,  value: counts.student,  bg: 'bg-blue-50',       text: 'text-blue-700'    },
             { label: t.adTeachers,  value: counts.teacher,  bg: 'bg-indigo-50',     text: 'text-indigo-700'  },
             { label: t.auAdmins,    value: counts.admin,    bg: 'bg-emerald-50',    text: 'text-emerald-700' },
             { label: t.admActive,   value: counts.active,   bg: 'bg-emerald-50',    text: 'text-emerald-700' },
-            { label: t.tdInactive,  value: counts.inactive, bg: 'bg-gray-50',       text: 'text-gray-500'    },
+            { label: t.tdInactive,  value: counts.inactive, bg: 'bg-gray-50 dark:bg-gray-800/50',       text: 'text-gray-500 dark:text-gray-400'    },
           ].map(s => (
-            <div key={s.label} className={cn('rounded-2xl border border-gray-100 p-3 text-center', s.bg)}>
+            <div key={s.label} className={cn('rounded-2xl border border-gray-100 dark:border-gray-700 p-3 text-center', s.bg)}>
               <p className={cn('text-xl font-bold', s.text)}>{s.value}</p>
               <p className="text-[11px] text-gray-400 mt-0.5">{s.label}</p>
             </div>
@@ -191,7 +191,7 @@ export default function UsersPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t.tstSearchPh}
-              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
             />
           </div>
 
@@ -206,7 +206,7 @@ export default function UsersPage() {
                   'px-3 py-2 text-xs font-semibold rounded-xl border transition-colors',
                   roleFilter === r
                     ? 'bg-emerald-600 text-white border-emerald-600'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300',
+                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-emerald-300',
                 )}
               >
                 {r === 'all' ? t.adAll : ROLE_META[r] ? t[ROLE_META[r].label] : r}
@@ -218,7 +218,7 @@ export default function UsersPage() {
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value as StatusFilter)}
-                className="appearance-none pl-3 pr-7 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="appearance-none pl-3 pr-7 py-2 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
               >
                 <option value="all">{t.auAllStatuses}</option>
                 <option value="active">{t.admActive}</option>
@@ -234,14 +234,14 @@ export default function UsersPage() {
       {loading && (
         <div className="space-y-2">
           {[1,2,3,4,5].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-4 animate-pulse flex items-center gap-3">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-4 animate-pulse flex items-center gap-3">
               <div className="w-9 h-9 bg-gray-200 rounded-xl flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-100 rounded w-1/4" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/4" />
               </div>
-              <div className="h-6 bg-gray-100 rounded-full w-16" />
-              <div className="h-6 bg-gray-100 rounded-full w-14" />
+              <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-full w-16" />
+              <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-full w-14" />
             </div>
           ))}
         </div>
@@ -249,7 +249,7 @@ export default function UsersPage() {
 
       {/* Bo'sh holat */}
       {!loading && users.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <Users className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.auEmpty}</p>
         </div>
@@ -257,26 +257,26 @@ export default function UsersPage() {
 
       {/* Filtr bo'yicha natija yo'q */}
       {!loading && users.length > 0 && filtered.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">{t.auNotFound}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-10 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t.auNotFound}</p>
         </div>
       )}
 
       {/* Foydalanuvchilar jadvali */}
       {!loading && filtered.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
 
           {/* Sarlavha qatori */}
-          <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 items-center px-5 py-3 bg-gray-50/60 border-b border-gray-100">
+          <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 items-center px-5 py-3 bg-gray-50/60 border-b border-gray-100 dark:border-gray-700">
             <div className="w-9" />
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t.adUser}</p>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-28 text-center">Rol</p>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-20 text-center">{t.tdColStatus}</p>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide w-24 text-right">{t.auJoined}</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t.adUser}</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide w-28 text-center">Rol</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide w-20 text-center">{t.tdColStatus}</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide w-24 text-right">{t.auJoined}</p>
           </div>
 
           {/* Qatorlar */}
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {filtered.map(user => {
               const roleMeta   = ROLE_META[user.role]
               const isUpdating = updatingId === user.id
@@ -287,20 +287,20 @@ export default function UsersPage() {
                   key={user.id}
                   className={cn(
                     'grid grid-cols-[auto_1fr_auto_auto_auto] gap-4 items-center px-5 py-3.5 transition-colors',
-                    isUpdating ? 'bg-gray-50' : 'hover:bg-gray-50/50',
+                    isUpdating ? 'bg-gray-50 dark:bg-gray-800/50' : 'hover:bg-gray-50/50',
                   )}
                 >
                   {/* Avatar */}
                   <div className="relative">
                     <Avatar name={user.full_name} email={user.email} role={user.role} />
                     {isSaved && (
-                      <CheckCircle className="absolute -top-1 -right-1 w-3.5 h-3.5 text-emerald-500 bg-white rounded-full" />
+                      <CheckCircle className="absolute -top-1 -right-1 w-3.5 h-3.5 text-emerald-500 bg-white dark:bg-gray-800 rounded-full" />
                     )}
                   </div>
 
                   {/* Ism + Email */}
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {user.full_name ?? t.taNoName}
                     </p>
                     <p className="text-xs text-gray-400 truncate">{user.email}</p>
@@ -318,8 +318,8 @@ export default function UsersPage() {
                         disabled={isUpdating}
                         className={cn(
                           'appearance-none text-[11px] font-semibold px-2 py-1 pr-5 rounded-full border cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/30',
-                          roleMeta?.bg ?? 'bg-gray-100',
-                          roleMeta?.color ?? 'text-gray-600',
+                          roleMeta?.bg ?? 'bg-gray-100 dark:bg-gray-700',
+                          roleMeta?.color ?? 'text-gray-600 dark:text-gray-300',
                           'border-transparent',
                           isUpdating && 'opacity-50 cursor-not-allowed',
                         )}
@@ -330,7 +330,7 @@ export default function UsersPage() {
                       </select>
                       <ChevronDown className={cn(
                         'absolute right-1.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 pointer-events-none',
-                        roleMeta?.color ?? 'text-gray-500'
+                        roleMeta?.color ?? 'text-gray-500 dark:text-gray-400'
                       )} />
                     </div>
                   </div>
@@ -345,7 +345,7 @@ export default function UsersPage() {
                         'text-[11px] font-semibold px-2.5 py-1 rounded-full border-none transition-all disabled:cursor-not-allowed disabled:opacity-50',
                         user.status === 'active'
                           ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200',
                       )}
                       title={t.auToggleHint}
                     >
@@ -370,7 +370,7 @@ export default function UsersPage() {
 
           {/* Ko'rsatilayotgan yozuvlar */}
           {filtered.length !== users.length && (
-            <div className="px-5 py-3 border-t border-gray-100 text-xs text-gray-400 text-center">
+            <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400 text-center">
               {filtered.length} ta ko'rsatilmoqda (jami {users.length} tadan)
             </div>
           )}

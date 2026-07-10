@@ -78,8 +78,8 @@ export default function AdminAttendancePage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.achAttendance}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.aatSubtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.achAttendance}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.aatSubtitle}</p>
       </div>
 
       {error && (
@@ -90,13 +90,13 @@ export default function AdminAttendancePage() {
       )}
 
       {/* Filtrlar */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div className="relative">
             <select
               value={groupId}
               onChange={e => setGroupId(e.target.value)}
-              className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             >
               <option value="">{t.tstAllGroups}</option>
               {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
@@ -108,13 +108,13 @@ export default function AdminAttendancePage() {
             value={dateFrom}
             onChange={e => setDateFrom(e.target.value)}
             placeholder={t.aatFrom}
-            className="px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
           <input
             type="date"
             value={dateTo}
             onChange={e => setDateTo(e.target.value)}
-            className="px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
           <button
             type="button"
@@ -150,7 +150,7 @@ export default function AdminAttendancePage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t.aatSearchPh}
-            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
           />
         </div>
       )}
@@ -159,14 +159,14 @@ export default function AdminAttendancePage() {
       {loading && (
         <div className="space-y-2">
           {[1,2,3,4].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 h-14 animate-pulse" />
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 h-14 animate-pulse" />
           ))}
         </div>
       )}
 
       {/* Bo'sh */}
       {!loading && records.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <CheckSquare className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.aatNotFound}</p>
         </div>
@@ -174,37 +174,37 @@ export default function AdminAttendancePage() {
 
       {/* Jadval */}
       {!loading && filtered.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[560px]">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tdColStudent}</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tfGroup}</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tcDate}</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.tdColStatus}</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500">{t.aatNote}</th>
+              <tr className="border-b border-gray-100 dark:border-gray-700 bg-gray-50/50">
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">{t.tdColStudent}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">{t.tfGroup}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">{t.tcDate}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">{t.tdColStatus}</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400">{t.aatNote}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {filtered.slice(0, 100).map(r => {
                 const meta = STATUS_META[r.status as keyof typeof STATUS_META]
                 return (
                   <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-5 py-3">
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
                         {(r.student as any)?.full_name ?? '—'}
                       </p>
                       <p className="text-xs text-gray-400">{(r.student as any)?.email}</p>
                     </td>
-                    <td className="px-5 py-3 text-gray-700">{(r.group as any)?.name ?? '—'}</td>
-                    <td className="px-5 py-3 text-gray-600 whitespace-nowrap">{fmtDate(r.attended_date, t)}</td>
+                    <td className="px-5 py-3 text-gray-700 dark:text-gray-200">{(r.group as any)?.name ?? '—'}</td>
+                    <td className="px-5 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{fmtDate(r.attended_date, t)}</td>
                     <td className="px-5 py-3">
                       <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', meta?.bg, meta?.color)}>
                         {ATT_STATUS_KEYS[r.status] ? t[ATT_STATUS_KEYS[r.status]] : meta?.label}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-500 text-xs">{r.note ?? '—'}</td>
+                    <td className="px-5 py-3 text-gray-500 dark:text-gray-400 text-xs">{r.note ?? '—'}</td>
                   </tr>
                 )
               })}
@@ -212,7 +212,7 @@ export default function AdminAttendancePage() {
           </table>
           </div>
           {filtered.length > 100 && (
-            <div className="px-5 py-3 border-t border-gray-100 text-xs text-gray-400">
+            <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400">
               {t.aatLimitPrefix}{filtered.length} {t.aatLimitSuffix}
             </div>
           )}

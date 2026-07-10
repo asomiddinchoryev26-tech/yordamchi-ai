@@ -42,7 +42,7 @@ function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
       'text-[11px] font-semibold px-2 py-0.5 rounded-full',
       status === 'active'
         ? 'bg-emerald-100 text-emerald-700'
-        : 'bg-gray-100 text-gray-500',
+        : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
     )}>
       {status === 'active' ? t.admActive : t.tdInactive}
     </span>
@@ -223,8 +223,8 @@ export default function StudentsPage() {
       {/* ── Sarlavha ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t.tdStudents}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tdStudents}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {loading ? t.tcUploading : `${students.length} ${t.stuCount}`}
           </p>
         </div>
@@ -243,15 +243,15 @@ export default function StudentsPage() {
       {/* ── Statistika ── */}
       {!loading && students.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.thTotal}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{students.length}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{students.length}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.admActive}</p>
             <p className="text-2xl font-bold text-emerald-600 mt-1">{activeCount}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.tdInactive}</p>
             <p className="text-2xl font-bold text-gray-400 mt-1">{inactiveCount}</p>
           </div>
@@ -271,15 +271,15 @@ export default function StudentsPage() {
 
       {/* ── Forma ── */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-bold text-gray-900">
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
               {editingId ? t.stuEditStudent : t.stuAddStudent}
             </h2>
             <button
               type="button"
               onClick={closeForm}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -289,7 +289,7 @@ export default function StudentsPage() {
             {/* Chap ustun — Shaxsiy ma'lumot */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.thFullName} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -297,12 +297,12 @@ export default function StudentsPage() {
                   value={form.full_name}
                   onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
                   placeholder={t.stuNamePh}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   Email {!editingId && <span className="text-red-500">*</span>}
                 </label>
                 <input
@@ -312,8 +312,8 @@ export default function StudentsPage() {
                   placeholder="student@example.com"
                   disabled={!!editingId}
                   className={cn(
-                    'w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors',
-                    editingId ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 'bg-white',
+                    'w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors',
+                    editingId ? 'bg-gray-50 dark:bg-gray-800/50 text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-800',
                   )}
                 />
                 {editingId && (
@@ -323,7 +323,7 @@ export default function StudentsPage() {
 
               {!editingId && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                     {t.thTempPassword} <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -331,13 +331,13 @@ export default function StudentsPage() {
                     value={form.password}
                     onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                     placeholder={t.pfPwMin}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.thPhone}
                 </label>
                 <input
@@ -345,12 +345,12 @@ export default function StudentsPage() {
                   value={form.phone}
                   onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                   placeholder="+998 90 123 45 67"
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.stuExtraInfo}
                 </label>
                 <textarea
@@ -358,7 +358,7 @@ export default function StudentsPage() {
                   onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
                   placeholder={t.stuBioPh}
                   rows={3}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors resize-none"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors resize-none"
                 />
               </div>
             </div>
@@ -366,22 +366,22 @@ export default function StudentsPage() {
             {/* O'ng ustun — Guruhlar va holat */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.stuAddToGroup}
                 </label>
                 {activeGroups.length === 0 ? (
-                  <div className="p-4 rounded-xl border border-dashed border-gray-200 text-center">
+                  <div className="p-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 text-center">
                     <BookOpen className="w-6 h-6 text-gray-300 mx-auto mb-2" />
                     <p className="text-xs text-gray-400">
                       {t.stuNoGroupsA} <strong>{t.tdGroups}</strong> {t.stuNoGroupsB}
                     </p>
                   </div>
                 ) : (
-                  <div className="border border-gray-200 rounded-xl p-3 max-h-52 overflow-y-auto space-y-0.5">
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 max-h-52 overflow-y-auto space-y-0.5">
                     {activeGroups.map(g => (
                       <label
                         key={g.id}
-                        className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/40 dark:bg-gray-800/50 cursor-pointer transition-colors"
                       >
                         <input
                           type="checkbox"
@@ -390,7 +390,7 @@ export default function StudentsPage() {
                           className="w-4 h-4 rounded accent-blue-600"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 truncate">{g.name}</p>
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{g.name}</p>
                           {g.subject && (
                             <p className="text-xs text-gray-400 truncate">
                               {g.subject.icon} {g.subject.name}
@@ -405,13 +405,13 @@ export default function StudentsPage() {
 
               {editingId && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                     {t.tdColStatus}
                   </label>
                   <select
                     value={form.status}
                     onChange={e => setForm(f => ({ ...f, status: e.target.value as typeof f.status }))}
-                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
                   >
                     <option value="active">{t.admActive}</option>
                     <option value="inactive">{t.tdInactive}</option>
@@ -446,7 +446,7 @@ export default function StudentsPage() {
               type="button"
               onClick={closeForm}
               disabled={formLoading}
-              className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
+              className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700/40 dark:bg-gray-800/50 transition-colors disabled:opacity-60"
             >
               {t.fpCancel}
             </button>
@@ -464,7 +464,7 @@ export default function StudentsPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t.tstSearchPh}
-              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
             />
           </div>
 
@@ -479,7 +479,7 @@ export default function StudentsPage() {
                   'px-3 py-2 text-xs font-semibold rounded-xl border transition-colors',
                   statusFilter === s
                     ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300',
+                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-blue-300',
                 )}
               >
                 {s === 'all' ? t.adAll : s === 'active' ? t.admActive : t.tdInactive}
@@ -491,7 +491,7 @@ export default function StudentsPage() {
               <select
                 value={groupFilter}
                 onChange={e => setGroupFilter(e.target.value)}
-                className="px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                className="px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
               >
                 <option value="all">{t.tstAllGroups}</option>
                 {activeGroups.map(g => (
@@ -507,14 +507,14 @@ export default function StudentsPage() {
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse">
               <div className="flex items-center gap-4">
                 <div className="w-11 h-11 bg-gray-200 rounded-xl flex-shrink-0" />
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-1/3" />
-                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2" />
                 </div>
-                <div className="h-6 bg-gray-100 rounded-full w-14" />
+                <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-full w-14" />
               </div>
             </div>
           ))}
@@ -523,11 +523,11 @@ export default function StudentsPage() {
 
       {/* ── Bo'sh holat ── */}
       {!loading && students.length === 0 && !pageError && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Users className="w-7 h-7 text-blue-600" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
             {t.stuEmpty}
           </h3>
           <p className="text-sm text-gray-400 mb-5">
@@ -546,8 +546,8 @@ export default function StudentsPage() {
 
       {/* ── Natija yo'q ── */}
       {!loading && students.length > 0 && filtered.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-10 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {search
               ? <>"<span className="font-medium">{search}</span>" {t.stuSearchNotFoundSuffix}</>
               : t.thFilterNoResult
@@ -562,7 +562,7 @@ export default function StudentsPage() {
           {filtered.map(student => (
             <div
               key={student.id}
-              className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow"
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
             >
               <div className="flex items-start gap-4">
                 <InitialAvatar name={student.full_name} email={student.email} />
@@ -570,13 +570,13 @@ export default function StudentsPage() {
                 {/* Asosiy ma'lumot */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-gray-900 truncate">
+                    <span className="font-bold text-gray-900 dark:text-gray-100 truncate">
                       {student.full_name ?? t.taNoName}
                     </span>
                     <StatusBadge status={student.status} />
                   </div>
 
-                  <p className="text-sm text-gray-500 mt-0.5 truncate">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                     {student.email}
                   </p>
 
@@ -594,7 +594,7 @@ export default function StudentsPage() {
                             'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold',
                             g.status === 'active'
                               ? 'bg-blue-50 text-blue-700 border border-blue-100'
-                              : 'bg-gray-100 text-gray-500',
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
                           )}
                         >
                           {g.name}
@@ -630,7 +630,7 @@ export default function StudentsPage() {
                         <button
                           type="button"
                           onClick={() => setDeletingId(null)}
-                          className="px-3 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                          className="px-3 py-1.5 text-xs font-semibold border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 dark:bg-gray-800/50 rounded-lg transition-colors"
                         >
                           {t.fpCancel}
                         </button>
@@ -641,7 +641,7 @@ export default function StudentsPage() {
                       <button
                         type="button"
                         onClick={() => openEdit(student)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                         title={t.tcEditT}
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -649,7 +649,7 @@ export default function StudentsPage() {
                       <button
                         type="button"
                         onClick={() => setDeletingId(student.id)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
                         title={t.admDisable}
                       >
                         <Trash2 className="w-3.5 h-3.5" />

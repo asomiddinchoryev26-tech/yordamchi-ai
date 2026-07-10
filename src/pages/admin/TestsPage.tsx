@@ -57,8 +57,8 @@ export default function AdminTestsPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.tsTitle}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.atSubtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tsTitle}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.atSubtitle}</p>
       </div>
 
       {pageError && (
@@ -74,15 +74,15 @@ export default function AdminTestsPage() {
       {/* Statistika */}
       {!loading && tests.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.thTotal}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{tests.length}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{tests.length}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.alPublished}</p>
             <p className="text-2xl font-bold text-emerald-600 mt-1">{totalPublished}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.tcDraft}</p>
             <p className="text-2xl font-bold text-gray-400 mt-1">{totalDraft}</p>
           </div>
@@ -99,7 +99,7 @@ export default function AdminTestsPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t.atSearchPh}
-              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
           <div className="flex gap-2">
@@ -112,7 +112,7 @@ export default function AdminTestsPage() {
                   'px-3 py-2 text-xs font-semibold rounded-xl border transition-colors',
                   filterPublished === f
                     ? 'bg-emerald-600 text-white border-emerald-600'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300',
+                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-emerald-300',
                 )}
               >
                 {f === 'all' ? t.adAll : f === 'published' ? t.tcPublished : t.tcDraft}
@@ -125,11 +125,11 @@ export default function AdminTestsPage() {
       {loading && (
         <div className="space-y-3">
           {[1,2,3].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse flex gap-4">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse flex gap-4">
               <div className="w-10 h-10 bg-gray-200 rounded-xl flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-100 rounded w-1/4" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/4" />
               </div>
             </div>
           ))}
@@ -137,7 +137,7 @@ export default function AdminTestsPage() {
       )}
 
       {!loading && tests.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <FileText className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.atEmpty}</p>
           <p className="text-xs text-gray-400 mt-1">{t.atEmptyHint}</p>
@@ -147,7 +147,7 @@ export default function AdminTestsPage() {
       {!loading && filtered.length > 0 && (
         <div className="space-y-3">
           {filtered.map(test => (
-            <div key={test.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+            <div key={test.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
               <div className="flex items-start gap-4">
                 <div className={cn(
                   'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
@@ -158,10 +158,10 @@ export default function AdminTestsPage() {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-bold text-gray-900">{test.title}</h3>
+                    <h3 className="font-bold text-gray-900 dark:text-gray-100">{test.title}</h3>
                     <span className={cn(
                       'text-[11px] font-semibold px-2 py-0.5 rounded-full',
-                      test.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500',
+                      test.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
                     )}>
                       {test.is_published ? t.tcPublished : t.tcDraft}
                     </span>
@@ -200,7 +200,7 @@ export default function AdminTestsPage() {
                       <button
                         type="button"
                         onClick={() => setDeletingId(null)}
-                        className="px-3 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                        className="px-3 py-1.5 text-xs font-semibold border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 dark:bg-gray-800/50 rounded-lg transition-colors"
                       >
                         {t.fpCancel}
                       </button>
@@ -209,7 +209,7 @@ export default function AdminTestsPage() {
                     <button
                       type="button"
                       onClick={() => setDeletingId(test.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
                       title={t.admDisable}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -223,8 +223,8 @@ export default function AdminTestsPage() {
       )}
 
       {!loading && tests.length > 0 && filtered.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">{t.atFilterNotFound}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-10 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t.atFilterNotFound}</p>
         </div>
       )}
     </div>

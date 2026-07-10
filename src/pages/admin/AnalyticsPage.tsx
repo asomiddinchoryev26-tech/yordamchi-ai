@@ -38,10 +38,10 @@ function HBar({ label, value, max, color, subLabel }: {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-xs">
-        <span className="text-gray-600 font-medium">{label}</span>
-        <span className="text-gray-500">{subLabel ?? value}</span>
+        <span className="text-gray-600 dark:text-gray-300 font-medium">{label}</span>
+        <span className="text-gray-500 dark:text-gray-400">{subLabel ?? value}</span>
       </div>
-      <div className="h-6 bg-gray-100 rounded-lg overflow-hidden">
+      <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
         <div
           className={cn('h-full rounded-lg flex items-center justify-end px-2 transition-all', color)}
           style={{ width: `${Math.max(pct, 2)}%` }}
@@ -149,7 +149,7 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-4 pb-8">
       <div className="h-8 bg-gray-200 rounded w-40 animate-pulse" />
       <div className="grid grid-cols-2 gap-4">
-        {[1,2,3,4].map(i => <div key={i} className="h-48 bg-gray-100 rounded-2xl animate-pulse" />)}
+        {[1,2,3,4].map(i => <div key={i} className="h-48 bg-gray-100 dark:bg-gray-700 rounded-2xl animate-pulse" />)}
       </div>
     </div>
   )
@@ -162,8 +162,8 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="space-y-6 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.anTitle}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.anSubtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.anTitle}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.anSubtitle}</p>
       </div>
 
       {error && (
@@ -183,12 +183,12 @@ export default function AdminAnalyticsPage() {
           ].map(s => {
             const Icon = s.icon
             return (
-              <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex items-center gap-3">
+              <div key={s.label} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 shadow-sm flex items-center gap-3">
                 <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', s.color)}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{s.value}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{s.value}</p>
                   <p className="text-xs text-gray-400">{s.label}</p>
                 </div>
               </div>
@@ -199,10 +199,10 @@ export default function AdminAnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Oylik talabalar ro'yxatdan o'tishi */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <Users className="w-4 h-4 text-blue-600" />
-            <h2 className="text-base font-bold text-gray-900">{t.anMonthlyStudents}</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t.anMonthlyStudents}</h2>
           </div>
           {months.every(m => m.students === 0) ? (
             <p className="text-sm text-gray-400 italic text-center py-6">{t.anNoData}</p>
@@ -223,10 +223,10 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Oylik o'qituvchilar */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <TrendingUp className="w-4 h-4 text-indigo-600" />
-            <h2 className="text-base font-bold text-gray-900">{t.anMonthlyTeachers}</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t.anMonthlyTeachers}</h2>
           </div>
           {months.every(m => m.teachers === 0) ? (
             <p className="text-sm text-gray-400 italic text-center py-6">{t.anNoData}</p>
@@ -247,10 +247,10 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Davomat taqsimoti */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <CheckSquare className="w-4 h-4 text-emerald-600" />
-            <h2 className="text-base font-bold text-gray-900">{t.anAttStates}</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t.anAttStates}</h2>
           </div>
           {!attDist || attDist.total === 0 ? (
             <p className="text-sm text-gray-400 italic text-center py-6">{t.sdNoAttendance}</p>
@@ -299,8 +299,8 @@ export default function AdminAnalyticsPage() {
                 ] as const).map(s => (
                   <div key={s.key} className="flex items-center gap-2 text-xs">
                     <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-                    <span className="text-gray-600 flex-1">{s.label}</span>
-                    <span className="font-semibold text-gray-900">{attDist[s.key]}</span>
+                    <span className="text-gray-600 dark:text-gray-300 flex-1">{s.label}</span>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">{attDist[s.key]}</span>
                     <span className="text-gray-400 w-10 text-right">
                       {Math.round((attDist[s.key] / attDist.total) * 100)}%
                     </span>
@@ -312,10 +312,10 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Test natijalari */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-5">
             <FileText className="w-4 h-4 text-amber-600" />
-            <h2 className="text-base font-bold text-gray-900">{t.tdTestResults}</h2>
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t.tdTestResults}</h2>
           </div>
           {!testDist || testDist.total === 0 ? (
             <p className="text-sm text-gray-400 italic text-center py-6">{t.anNoTestResults}</p>
@@ -329,7 +329,7 @@ export default function AdminAnalyticsPage() {
                 )}>
                   {testDist.total > 0 ? Math.round((testDist.passed / testDist.total) * 100) : 0}%
                 </p>
-                <p className="text-sm text-gray-500 mt-1">{t.anPassRate}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t.anPassRate}</p>
               </div>
               <div className="space-y-2">
                 <HBar label={t.anPassed} value={testDist.passed} max={testDist.total} color="bg-emerald-500"

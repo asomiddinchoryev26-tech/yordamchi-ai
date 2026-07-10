@@ -46,8 +46,8 @@ export function OrgInviteCard() {
           <Building2 className="w-5 h-5 text-[#93BBFF]" aria-hidden="true" />
         </div>
         <div className="min-w-0">
-          <p className="text-[15px] font-black text-gray-900 truncate">{org.name}</p>
-          <p className="text-[12px] text-gray-500">O'qituvchi va talabalarni shu kod bilan taklif qiling</p>
+          <p className="text-[15px] font-black text-gray-900 dark:text-gray-100 truncate">{org.name}</p>
+          <p className="text-[12px] text-gray-500 dark:text-gray-400">O'qituvchi va talabalarni shu kod bilan taklif qiling</p>
         </div>
       </div>
 

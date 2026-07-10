@@ -44,7 +44,7 @@ function PlatformOverview() {
     { l: t.saStatRevenue, v: s ? `${fmt(s.total_revenue)} ${t.saSum}` : '…', Icon: Wallet, c: 'text-emerald-500' },
   ]
   return (
-    <div className={CARD} style={{ background: 'linear-gradient(135deg,#EEF2FF,#F5F3FF)' }}>
+    <div className={`${CARD} bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-gray-800 dark:to-gray-800`}>
       <Head Icon={Globe} title={t.saPlatform} color="text-indigo-500" />
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         {cards.map(c => (

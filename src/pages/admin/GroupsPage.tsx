@@ -11,7 +11,7 @@ import type { SubjectRow } from '@/services/subject.service'
 
 const STATUS_LABELS: Record<string, { label: keyof Translations; className: string }> = {
   active:    { label: 'admActive',   className: 'bg-emerald-100 text-emerald-700' },
-  inactive:  { label: 'tdInactive',  className: 'bg-gray-100 text-gray-600'      },
+  inactive:  { label: 'tdInactive',  className: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'      },
   completed: { label: 'tdCompleted', className: 'bg-blue-100 text-blue-700'    },
 }
 
@@ -164,8 +164,8 @@ export default function GroupsPage() {
       {/* ── Sarlavha ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t.tdGroups}</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tdGroups}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {groups.length} {t.tdGroupWord}
           </p>
         </div>
@@ -191,15 +191,15 @@ export default function GroupsPage() {
 
       {/* ── Forma ── */}
       {showForm && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-bold text-gray-900">
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
               {editingId ? t.agEditGroup : t.agAddGroup}
             </h2>
             <button
               type="button"
               onClick={closeForm}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-700 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -209,7 +209,7 @@ export default function GroupsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Nom */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.agGroupName} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -217,19 +217,19 @@ export default function GroupsPage() {
                   value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder={t.agNamePh}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 />
               </div>
 
               {/* Fan */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.tcSubject}
                 </label>
                 <select
                   value={form.subject_id}
                   onChange={e => setForm(f => ({ ...f, subject_id: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 >
                   <option value="">{t.tcNoSubject}</option>
                   {subjects.map(s => (
@@ -242,7 +242,7 @@ export default function GroupsPage() {
 
               {/* Sig'im */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.agCapacity}
                 </label>
                 <input
@@ -251,19 +251,19 @@ export default function GroupsPage() {
                   max={200}
                   value={form.capacity}
                   onChange={e => setForm(f => ({ ...f, capacity: Number(e.target.value) }))}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 />
               </div>
 
               {/* Holat */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.tdColStatus}
                 </label>
                 <select
                   value={form.status}
                   onChange={e => setForm(f => ({ ...f, status: e.target.value as typeof form.status }))}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 >
                   <option value="active">{t.admActive}</option>
                   <option value="inactive">{t.tdInactive}</option>
@@ -273,34 +273,34 @@ export default function GroupsPage() {
 
               {/* Boshlanish sanasi */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.agStartDate}
                 </label>
                 <input
                   type="date"
                   value={form.start_date}
                   onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 />
               </div>
 
               {/* Tugash sanasi */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                   {t.agEndDate}
                 </label>
                 <input
                   type="date"
                   value={form.end_date}
                   onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))}
-                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
+                  className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
                 />
               </div>
             </div>
 
             {/* Tavsif */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                 {t.sbDescription}
               </label>
               <textarea
@@ -308,7 +308,7 @@ export default function GroupsPage() {
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 placeholder={t.agDescPh}
                 rows={2}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors resize-none"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors resize-none"
               />
             </div>
 
@@ -336,7 +336,7 @@ export default function GroupsPage() {
               <button
                 type="button"
                 onClick={closeForm}
-                className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+                className="px-5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700/40 dark:bg-gray-800/50 transition-colors"
               >
                 {t.fpCancel}
               </button>
@@ -354,7 +354,7 @@ export default function GroupsPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t.agSearchPh}
-            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-colors"
           />
         </div>
       )}
@@ -363,14 +363,14 @@ export default function GroupsPage() {
       {loading && (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gray-200 rounded-xl flex-shrink-0" />
                 <div className="flex-1">
                   <div className="h-4 bg-gray-200 rounded w-1/3 mb-2" />
-                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2" />
                 </div>
-                <div className="h-6 bg-gray-100 rounded-full w-16" />
+                <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-full w-16" />
               </div>
             </div>
           ))}
@@ -379,11 +379,11 @@ export default function GroupsPage() {
 
       {/* ── Bo'sh holat ── */}
       {!loading && groups.length === 0 && !pageError && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-12 text-center">
           <div className="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Users className="w-7 h-7 text-violet-600" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 mb-1">{t.agEmpty}</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">{t.agEmpty}</h3>
           <p className="text-sm text-gray-400 mb-5">
             {t.agEmptyHint}
           </p>
@@ -400,8 +400,8 @@ export default function GroupsPage() {
 
       {/* ── Qidiruv natijasi yo'q ── */}
       {!loading && groups.length > 0 && filtered.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-10 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             "<span className="font-medium">{search}</span>" {t.agSearchNotFoundSuffix}
           </p>
         </div>
@@ -416,7 +416,7 @@ export default function GroupsPage() {
             return (
               <div
                 key={group.id}
-                className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start gap-4">
                   {/* Fan ikonkasi yoki standart icon */}
@@ -433,14 +433,14 @@ export default function GroupsPage() {
                   {/* Asosiy ma'lumot */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-gray-900">{group.name}</h3>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{group.name}</h3>
                       <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', status.className)}>
                         {t[status.label]}
                       </span>
                     </div>
 
                     {/* Fan va o'qituvchi */}
-                    <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 flex-wrap">
+                    <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400 flex-wrap">
                       {subject && (
                         <span className="flex items-center gap-1">
                           <span
@@ -492,7 +492,7 @@ export default function GroupsPage() {
                         <button
                           type="button"
                           onClick={() => setDeletingId(null)}
-                          className="px-3 py-1.5 text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                          className="px-3 py-1.5 text-xs font-semibold border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40 dark:bg-gray-800/50 rounded-lg transition-colors"
                         >
                           {t.fpCancel}
                         </button>
@@ -502,7 +502,7 @@ export default function GroupsPage() {
                         <button
                           type="button"
                           onClick={() => openEdit(group)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-colors"
                           title={t.tcEditT}
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -510,7 +510,7 @@ export default function GroupsPage() {
                         <button
                           type="button"
                           onClick={() => setDeletingId(group.id)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-colors"
                           title={t.admDisable}
                         >
                           <Trash2 className="w-3.5 h-3.5" />

@@ -26,12 +26,12 @@ function ChangePasswordCard() {
     setTimeout(() => setDone(false), 4000)
   }
 
-  const INP = 'w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors'
+  const INP = 'w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors'
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm space-y-4">
       <div className="flex items-center gap-2">
         <Lock className="w-4 h-4 text-emerald-600" />
-        <h2 className="text-base font-bold text-gray-900">{t.asSecurity}</h2>
+        <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t.asSecurity}</h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <input type="password" value={newPw}   onChange={e => setNewPw(e.target.value)}   placeholder={t.asNewPw}     className={INP} autoComplete="new-password" />
@@ -127,11 +127,11 @@ export default function AdminSettingsPage() {
   if (loading) return (
     <div className="space-y-4 pb-8 max-w-2xl">
       <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4 animate-pulse">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 space-y-4 animate-pulse">
         {[1,2,3,4].map(i => (
           <div key={i} className="space-y-2">
             <div className="h-3 bg-gray-200 rounded w-1/4" />
-            <div className="h-10 bg-gray-100 rounded-xl" />
+            <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded-xl" />
           </div>
         ))}
       </div>
@@ -141,8 +141,8 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-5 pb-8 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.asTitle}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.asSubtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.asTitle}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.asSubtitle}</p>
       </div>
 
       {saved && (
@@ -159,15 +159,15 @@ export default function AdminSettingsPage() {
       )}
 
       {/* Asosiy sozlamalar */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-5">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm space-y-5">
         <div className="flex items-center gap-2 mb-2">
           <Settings className="w-4 h-4 text-emerald-600" />
-          <h2 className="text-base font-bold text-gray-900">{t.asGeneral}</h2>
+          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t.asGeneral}</h2>
         </div>
 
         {SETTING_FIELDS.map(field => (
           <div key={field.key}>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
               {t[field.labelKey]}
               {field.required && <span className="text-red-500 ml-1">*</span>}
             </label>
@@ -177,7 +177,7 @@ export default function AdminSettingsPage() {
                 onChange={e => handleChange(field.key, e.target.value)}
                 placeholder={field.phKey ? t[field.phKey] : field.placeholder}
                 rows={3}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
               />
             ) : (
               <input
@@ -187,7 +187,7 @@ export default function AdminSettingsPage() {
                 placeholder={field.phKey ? t[field.phKey] : field.placeholder}
                 min={field.type === 'number' ? 1 : undefined}
                 max={field.type === 'number' ? 200 : undefined}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
               />
             )}
           </div>
@@ -195,8 +195,8 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Tizim ma'lumotlari (read-only) */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900 mb-4">{t.asSystemInfo}</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
+        <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-4">{t.asSystemInfo}</h2>
         <div className="space-y-3 text-sm">
           {[
             { label: t.asPlatform,   value: 'YordamchiAI LMS' },
@@ -205,9 +205,9 @@ export default function AdminSettingsPage() {
             { label: 'Frontend',     value: 'React 19 + Vite + TypeScript' },
             { label: 'UI framework', value: 'Tailwind CSS v4' },
           ].map(row => (
-            <div key={row.label} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-              <span className="text-gray-500">{row.label}</span>
-              <span className="font-medium text-gray-900">{row.value}</span>
+            <div key={row.label} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+              <span className="text-gray-500 dark:text-gray-400">{row.label}</span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">{row.value}</span>
             </div>
           ))}
         </div>

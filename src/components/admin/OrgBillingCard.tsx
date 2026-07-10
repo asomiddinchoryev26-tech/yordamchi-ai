@@ -86,7 +86,7 @@ export function OrgBillingCard() {
   const upgrades = plans.filter(p => p.key !== 'free' && p.key !== plan)
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -94,8 +94,8 @@ export function OrgBillingCard() {
             <Crown className={isPaid ? 'w-5 h-5 text-white' : 'w-5 h-5 text-gray-400'} />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900">Tashkilot rejasi</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Tashkilot rejasi</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               <span className="font-semibold uppercase" style={{ color: isPaid ? '#F59E0B' : '#6b7280' }}>{plan}</span>
               {isPaid && expiry && <> · {new Date(expiry).toLocaleDateString('uz-UZ')} gacha</>}
             </p>
@@ -104,15 +104,15 @@ export function OrgBillingCard() {
       </div>
 
       {pending ? (
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200">
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-900/30">
           <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
-          <p className="text-sm text-amber-700">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
             <b className="uppercase">{pending.plan_type}</b> rejaga so'rov yuborildi — tasdiqlanishi kutilmoqda.
           </p>
         </div>
       ) : chosen ? (
         <div className="space-y-3">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
             <b className="uppercase">{chosen}</b> rejaga o'tish uchun to'lov usulini tanlang.
           </p>
 
@@ -133,13 +133,13 @@ export function OrgBillingCard() {
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-[11px] text-gray-400">
-                <span className="flex-1 h-px bg-gray-200" /> yoki chek yuklang <span className="flex-1 h-px bg-gray-200" />
+              <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
+                <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" /> yoki chek yuklang <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
               </div>
             </>
           )}
 
-          <label className="flex items-center justify-center gap-2 w-full px-3.5 py-3 rounded-xl border border-dashed border-gray-300 text-sm text-gray-500 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors">
+          <label className="flex items-center justify-center gap-2 w-full px-3.5 py-3 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 dark:hover:bg-gray-700/30 transition-colors">
             {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : receipt ? <Check className="w-4 h-4 text-emerald-500" /> : <Upload className="w-4 h-4" />}
             {uploading ? 'Yuklanmoqda…' : receipt ? 'Chek yuklandi ✓' : "To'lov chekini yuklash (rasm)"}
             <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
@@ -147,7 +147,7 @@ export function OrgBillingCard() {
           {err && <p className="text-sm text-red-600">{err}</p>}
           <div className="flex gap-2.5">
             <button type="button" onClick={() => setChosen(null)}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50">Bekor</button>
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/40">Bekor</button>
             <button type="button" onClick={submit} disabled={busy}
               className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2">
               {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "So'rov yuborish"}
@@ -158,10 +158,10 @@ export function OrgBillingCard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           {upgrades.map(p => (
             <button key={p.key} type="button" onClick={() => { setChosen(p.key); setErr(null) }}
-              className="flex items-center justify-between gap-2 p-3.5 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/40 transition-colors text-left">
+              className="flex items-center justify-between gap-2 p-3.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50/40 dark:hover:bg-gray-700/30 transition-colors text-left">
               <div>
-                <p className="text-sm font-bold text-gray-900 capitalize">{p.name}</p>
-                <p className="text-xs text-gray-500">{fmtPrice(p.price_uzs)}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100 capitalize">{p.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{fmtPrice(p.price_uzs)}</p>
               </div>
               <Check className="w-4 h-4 text-blue-500" />
             </button>

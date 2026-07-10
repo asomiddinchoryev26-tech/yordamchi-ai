@@ -24,7 +24,7 @@ type StatusFilter = 'all' | 'active' | 'inactive' | 'completed'
 
 const STATUS_META: Record<string, { label: keyof Translations; bg: string; color: string }> = {
   active:    { label: 'admActive',   bg: 'bg-emerald-100', color: 'text-emerald-700' },
-  inactive:  { label: 'tdInactive',  bg: 'bg-gray-100',    color: 'text-gray-600'    },
+  inactive:  { label: 'tdInactive',  bg: 'bg-gray-100 dark:bg-gray-700',    color: 'text-gray-600 dark:text-gray-300'    },
   completed: { label: 'tdCompleted', bg: 'bg-blue-100',    color: 'text-blue-700'    },
 }
 
@@ -133,8 +133,8 @@ export default function AdminCoursesPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.adCourses}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.adCourses}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
           {loading ? t.tcUploading : `${courses.length} ${t.adCoursesCount}`}
         </p>
       </div>
@@ -155,9 +155,9 @@ export default function AdminCoursesPage() {
             { label: t.tdStudents,      value: counts.students,   color: 'text-indigo-600',  bg: 'bg-indigo-50'  },
             { label: t.tdLessons,       value: counts.lessons,    color: 'text-amber-600',   bg: 'bg-amber-50'   },
           ].map(s => (
-            <div key={s.label} className={cn('rounded-2xl border border-gray-100 p-4', s.bg)}>
+            <div key={s.label} className={cn('rounded-2xl border border-gray-100 dark:border-gray-700 p-4', s.bg)}>
               <p className={cn('text-2xl font-bold', s.color)}>{s.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label}</p>
             </div>
           ))}
         </div>
@@ -173,7 +173,7 @@ export default function AdminCoursesPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t.acSearchPh}
-              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -186,7 +186,7 @@ export default function AdminCoursesPage() {
                   'px-3 py-2 text-xs font-semibold rounded-xl border transition-colors',
                   statusFilter === s
                     ? 'bg-emerald-600 text-white border-emerald-600'
-                    : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300',
+                    : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-emerald-300',
                 )}
               >
                 {s === 'all' ? t.adAll : STATUS_META[s] ? t[STATUS_META[s].label] : s}
@@ -197,7 +197,7 @@ export default function AdminCoursesPage() {
                 <select
                   value={subjectFilter}
                   onChange={e => setSubjectFilter(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  className="appearance-none pl-3 pr-8 py-2 text-xs font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                 >
                   <option value="all">{t.asgpAllSubjects}</option>
                   {uniqueSubjects.map(s => (
@@ -215,11 +215,11 @@ export default function AdminCoursesPage() {
       {loading && (
         <div className="space-y-3">
           {[1,2,3].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse flex gap-4">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse flex gap-4">
               <div className="w-12 h-12 bg-gray-200 rounded-xl flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-100 rounded w-1/2" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/2" />
               </div>
             </div>
           ))}
@@ -228,7 +228,7 @@ export default function AdminCoursesPage() {
 
       {/* Bo'sh */}
       {!loading && courses.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.adNoCourses}</p>
           <p className="text-xs text-gray-400 mt-1">
@@ -238,8 +238,8 @@ export default function AdminCoursesPage() {
       )}
 
       {!loading && courses.length > 0 && filtered.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
-          <p className="text-sm text-gray-500">{t.acFilterNotFound}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-10 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t.acFilterNotFound}</p>
         </div>
       )}
 
@@ -251,7 +251,7 @@ export default function AdminCoursesPage() {
             const fillPct = c.capacity > 0 ? Math.round((c.student_count / c.capacity) * 100) : 0
 
             return (
-              <div key={c.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+              <div key={c.id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                 <div className="flex items-start gap-4">
                   {/* Fan ikonkasi */}
                   <div
@@ -266,7 +266,7 @@ export default function AdminCoursesPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-gray-900">{c.name}</h3>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{c.name}</h3>
                       <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-full', st.bg, st.color)}>
                         {t[st.label]}
                       </span>
@@ -280,7 +280,7 @@ export default function AdminCoursesPage() {
 
                     {/* O'qituvchi */}
                     {c.teacher && (
-                      <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                      <div className="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
                         <GraduationCap className="w-3 h-3" />
                         <span>{c.teacher.full_name ?? c.teacher.email ?? '—'}</span>
                       </div>
@@ -296,7 +296,7 @@ export default function AdminCoursesPage() {
                     )}
 
                     {/* Statistika */}
-                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 flex-wrap">
+                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
                       <span className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
                         {c.student_count}/{c.capacity} {t.tdStudentWord}
@@ -310,7 +310,7 @@ export default function AdminCoursesPage() {
 
                     {/* To'lganlik */}
                     <div className="mt-2 flex items-center gap-2">
-                      <div className="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="w-32 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className={cn(
                             'h-full rounded-full',

@@ -40,8 +40,8 @@ function StatBar({ label, value, max, color }: { label: string; value: number; m
   const pct = max > 0 ? Math.round((value / max) * 100) : 0
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-gray-500 w-24 flex-shrink-0 truncate">{label}</span>
-      <div className="flex-1 h-5 bg-gray-100 rounded-lg overflow-hidden">
+      <span className="text-xs text-gray-500 dark:text-gray-400 w-24 flex-shrink-0 truncate">{label}</span>
+      <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
         <div
           className={cn('h-full rounded-lg flex items-center justify-end px-2 transition-all', color)}
           style={{ width: `${Math.max(pct, 4)}%` }}
@@ -49,7 +49,7 @@ function StatBar({ label, value, max, color }: { label: string; value: number; m
           {pct > 15 && <span className="text-[10px] text-white font-bold">{value}</span>}
         </div>
       </div>
-      <span className="text-xs font-semibold text-gray-700 w-8 text-right">{pct}%</span>
+      <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 w-8 text-right">{pct}%</span>
     </div>
   )
 }
@@ -160,7 +160,7 @@ export default function AdminReportsPage() {
     <div className="space-y-4 pb-8">
       <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
       <div className="grid grid-cols-3 gap-3">
-        {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-gray-100 rounded-2xl animate-pulse" />)}
+        {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-gray-100 dark:bg-gray-700 rounded-2xl animate-pulse" />)}
       </div>
     </div>
   )
@@ -168,8 +168,8 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.tdTabReports}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.arpSubtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tdTabReports}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.arpSubtitle}</p>
       </div>
 
       {error && (
@@ -192,12 +192,12 @@ export default function AdminReportsPage() {
           ].map(s => {
             const Icon = s.icon
             return (
-              <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
+              <div key={s.label} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4 flex items-center gap-3 shadow-sm">
                 <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0', s.bg)}>
                   <Icon className={cn('w-5 h-5', s.color)} />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">{s.value.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{s.value.toLocaleString()}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
                 </div>
               </div>
@@ -208,16 +208,16 @@ export default function AdminReportsPage() {
 
       {/* Guruh davomat hisoboti */}
       {groupReports.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-5">{t.arpGroupAtt}</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
+          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-5">{t.arpGroupAtt}</h2>
           <div className="space-y-4">
             {groupReports.map(g => {
               const presentPct = g.total > 0 ? Math.round((g.present / g.total) * 100) : 0
               return (
                 <div key={g.id} className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-800">{g.name}</span>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100">{g.name}</span>
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                       <span>{g.total} {t.tdLessonWord}</span>
                       <span className={cn(
                         'font-bold',
@@ -248,8 +248,8 @@ export default function AdminReportsPage() {
 
       {/* Test natijalari hisoboti */}
       {testReports.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-5">{t.tdTestResults}</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 shadow-sm">
+          <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-5">{t.tdTestResults}</h2>
           <div className="space-y-3">
             {testReports.map(tr => {
               const passPct = tr.total > 0 ? Math.round((tr.passed / tr.total) * 100) : 0
@@ -257,16 +257,16 @@ export default function AdminReportsPage() {
               return (
                 <div key={tr.id} className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-800 truncate flex-1 mr-4">{tr.title}</span>
+                    <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate flex-1 mr-4">{tr.title}</span>
                     <div className="flex items-center gap-3 text-xs flex-shrink-0">
-                      <span className="text-gray-500">{tr.total} {t.tdStudentWord}</span>
+                      <span className="text-gray-500 dark:text-gray-400">{tr.total} {t.tdStudentWord}</span>
                       <span className={cn(
                         'font-bold',
                         passPct >= 70 ? 'text-emerald-600' : passPct >= 50 ? 'text-amber-600' : 'text-red-600'
                       )}>
                         {passPct}% {t.mpPassed}
                       </span>
-                      <span className="text-gray-500">{t.arpAvg} {avgPct}%</span>
+                      <span className="text-gray-500 dark:text-gray-400">{t.arpAvg} {avgPct}%</span>
                     </div>
                   </div>
                   <StatBar
@@ -284,7 +284,7 @@ export default function AdminReportsPage() {
 
       {/* Ma'lumot yo'q */}
       {groupReports.length === 0 && testReports.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <BarChart2 className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.arpEmpty}</p>
           <p className="text-xs text-gray-400 mt-1">
