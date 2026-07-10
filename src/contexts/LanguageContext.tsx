@@ -408,6 +408,7 @@ export type Translations = {
   arpSubtitle: string; arpGroupAtt: string; arpAvg: string; arpEmpty: string; arpEmptyHint: string
   // Admin — settings page
   asTitle: string; asSubtitle: string; asSaved: string; asGeneral: string; asSystemInfo: string; asPlatform: string; asVersion: string
+  asSecurity: string; asNewPw: string; asConfirmPw: string; asPwChange: string; asPwChanged: string; asPwShort: string; asPwMismatch: string; asPwErr: string
   asOrgName: string; asOrgDesc: string; asOrgDescPh: string; asSupportEmail: string; asMaxGroup: string; asOrgNameReq: string
   // Admin — analytics page
   anTitle: string; anSubtitle: string; anAdmins: string; anMonthlyStudents: string; anMonthlyTeachers: string; anNoData: string; anCount: string
@@ -863,6 +864,7 @@ const uz: Translations = {
   atSubtitle: 'Barcha testlar va natijalar', atSearchPh: 'Test nomi yoki guruh...', atEmpty: "Testlar yo'q", atEmptyHint: "O'qituvchilar test yaratgandan so'ng bu yerda ko'rinadi", atResults: 'natija', atFilterNotFound: "Filtr bo'yicha test topilmadi",
   arpSubtitle: 'Platforma statistikasi va hisobotlari', arpGroupAtt: "Guruh bo'yicha davomat", arpAvg: "O'rtacha:", arpEmpty: "Hisobot uchun ma'lumot yo'q", arpEmptyHint: "Davomat va test natijalarini qo'shgandan so'ng hisobot paydo bo'ladi",
   asTitle: 'Sozlamalar', asSubtitle: 'Tizim konfiguratsiyasi', asSaved: 'Sozlamalar muvaffaqiyatli saqlandi', asGeneral: 'Umumiy sozlamalar', asSystemInfo: "Tizim ma'lumotlari", asPlatform: 'Platforma', asVersion: 'Versiya',
+  asSecurity: 'Xavfsizlik', asNewPw: 'Yangi parol', asConfirmPw: 'Parolni tasdiqlang', asPwChange: 'Parolni o‘zgartirish', asPwChanged: 'Parol muvaffaqiyatli o‘zgartirildi', asPwShort: 'Parol kamida 8 ta belgidan iborat bo‘lishi kerak', asPwMismatch: 'Parollar mos kelmadi', asPwErr: 'Parolni o‘zgartirishda xatolik',
   asOrgName: 'Tashkilot nomi', asOrgDesc: 'Tashkilot tavsifi', asOrgDescPh: "Online ta'lim platformasi", asSupportEmail: 'Yordam email manzili', asMaxGroup: 'Guruhda maksimal talabalar soni', asOrgNameReq: 'Tashkilot nomi majburiy',
   anTitle: 'Analitika', anSubtitle: "Platforma ishlash ko'rsatkichlari", anAdmins: 'Adminlar', anMonthlyStudents: "Oylik talabalar (so'nggi 6 oy)", anMonthlyTeachers: "Oylik o'qituvchilar (so'nggi 6 oy)", anNoData: "Ma'lumot yo'q", anCount: 'ta',
   anAttStates: 'Davomat holatlari', anNoTestResults: "Test natijasi yo'q", anPassRate: "O'tish darajasi", anPassed: "O'tdi (≥60%)", anFailed: "O'tmadi (<60%)", anTotalSubmitted: 'topshirilgan',
@@ -1325,6 +1327,7 @@ const ru: Translations = {
   atSubtitle: 'Все тесты и результаты', atSearchPh: 'Название теста или группа...', atEmpty: 'Тестов нет', atEmptyHint: 'Когда учителя создадут тесты, они появятся здесь', atResults: 'результ.', atFilterNotFound: 'Тесты по фильтру не найдены',
   arpSubtitle: 'Статистика и отчёты платформы', arpGroupAtt: 'Посещаемость по группам', arpAvg: 'Средн.:', arpEmpty: 'Нет данных для отчёта', arpEmptyHint: 'После добавления посещаемости и результатов тестов появится отчёт',
   asTitle: 'Настройки', asSubtitle: 'Конфигурация системы', asSaved: 'Настройки успешно сохранены', asGeneral: 'Общие настройки', asSystemInfo: 'Информация о системе', asPlatform: 'Платформа', asVersion: 'Версия',
+  asSecurity: 'Безопасность', asNewPw: 'Новый пароль', asConfirmPw: 'Подтвердите пароль', asPwChange: 'Изменить пароль', asPwChanged: 'Пароль успешно изменён', asPwShort: 'Пароль должен быть не менее 8 символов', asPwMismatch: 'Пароли не совпадают', asPwErr: 'Ошибка при смене пароля',
   asOrgName: 'Название организации', asOrgDesc: 'Описание организации', asOrgDescPh: 'Онлайн-платформа обучения', asSupportEmail: 'Email поддержки', asMaxGroup: 'Макс. число учеников в группе', asOrgNameReq: 'Название организации обязательно',
   anTitle: 'Аналитика', anSubtitle: 'Показатели работы платформы', anAdmins: 'Админы', anMonthlyStudents: 'Ученики по месяцам (посл. 6 мес.)', anMonthlyTeachers: 'Учителя по месяцам (посл. 6 мес.)', anNoData: 'Нет данных', anCount: 'шт',
   anAttStates: 'Статусы посещаемости', anNoTestResults: 'Нет результатов тестов', anPassRate: 'Процент сдачи', anPassed: 'Сдал (≥60%)', anFailed: 'Не сдал (<60%)', anTotalSubmitted: 'сдано',
@@ -1787,6 +1790,7 @@ const en: Translations = {
   atSubtitle: 'All tests and results', atSearchPh: 'Test name or group...', atEmpty: 'No tests', atEmptyHint: 'When teachers create tests, they will appear here', atResults: 'results', atFilterNotFound: 'No tests found for the filter',
   arpSubtitle: 'Platform statistics and reports', arpGroupAtt: 'Attendance by group', arpAvg: 'Avg:', arpEmpty: 'No data for the report', arpEmptyHint: 'A report will appear after attendance and test results are added',
   asTitle: 'Settings', asSubtitle: 'System configuration', asSaved: 'Settings saved successfully', asGeneral: 'General settings', asSystemInfo: 'System information', asPlatform: 'Platform', asVersion: 'Version',
+  asSecurity: 'Security', asNewPw: 'New password', asConfirmPw: 'Confirm password', asPwChange: 'Change password', asPwChanged: 'Password changed successfully', asPwShort: 'Password must be at least 8 characters', asPwMismatch: 'Passwords do not match', asPwErr: 'Failed to change password',
   asOrgName: 'Organization name', asOrgDesc: 'Organization description', asOrgDescPh: 'Online education platform', asSupportEmail: 'Support email address', asMaxGroup: 'Max students per group', asOrgNameReq: 'Organization name is required',
   anTitle: 'Analytics', anSubtitle: 'Platform performance metrics', anAdmins: 'Admins', anMonthlyStudents: 'Monthly students (last 6 months)', anMonthlyTeachers: 'Monthly teachers (last 6 months)', anNoData: 'No data', anCount: 'pcs',
   anAttStates: 'Attendance states', anNoTestResults: 'No test results', anPassRate: 'Pass rate', anPassed: 'Passed (≥60%)', anFailed: 'Failed (<60%)', anTotalSubmitted: 'submitted',

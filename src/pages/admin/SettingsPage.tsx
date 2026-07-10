@@ -1,8 +1,51 @@
 import { useState, useEffect } from 'react'
-import { Save, AlertCircle, CheckCircle, Settings } from 'lucide-react'
+import { Save, AlertCircle, CheckCircle, Settings, Lock, Loader2 } from 'lucide-react'
 import { settingsService } from '@/services/settings.service'
 import type { SettingsMap } from '@/services/settings.service'
+import { supabase } from '@/lib/supabase'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
+
+// ── Parolni o'zgartirish (o'z-o'ziga xizmat — har qanday admin, super-admin ham) ──
+function ChangePasswordCard() {
+  const { t } = useLanguage()
+  const [newPw,   setNewPw]   = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [busy,    setBusy]    = useState(false)
+  const [err,     setErr]     = useState<string | null>(null)
+  const [done,    setDone]    = useState(false)
+
+  async function submit() {
+    setErr(null); setDone(false)
+    if (newPw.length < 8)     { setErr(t.asPwShort); return }
+    if (newPw !== confirm)    { setErr(t.asPwMismatch); return }
+    setBusy(true)
+    const { error } = await supabase.auth.updateUser({ password: newPw })
+    setBusy(false)
+    if (error) { setErr(t.asPwErr); return }
+    setNewPw(''); setConfirm(''); setDone(true)
+    setTimeout(() => setDone(false), 4000)
+  }
+
+  const INP = 'w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors'
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
+      <div className="flex items-center gap-2">
+        <Lock className="w-4 h-4 text-emerald-600" />
+        <h2 className="text-base font-bold text-gray-900">{t.asSecurity}</h2>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input type="password" value={newPw}   onChange={e => setNewPw(e.target.value)}   placeholder={t.asNewPw}     className={INP} autoComplete="new-password" />
+        <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder={t.asConfirmPw} className={INP} autoComplete="new-password" />
+      </div>
+      {err  && <p className="text-sm text-red-600 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> {err}</p>}
+      {done && <p className="text-sm text-emerald-600 flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> {t.asPwChanged}</p>}
+      <button type="button" onClick={() => void submit()} disabled={busy || !newPw || !confirm}
+        className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl disabled:opacity-50">
+        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />} {t.asPwChange}
+      </button>
+    </div>
+  )
+}
 
 const SETTING_FIELDS: { key: string; labelKey: keyof Translations; placeholder: string; phKey?: keyof Translations; type: 'text' | 'textarea' | 'email' | 'number'; required: boolean }[] = [
   {
@@ -169,6 +212,9 @@ export default function AdminSettingsPage() {
           ))}
         </div>
       </div>
+
+      {/* Xavfsizlik — parolni o'zgartirish */}
+      <ChangePasswordCard />
 
       <button
         type="button"
