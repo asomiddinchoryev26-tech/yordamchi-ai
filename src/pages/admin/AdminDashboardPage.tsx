@@ -66,6 +66,38 @@ function fmtDate(d: string) {
   return `${dt.getDate()} ${MONTH_LABELS[dt.getMonth()]} ${dt.getFullYear()}`
 }
 
+// ─── Header ichidagi jonli sana + vaqt (Toshkent, har soniyada) ───────────────
+const UZ_MONTHS = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avgust','sentabr','oktabr','noyabr','dekabr']
+const UZ_DAYS: Record<string,string> = { Sun:'Yakshanba', Mon:'Dushanba', Tue:'Seshanba', Wed:'Chorshanba', Thu:'Payshanba', Fri:'Juma', Sat:'Shanba' }
+
+function HeaderClock() {
+  const { t, language } = useLanguage()
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Tashkent', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now)
+  let date: string
+  if (language === 'uz') {
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tashkent', weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(now)
+    const g = (k: string) => p.find(x => x.type === k)?.value ?? ''
+    date = `${g('day')}-${UZ_MONTHS[Number(g('month')) - 1]}, ${g('year')} · ${UZ_DAYS[g('weekday')] ?? ''}`
+  } else {
+    const loc = language === 'ru' ? 'ru-RU' : 'en-US'
+    date = new Intl.DateTimeFormat(loc, { timeZone: 'Asia/Tashkent', weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).format(now)
+  }
+  return (
+    <div className="hidden sm:flex flex-col items-end gap-0.5 flex-shrink-0">
+      <p className="text-3xl font-bold text-white tabular-nums tracking-wider leading-none">{time}</p>
+      <p className="text-emerald-100 text-sm mt-1.5">{date}</p>
+      <div className="flex items-center gap-1 text-emerald-300/80 text-[11px] mt-0.5">
+        <TrendingUp className="w-3 h-3" /> {t.adRealtime}
+      </div>
+    </div>
+  )
+}
+
 
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -235,12 +267,7 @@ export default function AdminDashboardPage() {
               {t.adUsersWord}
             </p>
           </div>
-          <div className="hidden sm:flex flex-col items-center gap-1">
-            <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center text-3xl">⚙️</div>
-            <div className="flex items-center gap-1 text-emerald-300 text-xs">
-              <TrendingUp className="w-3 h-3" /> {t.adRealtime}
-            </div>
-          </div>
+          <HeaderClock />
         </div>
       </div>
 

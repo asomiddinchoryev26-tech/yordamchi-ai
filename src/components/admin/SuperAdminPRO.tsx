@@ -10,7 +10,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Activity, Crown, Megaphone, Ticket, HeartPulse, CreditCard, Loader2, Send,
-  Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet, Trash2, UserPlus, Clock,
+  Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet, Trash2, UserPlus,
 } from 'lucide-react'
 import { systemHealthService, type SystemHealth } from '@/services/systemHealth.service'
 import { platformService, type PlatformStats, type OrgRow, type OrgPlan, type PlatformUser } from '@/services/platform.service'
@@ -559,45 +559,6 @@ function ActivityLogsPanel() {
 }
 
 // ═══ Wrapper — faqat Super Admin ═══
-// ═══ Jonli sana + vaqt (Toshkent) — har soniyada yangilanadi ═══
-const UZ_MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr']
-const UZ_DAYS: Record<string, string> = { Sun: 'Yakshanba', Mon: 'Dushanba', Tue: 'Seshanba', Wed: 'Chorshanba', Thu: 'Payshanba', Fri: 'Juma', Sat: 'Shanba' }
-
-function LiveClock() {
-  const { language } = useLanguage()
-  const [now, setNow] = useState(() => new Date())
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000)
-    return () => clearInterval(id)
-  }, [])
-
-  // Vaqt — har doim 24-soatlik, Toshkent
-  const time = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Tashkent', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(now)
-
-  // Sana — o'zbekcha qo'lda (ICU uz-UZ to'liq emas), ru/en uchun Intl
-  let date: string
-  if (language === 'uz') {
-    const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Tashkent', weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(now)
-    const g = (k: string) => p.find(x => x.type === k)?.value ?? ''
-    date = `${g('day')}-${UZ_MONTHS[Number(g('month')) - 1]}, ${g('year')} · ${UZ_DAYS[g('weekday')] ?? ''}`
-  } else {
-    const loc = language === 'ru' ? 'ru-RU' : 'en-US'
-    date = new Intl.DateTimeFormat(loc, { timeZone: 'Asia/Tashkent', weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).format(now)
-  }
-
-  return (
-    <div className="flex items-center gap-2.5 pl-3 pr-3.5 py-2 rounded-xl border border-gray-100 dark:border-gray-700 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-gray-800 dark:to-gray-800 shadow-sm">
-      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)' }}>
-        <Clock className="w-4 h-4 text-white" aria-hidden="true" />
-      </div>
-      <div className="leading-tight">
-        <p className="text-[15px] font-black text-gray-900 dark:text-gray-100 tabular-nums tracking-wide">{time}</p>
-        <p className="text-[11px] text-gray-500 dark:text-gray-400">{date}</p>
-      </div>
-    </div>
-  )
-}
-
 export function SuperAdminPanel({ currentUserId }: { currentUserId: string }) {
   const { t } = useLanguage()
   const [isSuper, setIsSuper] = useState<boolean | null>(null)
@@ -612,12 +573,9 @@ export function SuperAdminPanel({ currentUserId }: { currentUserId: string }) {
   )
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Crown className="w-5 h-5 text-amber-500" />
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.saSuperMgmt}</h2>
-        </div>
-        <LiveClock />
+      <div className="flex items-center gap-2">
+        <Crown className="w-5 h-5 text-amber-500" />
+        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.saSuperMgmt}</h2>
       </div>
       <PlatformOverview />
       <OrganizationsManager />
