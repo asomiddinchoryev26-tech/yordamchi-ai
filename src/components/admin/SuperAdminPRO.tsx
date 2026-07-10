@@ -10,7 +10,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Activity, Crown, Megaphone, Ticket, HeartPulse, CreditCard, Loader2, Send,
-  Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet, Trash2,
+  Plus, Check, Search, X, Receipt, Building2, Globe, Ban, Power, Users, Wallet, Trash2, UserPlus,
 } from 'lucide-react'
 import { systemHealthService, type SystemHealth } from '@/services/systemHealth.service'
 import { platformService, type PlatformStats, type OrgRow, type OrgPlan, type PlatformUser } from '@/services/platform.service'
@@ -241,6 +241,56 @@ function PlatformUsersManager() {
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+// ═══ Yangi admin qo'shish (tanlangan tashkilotга) ═══
+function AddAdminSection() {
+  const { t } = useLanguage()
+  const [orgs, setOrgs]   = useState<OrgRow[]>([])
+  const [orgId, setOrgId] = useState('')
+  const [name, setName]   = useState('')
+  const [email, setEmail] = useState('')
+  const [pw, setPw]       = useState('')
+  const [busy, setBusy]   = useState(false)
+  const [err, setErr]     = useState<string | null>(null)
+  const [done, setDone]   = useState<string | null>(null)
+
+  useEffect(() => { void platformService.listOrganizations().then(setOrgs) }, [])
+
+  const submit = async () => {
+    setErr(null); setDone(null)
+    if (!orgId)                          { setErr(t.saPickOrg);   return }
+    if (!name.trim() || !email.trim())   { setErr(t.saAdminReq);  return }
+    if (pw.length < 8)                   { setErr(t.saPwShort8);  return }
+    setBusy(true)
+    try {
+      await platformService.createAdmin(name.trim(), email.trim(), pw, orgId)
+      setDone(t.saAdminCreated); setName(''); setEmail(''); setPw('')
+      setTimeout(() => setDone(null), 6000)
+    } catch (e) { setErr(e instanceof Error ? e.message : t.saAdminErr) }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <div className={CARD}>
+      <Head Icon={UserPlus} title={t.saAddAdmin} color="text-emerald-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <select value={orgId} onChange={e => setOrgId(e.target.value)} className={INPUT}>
+          <option value="">{t.saPickOrg}</option>
+          {orgs.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
+        </select>
+        <input value={name}  onChange={e => setName(e.target.value)}  placeholder={t.saAdminName}  className={INPUT} />
+        <input value={email} onChange={e => setEmail(e.target.value)} placeholder={t.saAdminEmail} type="email" autoComplete="off" className={INPUT} />
+        <input value={pw}    onChange={e => setPw(e.target.value)}    placeholder={t.saAdminPw}    type="password" autoComplete="new-password" className={INPUT} />
+      </div>
+      {err  && <p className="text-sm text-red-600 mt-2 flex items-center gap-1.5"><X className="w-4 h-4" /> {err}</p>}
+      {done && <p className="text-sm text-emerald-600 mt-2 flex items-center gap-1.5"><Check className="w-4 h-4" /> {done}</p>}
+      <button type="button" onClick={() => void submit()} disabled={busy} className={`${BTN} mt-3`} style={BTN_BG}>
+        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />} {t.saCreateAdminBtn}
+      </button>
+      <p className="text-[11px] text-gray-400 mt-2">{t.saAddAdminNote}</p>
     </div>
   )
 }
@@ -529,6 +579,7 @@ export function SuperAdminPanel({ currentUserId }: { currentUserId: string }) {
       </div>
       <PlatformOverview />
       <OrganizationsManager />
+      <AddAdminSection />
       <PlatformUsersManager />
       <AdminPremiumStats />
       <SystemHealthCard />

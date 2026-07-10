@@ -275,6 +275,7 @@ export type Translations = {
   saSuspended: string; saActiveOrg: string; saApplyPlan: string; saPlanMonths: string; saNoOrgs: string; saOrgSuspendedNote: string
   saCreateOrg: string; saOrgNamePh: string; saDelete: string; saDeleteOrgConfirm: string; saOrgNotEmptyErr: string
   saUsersTitle: string; saUserSearchPh: string; saNoUsers: string; saCreate2: string
+  saAddAdmin: string; saPickOrg: string; saAdminName: string; saAdminEmail: string; saAdminPw: string; saCreateAdminBtn: string; saAdminCreated: string; saAdminReq: string; saPwShort8: string; saAdminErr: string; saAddAdminNote: string
   // Materials — file preview modal
   fpPdf: string; fpImage: string; fpVideo: string; fpAudio: string; fpDocument: string; fpText: string; fpFile: string; fpFilePrefix: string
   fpZoomOut: string; fpZoomIn: string; fpRotate: string; fpFsExit: string; fpFsEnter: string; fpClose: string
@@ -758,6 +759,7 @@ const uz: Translations = {
   saSuspended: 'Bloklangan', saActiveOrg: 'Faol', saApplyPlan: "Reja o'rnatish", saPlanMonths: 'oy', saNoOrgs: 'Tashkilotlar yoʻq', saOrgSuspendedNote: 'Bloklangan tashkilot foydalanuvchilari tizimga kira olmaydi.',
   saCreateOrg: 'Yangi tashkilot', saOrgNamePh: 'Tashkilot nomi', saDelete: "O'chirish", saDeleteOrgConfirm: "Bu tashkilotni butunlay o'chirasizmi?", saOrgNotEmptyErr: "A'zosi bor tashkilotni o'chirib bo'lmaydi.",
   saUsersTitle: 'Foydalanuvchilar', saUserSearchPh: 'Ism yoki email bo‘yicha qidirish…', saNoUsers: 'Foydalanuvchi topilmadi', saCreate2: 'Yaratish',
+  saAddAdmin: 'Yangi admin qo‘shish', saPickOrg: 'Tashkilotni tanlang', saAdminName: 'Ism familiya', saAdminEmail: 'Email', saAdminPw: 'Parol (kamida 8 belgi)', saCreateAdminBtn: 'Admin yaratish', saAdminCreated: 'Admin muvaffaqiyatli yaratildi ✅', saAdminReq: 'Ism va email majburiy', saPwShort8: 'Parol kamida 8 ta belgidan iborat bo‘lishi kerak', saAdminErr: 'Admin yaratishda xatolik', saAddAdminNote: 'Admin tanlangan tashkilotga biriktiriladi va shu tashkilotni boshqaradi.',
   fpPdf: 'PDF', fpImage: 'Rasm', fpVideo: 'Video', fpAudio: 'Audio', fpDocument: 'Hujjat', fpText: 'Matn', fpFile: 'Fayl', fpFilePrefix: 'Fayl:',
   fpZoomOut: 'Kichraytirish', fpZoomIn: 'Kattalashtirish', fpRotate: 'Aylantirish', fpFsExit: "To'liq ekrandan chiqish", fpFsEnter: "To'liq ekran", fpClose: 'Yopish',
   fpCantPreview: "Ko'rib chiqib bo'lmadi", fpCantPreviewDl: "Ko'rib chiqib bo'lmadi — yuklab oling", fpCantPreviewType: "Bu fayl turini ko'rib bo'lmaydi",
@@ -1222,6 +1224,7 @@ const ru: Translations = {
   saSuspended: 'Заблокирован', saActiveOrg: 'Активен', saApplyPlan: 'Установить план', saPlanMonths: 'мес', saNoOrgs: 'Нет организаций', saOrgSuspendedNote: 'Пользователи заблокированной организации не смогут войти.',
   saCreateOrg: 'Новая организация', saOrgNamePh: 'Название организации', saDelete: 'Удалить', saDeleteOrgConfirm: 'Удалить эту организацию полностью?', saOrgNotEmptyErr: 'Нельзя удалить организацию с участниками.',
   saUsersTitle: 'Пользователи', saUserSearchPh: 'Поиск по имени или email…', saNoUsers: 'Пользователи не найдены', saCreate2: 'Создать',
+  saAddAdmin: 'Добавить админа', saPickOrg: 'Выберите организацию', saAdminName: 'Имя Фамилия', saAdminEmail: 'Email', saAdminPw: 'Пароль (мин. 8 символов)', saCreateAdminBtn: 'Создать админа', saAdminCreated: 'Админ успешно создан ✅', saAdminReq: 'Имя и email обязательны', saPwShort8: 'Пароль должен быть не менее 8 символов', saAdminErr: 'Ошибка при создании админа', saAddAdminNote: 'Админ будет привязан к выбранной организации и будет управлять ею.',
   fpPdf: 'PDF', fpImage: 'Изображение', fpVideo: 'Видео', fpAudio: 'Аудио', fpDocument: 'Документ', fpText: 'Текст', fpFile: 'Файл', fpFilePrefix: 'Файл:',
   fpZoomOut: 'Уменьшить', fpZoomIn: 'Увеличить', fpRotate: 'Повернуть', fpFsExit: 'Выйти из полноэкранного режима', fpFsEnter: 'Полный экран', fpClose: 'Закрыть',
   fpCantPreview: 'Не удалось открыть', fpCantPreviewDl: 'Не удалось открыть — скачайте', fpCantPreviewType: 'Этот тип файла нельзя открыть',
@@ -1686,6 +1689,7 @@ const en: Translations = {
   saSuspended: 'Suspended', saActiveOrg: 'Active', saApplyPlan: 'Set plan', saPlanMonths: 'mo', saNoOrgs: 'No organizations', saOrgSuspendedNote: 'Users of a suspended organization cannot sign in.',
   saCreateOrg: 'New organization', saOrgNamePh: 'Organization name', saDelete: 'Delete', saDeleteOrgConfirm: 'Delete this organization entirely?', saOrgNotEmptyErr: 'Cannot delete an organization that has members.',
   saUsersTitle: 'Users', saUserSearchPh: 'Search by name or email…', saNoUsers: 'No users found', saCreate2: 'Create',
+  saAddAdmin: 'Add admin', saPickOrg: 'Select organization', saAdminName: 'Full name', saAdminEmail: 'Email', saAdminPw: 'Password (min 8 chars)', saCreateAdminBtn: 'Create admin', saAdminCreated: 'Admin created successfully ✅', saAdminReq: 'Name and email are required', saPwShort8: 'Password must be at least 8 characters', saAdminErr: 'Failed to create admin', saAddAdminNote: 'The admin will be attached to the selected organization and will manage it.',
   fpPdf: 'PDF', fpImage: 'Image', fpVideo: 'Video', fpAudio: 'Audio', fpDocument: 'Document', fpText: 'Text', fpFile: 'File', fpFilePrefix: 'File:',
   fpZoomOut: 'Zoom out', fpZoomIn: 'Zoom in', fpRotate: 'Rotate', fpFsExit: 'Exit fullscreen', fpFsEnter: 'Fullscreen', fpClose: 'Close',
   fpCantPreview: 'Cannot preview', fpCantPreviewDl: 'Cannot preview — download it', fpCantPreviewType: 'This file type cannot be previewed',

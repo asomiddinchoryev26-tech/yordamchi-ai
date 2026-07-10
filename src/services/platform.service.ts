@@ -102,4 +102,15 @@ export const platformService = {
     const { error } = await sbRpc.rpc('set_user_status', { p_user: userId, p_status: status })
     if (error) throw new Error(error.message ?? 'Holatni o‘zgartirishda xatolik')
   },
+
+  /** Yangi admin akkaunt yaratish va tanlangan tashkilotга biriktirish (admin-users edge). */
+  createAdmin: async (fullName: string, email: string, password: string, orgId: string): Promise<void> => {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      body: { action: 'create', full_name: fullName, email, password, role: 'admin', organization_id: orgId },
+    })
+    if (error) throw new Error('Admin yaratishda xatolik (edge funksiya ishlamayapti?).')
+    const res = data as { userId?: string; error?: string } | null
+    if (res?.error)   throw new Error(res.error)
+    if (!res?.userId) throw new Error('Admin yaratildi, lekin ID qaytmadi')
+  },
 }

@@ -52,16 +52,26 @@ serve(async (req: Request) => {
 
     // ── CREATE ──────────────────────────────────────────────────────────────
     if (action === 'create') {
-      const { email, full_name, password, phone, bio, role } = body
+      const { email, full_name, password, phone, bio, role, organization_id } = body
 
       if (!email || !full_name || !password || !role) {
         return json({ error: "Majburiy maydonlar: email, full_name, password, role" }, 400)
       }
-      if (!['teacher', 'student'].includes(role)) {
-        return json({ error: "Rol faqat 'teacher' yoki 'student' bo'lishi mumkin" }, 400)
+      // Super-admin 'admin' ham yarata oladi; oddiy admin faqat teacher/student
+      const allowedRoles = callerProfile.is_super_admin ? ['teacher', 'student', 'admin'] : ['teacher', 'student']
+      if (!allowedRoles.includes(role)) {
+        return json({ error: "Ruxsat etilmagan rol" }, 400)
       }
       if (password.length < 8) {
         return json({ error: "Parol kamida 8 ta belgidan iborat bo'lishi kerak" }, 400)
+      }
+
+      // Biriktiriladigan tashkilot: super-admin istalganini tanlaydi; oddiy admin — o'z orgi
+      let targetOrg = callerProfile.organization_id
+      if (callerProfile.is_super_admin && organization_id) {
+        const { data: org } = await adminClient.from('organizations').select('id').eq('id', organization_id).maybeSingle()
+        if (!org) return json({ error: "Tashkilot topilmadi" }, 400)
+        targetOrg = organization_id
       }
 
       const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
@@ -92,7 +102,7 @@ serve(async (req: Request) => {
         phone:           phone?.trim() || null,
         bio:             bio?.trim()   || null,
         status:          'active',
-        organization_id: callerProfile.organization_id,
+        organization_id: targetOrg,
       }, { onConflict: 'id' })
 
       if (profileErr) {
