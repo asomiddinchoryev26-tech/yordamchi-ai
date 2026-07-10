@@ -63,8 +63,8 @@ export default function AdminLessonsPage() {
   return (
     <div className="space-y-5 pb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.tdLessons}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{t.alSubtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.tdLessons}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.alSubtitle}</p>
       </div>
 
       {error && (
@@ -77,15 +77,15 @@ export default function AdminLessonsPage() {
       {/* Statistika */}
       {!loading && lessons.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.alTotalLessons}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{lessons.length}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{lessons.length}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.alPublished}</p>
             <p className="text-2xl font-bold text-emerald-600 mt-1">{publishedCount}</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-4">
             <p className="text-xs text-gray-400 font-medium">{t.tcDraft}</p>
             <p className="text-2xl font-bold text-gray-400 mt-1">{lessons.length - publishedCount}</p>
           </div>
@@ -102,14 +102,14 @@ export default function AdminLessonsPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t.alSearchPh}
-              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
           <div className="relative">
             <select
               value={groupFilter}
               onChange={e => setGroupFilter(e.target.value)}
-              className="appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="appearance-none px-3 py-2.5 pr-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             >
               <option value="all">{t.tstAllGroups}</option>
               {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
@@ -123,11 +123,11 @@ export default function AdminLessonsPage() {
       {loading && (
         <div className="space-y-3">
           {[1,2,3,4].map(i => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse flex gap-4">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-5 animate-pulse flex gap-4">
               <div className="w-10 h-10 bg-gray-200 rounded-xl flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-100 rounded w-1/4" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded w-1/4" />
               </div>
             </div>
           ))}
@@ -136,7 +136,7 @@ export default function AdminLessonsPage() {
 
       {/* Bo'sh */}
       {!loading && lessons.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-14 text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-14 text-center">
           <BookOpen className="w-10 h-10 text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400">{t.alEmpty}</p>
           <p className="text-xs text-gray-400 mt-1">{t.alEmptyHint}</p>
@@ -187,7 +187,7 @@ export default function AdminLessonsPage() {
                         'text-[11px] font-semibold px-2 py-0.5 rounded-full',
                         lesson.is_published
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                          : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 dark:bg-gray-700 dark:text-gray-400'
                       )}>
                         {lesson.is_published ? t.tcPublished : t.tcDraft}
                       </span>
@@ -214,7 +214,7 @@ export default function AdminLessonsPage() {
                 {isExp && (
                   <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-3 space-y-4">
                     {lesson.content && (
-                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                      <p className="text-sm text-gray-700 dark:text-gray-200 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                         {lesson.content}
                       </p>
                     )}
