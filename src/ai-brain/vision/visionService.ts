@@ -13,6 +13,7 @@
  */
 
 import { supabase }           from '@/lib/supabase'
+import { logger }             from '@/lib/logger'
 import { intelligenceService } from '../services/intelligence-service'
 import { memoryEngine }        from '../memory/engine'
 import type { StudentContext } from '@/services/ai-provider.service'
@@ -209,7 +210,7 @@ async function saveToHistory(
     .select('id')
     .single()
 
-  if (error) console.warn('[VisionService] History save failed (non-critical):', error.message)
+  if (error) logger.warn('[VisionService] History save failed (non-critical):', error.message)
   return (data as { id: string } | null)?.id ?? `local_${Date.now()}`
 }
 

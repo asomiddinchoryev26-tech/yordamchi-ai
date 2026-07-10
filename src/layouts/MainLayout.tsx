@@ -5,7 +5,7 @@ import { Sun, Moon, Globe, ChevronDown, Menu, X, ArrowRight } from 'lucide-react
 import { motion, AnimatePresence } from 'framer-motion'
 import { PATHS } from '@/routes/paths'
 import { APP_NAME } from '@/utils/constants'
-import logoSrc from '@/assets/images/logo.svg'
+import { LogoIcon } from '@/components/common/Logo'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage, type Language } from '@/contexts/LanguageContext'
 import { cn } from '@/lib/utils'
@@ -89,12 +89,7 @@ export default function MainLayout() {
             className="flex items-center gap-2.5 flex-shrink-0 group"
             aria-label={`${APP_NAME} — Home`}
           >
-            <img
-              src={logoSrc}
-              alt=""
-              aria-hidden="true"
-              className="w-8 h-8 rounded-xl transition-transform duration-200 group-hover:scale-105"
-            />
+            <LogoIcon className="w-8 h-8 transition-transform duration-200 group-hover:scale-105" />
             <span className="font-bold text-gray-900 dark:text-gray-50 text-[17px] tracking-tight transition-colors duration-200 group-hover:text-brand dark:group-hover:text-brand-light">
               {APP_NAME}
             </span>
@@ -345,7 +340,7 @@ export default function MainLayout() {
       >
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="flex items-center gap-2">
-            <img src={logoSrc} alt="" className="w-6 h-6 rounded-lg" aria-hidden="true" />
+            <LogoIcon className="w-6 h-6" />
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{APP_NAME}</span>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-500 order-last sm:order-none">

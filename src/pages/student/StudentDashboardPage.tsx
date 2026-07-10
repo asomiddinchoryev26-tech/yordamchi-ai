@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 import { PATHS } from '@/routes/paths'
 import { ProgressRing } from '@/components/dashboard'
 import Logo from '@/components/common/Logo'
@@ -635,6 +636,39 @@ function DailyMotivationCard() {
   )
 }
 
+// ─── Premium quick-access pill (top ribbon) ──────────────────────────────────
+function QuickAccessPill({ Icon, label, accent, onClick }: {
+  Icon: typeof BookOpen; label: string; accent: string; onClick: () => void
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileHover={{ y: -2, scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+      className="group inline-flex items-center gap-2 rounded-full p-1.5 sm:pl-2 sm:pr-3.5"
+      style={{
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        willChange: 'transform',
+      }}
+    >
+      <span
+        className="flex items-center justify-center w-6 h-6 rounded-full flex-shrink-0"
+        style={{ background: `${accent}22`, border: `1px solid ${accent}44` }}
+      >
+        <Icon className="w-3.5 h-3.5" style={{ color: accent }} aria-hidden="true" />
+      </span>
+      <span className="hidden sm:inline text-[12px] font-semibold text-white/65 group-hover:text-white/90 transition-colors">
+        {label}
+      </span>
+    </motion.button>
+  )
+}
+
 // ─── Section: Hero (Sprint 4.7 Phase 1 — Premium redesign with greeting) ─────
 // All navigation logic preserved: navigate(PATHS.STUDENT.AI_ASSISTANT/LESSONS)
 // All existing functionality: HomeAIInput, quick chips, CTA buttons
@@ -680,6 +714,41 @@ function HeroSection({ name, navigate, isPremium, onUpgrade }: {
       </div>
       {/* Floating AI icons (education themed — dots removed) */}
       <FloatingAIIcons />
+
+      {/* ── Premium top ribbon: live AI status + quick access shortcuts ─────── */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE }}
+        className="relative z-10 mb-6 sm:mb-7 flex items-center justify-between gap-3 flex-wrap"
+      >
+        {/* Live "AI ready 24/7" status */}
+        <div
+          className="inline-flex items-center gap-2 pl-2.5 pr-3.5 py-1.5 rounded-full"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+        >
+          <span className="relative flex w-2 h-2" aria-hidden="true">
+            <span className="absolute inline-flex w-full h-full rounded-full animate-ping" style={{ background: '#34D399', opacity: 0.6 }} />
+            <span className="relative inline-flex w-2 h-2 rounded-full" style={{ background: '#34D399', boxShadow: '0 0 8px rgba(52,211,153,0.9)' }} />
+          </span>
+          <span className="text-[11.5px] font-bold tracking-wide" style={{ color: 'rgba(255,255,255,0.72)' }}>
+            YordamchiAI · 24/7 {t.sdOnlineReady}
+          </span>
+        </div>
+
+        {/* Quick access shortcuts */}
+        <div className="flex items-center gap-2">
+          <QuickAccessPill Icon={BookOpen}  label={t.sdMyLessons}  accent="#5B7FFF" onClick={() => navigate(PATHS.STUDENT.LESSONS)} />
+          <QuickAccessPill Icon={FileIcon}  label={t.tests}        accent="#7C3AED" onClick={() => navigate(PATHS.STUDENT.TESTS)} />
+          <QuickAccessPill Icon={BarChart3} label={t.sdStatsShort} accent="#EC4899" onClick={() => navigate(PATHS.STUDENT.MY_PROGRESS)} />
+          <QuickAccessPill Icon={Trophy}    label={t.sdRankShort}  accent="#F59E0B" onClick={() => navigate(PATHS.STUDENT.LEADERBOARD)} />
+        </div>
+      </motion.div>
 
       {/* 2-column split only from xl (1280px) — at lg (1024px) the persistent 260px
           sidebar leaves too little room for a fixed-width illustration column, so
@@ -2782,7 +2851,7 @@ export default function StudentDashboardPage() {
         period_month: r.period_month, group_name: r.groups?.name ?? null,
       })))
     } catch (e) {
-      console.error('[StudentDashboard] load error:', e)
+      logger.error('[StudentDashboard] load error:', e)
       setError(true)
     } finally {
       setLoading(false)

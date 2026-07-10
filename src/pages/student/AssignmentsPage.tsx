@@ -11,6 +11,7 @@ import {
   Paperclip, Download, RefreshCw, Loader2, FileText, Star, Filter, Sparkles,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { logger } from '@/lib/logger'
 import { subjectService } from '@/services/subject.service'
 import {
   assignmentService, deadlineState, formatFileSize,
@@ -95,7 +96,7 @@ export default function AssignmentsPage() {
       setItems(asg)
       setSubjects(subs)
     } catch (e) {
-      console.error('[Assignments] load error:', e)
+      logger.error('[Assignments] load error:', e)
       setError(true)
     } finally {
       setLoading(false)

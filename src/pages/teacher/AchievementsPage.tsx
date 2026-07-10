@@ -81,6 +81,7 @@ export default function TeacherAchievementsPage() {
   useEffect(() => {
     if (!auth.user?.id) return
     void load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load() unmemoized by design; re-run only on user id change
   }, [auth.user?.id])
 
   async function load() {
@@ -115,7 +116,7 @@ export default function TeacherAchievementsPage() {
     setLoading(false)
   }
 
-  function handleDownload(item: EarnedAchievement) {
+  async function handleDownload(item: EarnedAchievement) {
     setDownloadingId(item.id)
     try {
       const certData: CertificateData = {
@@ -129,7 +130,7 @@ export default function TeacherAchievementsPage() {
         certId:           item.id,
         periodLabel:      buildPeriodLabel(item.period_year, item.period_month),
       }
-      generateCertificatePDF(certData)
+      await generateCertificatePDF(certData)
     } catch {
       setError(t.mpLoadErr)
     } finally {

@@ -4,6 +4,7 @@ import {
 } from 'react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 import type { AuthState, User, UserRole, LoginCredentials, RegisterPayload } from '@/types/auth.types'
 
 // ─── Supabase xato → O'zbek ──────────────────────────────────────────────────
@@ -34,31 +35,32 @@ async function resolveUser(sbUser: SupabaseUser): Promise<User | null> {
   const { data: roleValue, error: roleErr } = await supabase.rpc('get_my_profile_role')
 
   if (roleErr || !roleValue) {
-    console.error('[resolveUser] rpc get_my_profile_role failed:', roleErr?.message ?? 'null returned')
+    logger.error('[resolveUser] rpc get_my_profile_role failed:', roleErr?.message ?? 'null returned')
     return null
   }
 
   const role = normalizeRole(roleValue)
   if (!role) {
-    console.warn('[resolveUser] unrecognized role value:', roleValue)
+    logger.warn('[resolveUser] unrecognized role value:', roleValue)
     return null
   }
 
-  // full_name ni best-effort olamiz (SELECT policy yo'q bo'lsa ham login ishlaydi)
+  // full_name + organization_id ni best-effort olamiz (SELECT policy yo'q bo'lsa ham login ishlaydi)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name')
+    .select('full_name, organization_id')
     .eq('id', sbUser.id)
     .single()
 
   const meta = (sbUser.user_metadata ?? {}) as Record<string, unknown>
   return {
-    id:        sbUser.id,
-    email:     sbUser.email ?? '',
-    name:      profile?.full_name ?? (typeof meta['name'] === 'string' ? meta['name'] : (sbUser.email ?? '')),
+    id:             sbUser.id,
+    email:          sbUser.email ?? '',
+    name:           profile?.full_name ?? (typeof meta['name'] === 'string' ? meta['name'] : (sbUser.email ?? '')),
     role,
-    avatarUrl: typeof meta['avatar_url'] === 'string' ? meta['avatar_url'] : undefined,
-    createdAt: sbUser.created_at,
+    avatarUrl:      typeof meta['avatar_url'] === 'string' ? meta['avatar_url'] : undefined,
+    createdAt:      sbUser.created_at,
+    organizationId: profile?.organization_id ?? null,
   }
 }
 
@@ -99,15 +101,23 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 
 // ─── Context interface ────────────────────────────────────────────────────────
 
+// Explicit outcome so callers never have to read the async-updated `error` state
+// to decide what to show (that caused a stale-closure "check your email" bug).
+export type RegisterResult =
+  | { status: 'signed-in';     user: User }   // email confirmation off → logged in
+  | { status: 'confirm-email' }               // must verify email before signing in
+  | { status: 'error';         message: string }
+
 export interface AuthContextValue {
   user:            User | null
   isAuthenticated: boolean
   isLoading:       boolean
   error:           string | null
   login:      (creds: LoginCredentials & { rememberMe?: boolean }) => Promise<User | null>
-  register:   (payload: RegisterPayload)                           => Promise<User | null>
+  register:   (payload: RegisterPayload)                           => Promise<RegisterResult>
   logout:     ()                                                   => Promise<void>
   clearError: ()                                                   => void
+  refreshUser:()                                                   => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -205,7 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Sign Up ──
   const register = useCallback(
-    async (payload: RegisterPayload): Promise<User | null> => {
+    async (payload: RegisterPayload): Promise<RegisterResult> => {
       dispatch({ type: 'SET_LOADING', payload: true })
       dispatch({ type: 'CLEAR_ERROR' })
 
@@ -222,44 +232,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
 
       if (error) {
-        dispatch({ type: 'SET_ERROR', payload: mapAuthError(error.message) })
-        return null
+        const message = mapAuthError(error.message)
+        dispatch({ type: 'SET_ERROR', payload: message })
+        return { status: 'error', message }
       }
 
       if (!data.user) {
-        dispatch({ type: 'SET_LOADING', payload: false })
-        return null
+        const message = "Ro'yxatdan o'tishda xatolik. Qayta urinib ko'ring."
+        dispatch({ type: 'SET_ERROR', payload: message })
+        return { status: 'error', message }
       }
 
-      // profiles jadvaliga yozamiz (upsert — trigger allaqachon yozgan bo'lsa xato bermaydi)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id:        data.user.id,
-          full_name: payload.name.trim(),
-          email:     payload.email.trim().toLowerCase(),
-          role:      payload.role,
-        }, { onConflict: 'id' })
-
-      if (profileError) {
-        dispatch({ type: 'SET_ERROR', payload: "Profil yaratishda xatolik. Qayta urinib ko'ring." })
-        return null
+      const profileRow = {
+        id:        data.user.id,
+        full_name: payload.name.trim(),
+        email:     payload.email.trim().toLowerCase(),
+        role:      payload.role,
       }
 
-      // data.session is non-null → email confirmation disabled → auto-logged in
+      // Email confirmation OFF → we already have a session → ensure the profile
+      // exists (authenticated write), then sign in.
       if (data.session) {
+        const { error: profileError } = await supabase.from('profiles').upsert(profileRow, { onConflict: 'id' })
+        if (profileError) {
+          const message = "Profil yaratishda xatolik. Qayta urinib ko'ring."
+          dispatch({ type: 'SET_ERROR', payload: message })
+          return { status: 'error', message }
+        }
         const user = await resolveUser(data.user)
         if (user) {
           localStorage.setItem(LS_REMEMBER, 'true')
           sessionStorage.setItem(SS_ACTIVE, '1')
           dispatch({ type: 'SET_USER', payload: user })
-          return user
+          return { status: 'signed-in', user }
         }
+        const message = "Profilni o'qishda xatolik. Qayta urinib ko'ring."
+        dispatch({ type: 'SET_ERROR', payload: message })
+        return { status: 'error', message }
       }
 
-      // Email confirmation required → user must verify before signing in
+      // Email confirmation required. The DB trigger is the source of truth for the
+      // profile; this upsert is a best-effort fallback and its error (RLS may reject
+      // an unauthenticated write) must NOT block the "check your email" flow.
+      await supabase.from('profiles').upsert(profileRow, { onConflict: 'id' })
       dispatch({ type: 'SET_LOADING', payload: false })
-      return null
+      return { status: 'confirm-email' }
     },
     [],
   )
@@ -275,6 +292,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ── Clear error ──
   const clearError = useCallback(() => dispatch({ type: 'CLEAR_ERROR' }), [])
 
+  // ── Refresh the current user (e.g. after onboarding assigns an organization) ──
+  const refreshUser = useCallback(async () => {
+    const { data: { user: sbUser } } = await supabase.auth.getUser()
+    if (!sbUser) return
+    const user = await resolveUser(sbUser)
+    if (user) dispatch({ type: 'SET_USER', payload: user })
+  }, [])
+
   return (
     <AuthContext.Provider value={{
       user:            state.user,
@@ -285,6 +310,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       register,
       logout,
       clearError,
+      refreshUser,
     }}>
       {children}
     </AuthContext.Provider>

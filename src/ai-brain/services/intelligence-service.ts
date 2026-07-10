@@ -16,6 +16,7 @@
  */
 
 import type { StudentContext } from '@/services/ai-provider.service'
+import { logger } from '@/lib/logger'
 import type { StudentIntelligenceProfile } from '../intelligence/types'
 import type { TutorMode } from '../tutor/types'
 import { buildIntelligenceProfile } from '../intelligence/builder'
@@ -126,7 +127,7 @@ export const intelligenceService = {
 
     } catch (err) {
       // Never let intelligence failures crash the AI pipeline
-      console.warn('[IntelligenceService] buildSystemPrompt failed — using generic fallback:', err)
+      logger.warn('[IntelligenceService] buildSystemPrompt failed — using generic fallback:', err)
       return null
     }
   },

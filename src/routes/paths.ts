@@ -5,6 +5,7 @@ export const PATHS = {
   REGISTER:        '/register',
   FORGOT_PASSWORD: '/forgot-password',
   WELCOME:         '/welcome',
+  ONBOARDING:      '/onboarding',
 
   STUDENT: {
     ROOT:         '/dashboard',
@@ -17,6 +18,7 @@ export const PATHS = {
     MY_PROGRESS:  '/dashboard/progress',
     CERTIFICATES: '/dashboard/certificates',
     LEADERBOARD:  '/dashboard/leaderboard',
+    SETTINGS:     '/dashboard/settings',
     AI_ASSISTANT: '/dashboard/ai-assistant',
     AI_VISION:    '/dashboard/ai-vision',    // Sprint 3.2 Phase 1
   },

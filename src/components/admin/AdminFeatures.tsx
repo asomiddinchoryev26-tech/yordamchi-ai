@@ -143,7 +143,7 @@ export function AdminPermissionsPanel({ currentUserId }: { currentUserId: string
   const toggle = (adminId: string, perm: AdminPermission) => {
     setDraft(prev => {
       const set = new Set(prev[adminId] ?? [])
-      set.has(perm) ? set.delete(perm) : set.add(perm)
+      if (set.has(perm)) set.delete(perm); else set.add(perm)
       return { ...prev, [adminId]: set }
     })
   }

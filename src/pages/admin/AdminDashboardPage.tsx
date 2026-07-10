@@ -7,8 +7,11 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
 import { AdminPremiumStats } from '@/components/admin/AdminFeatures'
+import { OrgInviteCard } from '@/components/admin/OrgInviteCard'
+import { OrgBillingCard } from '@/components/admin/OrgBillingCard'
 import { SuperAdminPanel } from '@/components/admin/SuperAdminPRO'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
@@ -82,6 +85,7 @@ export default function AdminDashboardPage() {
   const [userSearch,     setUserSearch]     = useState('')
   const [userRoleFilter, setUserRoleFilter] = useState<'all'|UserRole>('all')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
 
   async function load() {
@@ -188,7 +192,7 @@ export default function AdminDashboardPage() {
       }))
       setActivity([...recentSignups, ...recentActivity].slice(0,12))
     } catch (e) {
-      console.error(e)
+      logger.error(e)
     } finally {
       setLoading(false)
     }
@@ -230,6 +234,10 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Organization invite code + billing (org management) ── */}
+      <OrgInviteCard />
+      <OrgBillingCard />
 
       {/* ── Tabs ── */}
       <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-x-auto">

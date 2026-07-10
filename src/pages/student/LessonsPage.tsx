@@ -325,6 +325,7 @@ export default function StudentLessonsPage() {
     if (!auth.user?.id) return
     void load()
     void loadSections()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load()/loadSections() unmemoized by design; re-run only on user id change
   }, [auth.user?.id])
 
   async function load() {
@@ -456,7 +457,7 @@ export default function StudentLessonsPage() {
   function toggleBookmark(id: string) {
     setBookmarked(prev => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) next.delete(id); else next.add(id)
       return next
     })
   }

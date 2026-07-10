@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, AlertCircle, BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
+import { Users, AlertCircle, BookOpen, ChevronDown, ChevronRight, Plus, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
@@ -50,10 +50,35 @@ export default function TeacherGroupsPage() {
   const [error,      setError]      = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
+  // Create-group (teacher self-service)
+  const [showCreate, setShowCreate] = useState(false)
+  const [subjects,   setSubjects]   = useState<{ id: string; name: string }[]>([])
+  const [form,       setForm]       = useState({ name: '', subjectId: '', capacity: '30' })
+  const [creating,   setCreating]   = useState(false)
+  const [createErr,  setCreateErr]  = useState<string | null>(null)
+
   useEffect(() => {
     if (!auth.user?.id) return
     void load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load() unmemoized by design; re-run only on user id change
   }, [auth.user?.id])
+
+  async function handleCreate(e: { preventDefault(): void }) {
+    e.preventDefault()
+    if (!auth.user?.id || !form.name.trim()) return
+    setCreating(true); setCreateErr(null)
+    const { error: err } = await supabase.from('groups').insert({
+      name:       form.name.trim(),
+      subject_id: form.subjectId || null,
+      teacher_id: auth.user.id,          // RLS: teacher can only create own groups
+      capacity:   parseInt(form.capacity, 10) || 30,
+      status:     'active',
+      // organization_id is set automatically by the trg_set_org_id trigger
+    })
+    if (err) { setCreateErr(t.mpLoadErr); setCreating(false); return }
+    setShowCreate(false); setForm({ name: '', subjectId: '', capacity: '30' }); setCreating(false)
+    void load()
+  }
 
   async function load() {
     if (!auth.user?.id) return
@@ -91,6 +116,9 @@ export default function TeacherGroupsPage() {
           .filter(Boolean)
           .sort((a: any, b: any) => (a.full_name ?? '').localeCompare(b.full_name ?? '')),
       })))
+
+      const { data: subs } = await supabase.from('subjects').select('id, name').order('name')
+      setSubjects((subs ?? []) as { id: string; name: string }[])
     } catch {
       setError(t.mpLoadErr)
     } finally {
@@ -119,11 +147,20 @@ export default function TeacherGroupsPage() {
 
   return (
     <div className="space-y-5 pb-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">{t.tdTabCourses}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          {groups.length} {t.tdGroupWord}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">{t.tdTabCourses}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {groups.length} {t.tdGroupWord}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => { setShowCreate(true); setCreateErr(null) }}
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors flex-shrink-0"
+        >
+          <Plus className="w-4 h-4" /> Yangi guruh
+        </button>
       </div>
 
       {error && (
@@ -279,6 +316,53 @@ export default function TeacherGroupsPage() {
           )
         })}
       </div>
+
+      {/* ── Yangi guruh modali ── */}
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={() => { if (!creating) setShowCreate(false) }}>
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900">Yangi guruh yaratish</h2>
+              <button type="button" onClick={() => setShowCreate(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Guruh nomi</label>
+                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Masalan: 10-A sinf" autoFocus
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Fan (ixtiyoriy)</label>
+                <select value={form.subjectId} onChange={e => setForm(f => ({ ...f, subjectId: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400">
+                  <option value="">— Fan tanlanmagan —</option>
+                  {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Sig'imi</label>
+                <input type="number" min={1} max={200} value={form.capacity}
+                  onChange={e => setForm(f => ({ ...f, capacity: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400" />
+              </div>
+              {createErr && <p className="text-sm text-red-600">{createErr}</p>}
+              <div className="flex gap-2.5 pt-1">
+                <button type="button" onClick={() => setShowCreate(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50">Bekor</button>
+                <button type="submit" disabled={creating || !form.name.trim()}
+                  className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2">
+                  {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Yaratish'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

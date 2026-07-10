@@ -30,7 +30,8 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, hint, error, leftIcon, rightIcon, className, wrapperClassName, id, ...props }, ref) => {
-    const uid = id ?? React.useId()
+    const autoId = React.useId()
+    const uid = id ?? autoId
     const hasError = !!error
 
     return (
@@ -105,7 +106,8 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, hint, error, className, wrapperClassName, id, autoResize, onChange, ...props }, ref) => {
-    const uid = id ?? React.useId()
+    const autoId = React.useId()
+    const uid = id ?? autoId
     const hasError = !!error
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

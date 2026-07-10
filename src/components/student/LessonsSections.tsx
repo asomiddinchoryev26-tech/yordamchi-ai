@@ -356,7 +356,7 @@ export function AnalyticsSection({ stats, loading }: { stats: StudentLearningSta
     )
   }
   const cards = [
-    { label: t.achWeeklyActivity, value: `${Math.round(stats.weeklyActivity.reduce((a, b) => a + b, 0) / stats.weeklyActivity.length)}%`, Icon: TrendingUp, color: '#5B7FFF', chart: true },
+    { label: t.achWeeklyActivity, value: stats.weeklyActivity.some(v => v > 0) ? `${Math.round(stats.weeklyActivity.reduce((a, b) => a + b, 0) / stats.weeklyActivity.length)}%` : '—', Icon: TrendingUp, color: '#5B7FFF', chart: true },
     { label: t.lessStreak,        value: `${stats.streakDays} ${t.achDays}`, Icon: Flame,      color: '#F59E0B' },
     { label: t.achCompletedLessons, value: String(stats.completedLessons), Icon: CheckCircle2, color: '#22C55E' },
     { label: t.achStudyHours,     value: `${stats.studyHours}${t.achHourShort}`, Icon: Clock,       color: '#A78BFA' },

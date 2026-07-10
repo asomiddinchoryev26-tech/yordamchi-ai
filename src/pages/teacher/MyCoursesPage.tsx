@@ -91,6 +91,7 @@ export default function TeacherCoursesPage() {
   useEffect(() => {
     if (!auth.user?.id) return
     void loadInit()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadInit() unmemoized by design; re-run only on user id change
   }, [auth.user?.id])
 
   async function loadInit() {
@@ -122,6 +123,7 @@ export default function TeacherCoursesPage() {
   useEffect(() => {
     if (!groupId) return
     void loadLessons()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadLessons() unmemoized by design; re-run only on groupId change
   }, [groupId])
 
   // Guruh tanlangach dars formasini (materiallar bilan) darhol ko'rsatamiz —

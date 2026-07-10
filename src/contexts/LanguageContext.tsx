@@ -292,6 +292,7 @@ export type Translations = {
   sdAsgNo: string; sdLoadFailed: string; sdAsgHint: string
   sdStatSolved: string; sdStatAccuracy: string; sdStatAIAvail: string; sdStatLangs: string
   sdRecBefore: string; sdRecAfter: string; sdStartAI: string; sdMyLessons: string
+  sdOnlineReady: string; sdStatsShort: string; sdRankShort: string
   sdErrTitle: string; sdErrDesc: string
   // Teacher dashboard page
   tdTabStudents: string; tdTabCourses: string; tdTabReports: string; tdTabAchievements: string
@@ -491,6 +492,11 @@ export type Translations = {
   pmUploadReceipt: string; pmSelectReceipt: string; pmSubmitPayment: string; pmBack: string
   pmPaySuccess: string; pmPaySuccessDesc: string; pmReceiptRequired: string; pmPayError: string
   pmChoosePlan: string; pmPendingTitle: string; pmPendingDesc: string
+  // Settings page
+  setSubtitle: string; setPreferences: string; setAppearance: string; setSecurity: string
+  setDarkOn: string; setPremiumTheme: string; setReminders: string; setRemindersDesc: string
+  setAiUpdates: string; setAiUpdatesDesc: string; setChangePassword: string
+  setActiveSession: string; setSessionDesc: string; setEdit: string
 }
 
 // ─── O'ZBEK ──────────────────────────────────────────────────────────────────
@@ -760,6 +766,7 @@ const uz: Translations = {
   sdAsgNo: "Topshiriqlar yo'q", sdLoadFailed: "Yuklab bo'lmadi", sdAsgHint: "Yangi uy vazifalari shu yerda ko'rinadi",
   sdStatSolved: 'Yechilgan savollar', sdStatAccuracy: 'Aniqlik darajasi', sdStatAIAvail: 'AI mavjud', sdStatLangs: "Qo'llab-quvvatlanadigan tillar",
   sdRecBefore: 'bugun', sdRecAfter: 'mavzusini takrorlang', sdStartAI: 'AI Yordamchini boshlash', sdMyLessons: 'Darslarim',
+  sdOnlineReady: 'tayyor', sdStatsShort: 'Statistika', sdRankShort: 'Reyting',
   sdErrTitle: "Ma'lumotlarni yuklab bo'lmadi", sdErrDesc: "Internet aloqasini tekshiring va qayta urinib ko'ring.",
   tdTabStudents: 'Talabalarim', tdTabCourses: 'Guruhlarim', tdTabReports: 'Hisobotlar', tdTabAchievements: 'Yutuqlar',
   tdGold: 'Oltin', tdSilver: 'Kumush', tdBronze: 'Bronza', tdSpecial: 'Maxsus', tdBelowBronze: '< Bronza', tdAchievement: 'Yutuq',
@@ -942,6 +949,11 @@ const uz: Translations = {
   pmReceiptRequired: 'Iltimos, chek rasmini yuklang', pmPayError: 'To\'lovni yuborib bo\'lmadi. Qayta urinib ko\'ring.',
   pmChoosePlan: 'Rejani tanlang', pmPendingTitle: 'To\'lov tekshirilmoqda',
   pmPendingDesc: 'To\'lovingiz yuborilgan va admin tasdig\'ini kutmoqda. Tasdiqlangach premium avtomatik faollashadi.',
+  setSubtitle: 'Hisob va ilova sozlamalari', setPreferences: 'Afzalliklar', setAppearance: 'Ko\'rinish', setSecurity: 'Xavfsizlik',
+  setDarkOn: 'Qorong\'i rejim yoqilgan', setPremiumTheme: 'Premium mavzu', setReminders: 'Dars eslatmalari',
+  setRemindersDesc: 'Darslar va topshiriqlar haqida eslatmalar', setAiUpdates: 'AI yordamchi yangiliklari',
+  setAiUpdatesDesc: 'Yangi AI imkoniyatlari haqida xabarlar', setChangePassword: 'Parolni o\'zgartirish',
+  setActiveSession: 'Faol sessiya', setSessionDesc: 'Siz bu qurilmada tizimga kirgansiz', setEdit: 'Tahrirlash',
 }
 
 // ─── РУССКИЙ ─────────────────────────────────────────────────────────────────
@@ -1211,6 +1223,7 @@ const ru: Translations = {
   sdAsgNo: 'Заданий нет', sdLoadFailed: 'Не удалось загрузить', sdAsgHint: 'Новые домашние задания появятся здесь',
   sdStatSolved: 'Решённых вопросов', sdStatAccuracy: 'Точность', sdStatAIAvail: 'AI доступен', sdStatLangs: 'Поддерживаемых языков',
   sdRecBefore: 'сегодня повторите тему', sdRecAfter: '', sdStartAI: 'Запустить AI-помощника', sdMyLessons: 'Мои уроки',
+  sdOnlineReady: 'готов', sdStatsShort: 'Статистика', sdRankShort: 'Рейтинг',
   sdErrTitle: 'Не удалось загрузить данные', sdErrDesc: 'Проверьте интернет-соединение и попробуйте снова.',
   tdTabStudents: 'Мои ученики', tdTabCourses: 'Мои группы', tdTabReports: 'Отчёты', tdTabAchievements: 'Достижения',
   tdGold: 'Золото', tdSilver: 'Серебро', tdBronze: 'Бронза', tdSpecial: 'Особый', tdBelowBronze: '< Бронза', tdAchievement: 'Достижение',
@@ -1393,6 +1406,11 @@ const ru: Translations = {
   pmReceiptRequired: 'Пожалуйста, загрузите фото чека', pmPayError: 'Не удалось отправить платёж. Попробуйте снова.',
   pmChoosePlan: 'Выберите план', pmPendingTitle: 'Платёж на проверке',
   pmPendingDesc: 'Ваш платёж отправлен и ожидает подтверждения администратора. После подтверждения premium активируется автоматически.',
+  setSubtitle: 'Настройки аккаунта и приложения', setPreferences: 'Предпочтения', setAppearance: 'Внешний вид', setSecurity: 'Безопасность',
+  setDarkOn: 'Тёмный режим включён', setPremiumTheme: 'Премиум тема', setReminders: 'Напоминания об уроках',
+  setRemindersDesc: 'Напоминания об уроках и заданиях', setAiUpdates: 'Обновления AI-ассистента',
+  setAiUpdatesDesc: 'Новости о новых возможностях AI', setChangePassword: 'Изменить пароль',
+  setActiveSession: 'Активная сессия', setSessionDesc: 'Вы вошли на этом устройстве', setEdit: 'Редактировать',
 }
 
 // ─── ENGLISH ─────────────────────────────────────────────────────────────────
@@ -1662,6 +1680,7 @@ const en: Translations = {
   sdAsgNo: 'No assignments', sdLoadFailed: 'Failed to load', sdAsgHint: 'New homework will appear here',
   sdStatSolved: 'Solved questions', sdStatAccuracy: 'Accuracy', sdStatAIAvail: 'AI available', sdStatLangs: 'Supported languages',
   sdRecBefore: 'revise the', sdRecAfter: 'topic today', sdStartAI: 'Start AI Assistant', sdMyLessons: 'My lessons',
+  sdOnlineReady: 'ready', sdStatsShort: 'Progress', sdRankShort: 'Ranking',
   sdErrTitle: 'Failed to load data', sdErrDesc: 'Check your internet connection and try again.',
   tdTabStudents: 'My students', tdTabCourses: 'My groups', tdTabReports: 'Reports', tdTabAchievements: 'Achievements',
   tdGold: 'Gold', tdSilver: 'Silver', tdBronze: 'Bronze', tdSpecial: 'Special', tdBelowBronze: '< Bronze', tdAchievement: 'Achievement',
@@ -1844,6 +1863,11 @@ const en: Translations = {
   pmReceiptRequired: 'Please upload a receipt image', pmPayError: 'Could not submit payment. Please try again.',
   pmChoosePlan: 'Choose a plan', pmPendingTitle: 'Payment under review',
   pmPendingDesc: 'Your payment has been submitted and is awaiting admin approval. Premium activates automatically once approved.',
+  setSubtitle: 'Account & app settings', setPreferences: 'Preferences', setAppearance: 'Appearance', setSecurity: 'Security',
+  setDarkOn: 'Dark mode enabled', setPremiumTheme: 'Premium theme', setReminders: 'Learning reminders',
+  setRemindersDesc: 'Reminders about lessons and assignments', setAiUpdates: 'AI assistant updates',
+  setAiUpdatesDesc: 'News about new AI features', setChangePassword: 'Change password',
+  setActiveSession: 'Active session', setSessionDesc: 'You are signed in on this device', setEdit: 'Edit',
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────

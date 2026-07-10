@@ -63,15 +63,28 @@ export const paymentAdminService = {
     } catch { return [] }
   },
 
-  /** Kutilayotgan (pending) qo'lda to'lovlar — admin tasdiqlashi uchun. */
+  /** Kutilayotgan (pending) qo'lda to'lovlar — admin tasdiqlashi uchun.
+   *  Org to'lovlari uchun tashkilot nomi ham olinadi (organization:organizations(name)). */
   listPending: async (): Promise<PaymentRecord[]> => {
     try {
       const { data } = await sb.from('payments')
-        .select('*')
+        .select('*, organization:organizations(name)')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
       return (data ?? []) as PaymentRecord[]
     } catch { return [] }
+  },
+
+  /** Org to'lovини tasdiqlash — approve_org_payment (super-admin, org rejasini yangilaydi). */
+  approveOrg: async (paymentId: string): Promise<void> => {
+    const { error } = await sbRpc.rpc('approve_org_payment', { p_payment_id: paymentId })
+    if (error) throw new Error(error.message ?? 'Tasdiqlashda xatolik')
+  },
+
+  /** Org to'lovини rad etish — reject_org_payment (super-admin). */
+  rejectOrg: async (paymentId: string, note?: string): Promise<void> => {
+    const { error } = await sbRpc.rpc('reject_org_payment', { p_payment_id: paymentId, p_note: note ?? null })
+    if (error) throw new Error(error.message ?? 'Rad etishda xatolik')
   },
 
   /**

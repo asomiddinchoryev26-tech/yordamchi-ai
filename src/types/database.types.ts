@@ -87,6 +87,7 @@ export type Database = {
           bio:        string | null
           status:     'active' | 'inactive'
           created_at: string
+          organization_id: string | null
         }
         Insert: {
           id:          string
@@ -98,6 +99,7 @@ export type Database = {
           bio?:        string | null
           status?:     'active' | 'inactive'
           created_at?: string
+          organization_id?: string | null
         }
         Update: {
           id?:         string
@@ -109,6 +111,7 @@ export type Database = {
           bio?:        string | null
           status?:     'active' | 'inactive'
           created_at?: string
+          organization_id?: string | null
         }
         Relationships: []
       }

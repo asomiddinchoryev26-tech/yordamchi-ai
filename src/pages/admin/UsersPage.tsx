@@ -62,6 +62,7 @@ export default function UsersPage() {
   const [savedId,    setSavedId]    = useState<string | null>(null)
 
   // ── Yuklash ───────────────────────────────────────────────────────────────
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
 
   async function load() {

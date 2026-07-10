@@ -74,6 +74,7 @@ export default function TeacherLayout() {
       const lessons  = groups.reduce((a: number, g: any) => a + (g.lessons?.length ?? 0), 0)
       setStats({ students, lessons, groups: groups.length })
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the user id changes, not on every auth.user identity change
   }, [auth.user?.id])
 
   async function handleLogout() {

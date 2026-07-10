@@ -107,7 +107,7 @@ export const RECOMMENDATION_RULES: readonly RecommendationRule[] = [
       estimatedMin:     30,
       xpReward:         25,
       suggestedPrompt:  p.currentCourse
-        ? `${p.currentCourse.subjectName ?? p.currentCourse.name} bo\'yicha keyingi mavzuni tushuntir`
+        ? `${p.currentCourse.subjectName ?? p.currentCourse.name} bo'yicha keyingi mavzuni tushuntir`
         : null,
     }),
   },

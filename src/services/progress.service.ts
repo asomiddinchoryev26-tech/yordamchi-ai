@@ -42,7 +42,7 @@ export type AttendanceAnalytics = {
 }
 
 export type LeaderboardEntry = { name: string; xp: number; coins: number; isSelf: boolean }
-export type Leaderboard = { classRank: number; classTotal: number; schoolRank: number; entries: LeaderboardEntry[] }
+export type Leaderboard = { classRank: number | null; classTotal: number | null; schoolRank: number | null; entries: LeaderboardEntry[] }
 
 export type ProgressProfile = {
   level: number; xp: number; xpToNext: number; progressPct: number
@@ -104,8 +104,8 @@ export const progressService = {
     const snap    = (snapRes.data    ?? []) as { total_score: number }[]
 
     // ai_reviews (022 migratsiyadan keyin) — zaif mavzular
-    let weakTopics: string[] = []
-    let aiScores:   number[] = []
+    const weakTopics: string[] = []
+    const aiScores:   number[] = []
     try {
       const { data } = await sbLoose.from('ai_reviews').select('ai_score,weak_topics')
       for (const r of (data ?? []) as { ai_score: number | null; weak_topics: string[] | null }[]) {
@@ -203,10 +203,30 @@ export const progressService = {
       monthLabel: `${MONTHS_UZ[m]} ${y}`, calendar, aiAnalysis, risk,
     }
 
-    // ── Reyting (snapshot asosida o'z o'rni; sinf/maktab placeholder) ──
+    // ── Reyting — real sinf/maktab o'rni get_my_leaderboard() RPC dan ──
+    // RPC SECURITY DEFINER: barcha talabalar ballarini hisoblaydi, faqat
+    // chaqiruvchining o'z o'rnini qaytaradi (maxfiylik saqlanadi). RPC bo'lmasa
+    // yoki xato bo'lsa — ranklar null qoladi (UI "—" ko'rsatadi).
     const myScore = snap[0]?.total_score ?? xp
+    let classRank: number | null = null
+    let classTotal: number | null = null
+    let schoolRank: number | null = null
+    try {
+      const { data: lbData } = await (supabase as unknown as {
+        rpc: (fn: string) => Promise<{
+          data: { class_rank: number | null; class_total: number | null; school_rank: number | null }[] | null
+        }>
+      }).rpc('get_my_leaderboard')
+      const row = lbData?.[0]
+      if (row) {
+        classRank  = row.class_rank
+        classTotal = row.class_total
+        schoolRank = row.school_rank
+      }
+    } catch { /* RPC yo'q/xato → ranklar null (UI "—") */ }
+
     const leaderboard: Leaderboard = {
-      classRank: 3, classTotal: 28, schoolRank: 25,   // TODO(Supabase): real leaderboard RPC
+      classRank, classTotal, schoolRank,
       entries: [
         { name: 'Siz', xp: myScore, coins, isSelf: true },
       ],

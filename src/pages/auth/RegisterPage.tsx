@@ -12,7 +12,7 @@ import { AlertCircle, CheckCircle, User, Mail, Lock, Pencil } from 'lucide-react
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
 import type { UserRole } from '@/types/auth.types'
-import logoSrc from '@/assets/images/logo.svg'
+import { LogoIcon } from '@/components/common/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
 import RoleSelectionStep from './RoleSelectionStep'
 
@@ -75,12 +75,13 @@ export default function RegisterPage() {
     if (!role) { setStep('role'); return }   // rol tanlanmagan bo'lsa 1-bosqichga qaytamiz
     setFormLoading(true)
     auth.clearError()
-    const user = await auth.register({ name, email, password, role })
-    if (user) {
-      navigate(ROLE_PATH[user.role], { replace: true })
-    } else if (!auth.error) {
+    const result = await auth.register({ name, email, password, role })
+    if (result.status === 'signed-in') {
+      navigate(ROLE_PATH[result.user.role], { replace: true })
+    } else if (result.status === 'confirm-email') {
       setEmailSent(true)
     }
+    // result.status === 'error' → auth.error is set and shown by the error banner
     setFormLoading(false)
   }
 
@@ -152,12 +153,7 @@ export default function RegisterPage() {
 
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-7">
-          <div
-            className="w-9 h-9 rounded-[11px] flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)', boxShadow: '0 0 18px rgba(91,127,255,0.45)' }}
-          >
-            <img src={logoSrc} alt="Y" className="w-6 h-6" />
-          </div>
+          <LogoIcon className="w-9 h-9" />
           <span className="text-[17px] font-black text-white tracking-tight">YordamchiAI</span>
         </div>
 

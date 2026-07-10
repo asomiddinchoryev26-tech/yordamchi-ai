@@ -14,6 +14,7 @@ export default function AdminTestsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [filterPublished, setFilterPublished] = useState<'all' | 'published' | 'draft'>('all')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
 
   async function load() {

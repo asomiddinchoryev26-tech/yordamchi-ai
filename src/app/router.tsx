@@ -17,6 +17,7 @@ const LoginPage          = lazy(() => import('@/pages/auth/LoginPage'))
 const RegisterPage       = lazy(() => import('@/pages/auth/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'))
 const WelcomeScreen      = lazy(() => import('@/pages/auth/WelcomeScreen'))
+const OnboardingPage     = lazy(() => import('@/pages/auth/OnboardingPage'))
 export const router = createBrowserRouter([
   {
     path: PATHS.HOME,
@@ -47,7 +48,8 @@ export const router = createBrowserRouter([
       {
         element: <PrivateRoute />,
         children: [
-          { path: 'welcome', element: <WelcomeScreen /> },
+          { path: 'welcome',    element: <WelcomeScreen /> },
+          { path: 'onboarding', element: <OnboardingPage /> },
         ],
       },
 

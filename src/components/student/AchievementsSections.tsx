@@ -192,11 +192,19 @@ export function LeaderboardCard({ lb }: { lb: Leaderboard }) {
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="rounded-[16px] p-4" style={GLASS}>
           <p className="text-[11px] text-white/45">{t.achClassRank}</p>
-          <p className="text-[20px] font-black text-white">#{lb.classRank} <span className="text-[13px] text-white/40 font-semibold">/ {lb.classTotal}</span></p>
+          {lb.classRank != null ? (
+            <p className="text-[20px] font-black text-white">#{lb.classRank} <span className="text-[13px] text-white/40 font-semibold">/ {lb.classTotal}</span></p>
+          ) : (
+            <p className="text-[20px] font-black text-white/35">—</p>
+          )}
         </div>
         <div className="rounded-[16px] p-4" style={GLASS}>
           <p className="text-[11px] text-white/45">{t.achSchoolRank}</p>
-          <p className="text-[20px] font-black text-white">#{lb.schoolRank}</p>
+          {lb.schoolRank != null ? (
+            <p className="text-[20px] font-black text-white">#{lb.schoolRank}</p>
+          ) : (
+            <p className="text-[20px] font-black text-white/35">—</p>
+          )}
         </div>
       </div>
       <div className="rounded-[16px] p-2.5 space-y-1" style={GLASS}>

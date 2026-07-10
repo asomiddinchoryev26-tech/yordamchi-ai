@@ -14,6 +14,7 @@ import {
   type ReactNode,
 } from 'react'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
 import {
   buildDefaultProfile, getGradient,
@@ -142,7 +143,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         }
       })
     } catch (e) {
-      console.error('[Profile] update failed:', e)
+      logger.error('[Profile] update failed:', e)
       setError('Xatolik yuz berdi')
     } finally {
       setIsSaving(false)
@@ -161,7 +162,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       // Use cache-busted URL for immediate in-memory display
       setProfile(prev => prev ? { ...prev, avatarUrl: publicUrl, avatarMode: 'uploaded' } : null)
     } catch (e) {
-      console.error('[Profile] avatar upload failed:', e)
+      logger.error('[Profile] avatar upload failed:', e)
       setError('Avatar yuklanmadi')
     } finally {
       setIsSaving(false)
@@ -178,7 +179,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       await avatarService.saveUrl(profile.id, null)
       setProfile(prev => prev ? { ...prev, avatarUrl: null, avatarMode: 'initials' } : null)
     } catch (e) {
-      console.error('[Profile] avatar delete failed:', e)
+      logger.error('[Profile] avatar delete failed:', e)
       setError('Avatar o\'chirilmadi')
     } finally {
       setIsSaving(false)

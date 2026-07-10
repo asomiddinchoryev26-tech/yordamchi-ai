@@ -1,4 +1,5 @@
-import { jsPDF } from 'jspdf'
+// jsPDF is lazy-loaded inside generateCertificatePDF() so it ships as its own
+// chunk (loaded only when a certificate is generated), not in the main bundle.
 
 // ─── Tiplari ──────────────────────────────────────────────────────────────────
 
@@ -42,7 +43,9 @@ const MONTHS_UZ = [
 
 // ─── Asosiy funksiya ──────────────────────────────────────────────────────────
 
-export function generateCertificatePDF(data: CertificateData): void {
+export async function generateCertificatePDF(data: CertificateData): Promise<void> {
+  // Load jsPDF on demand — keeps it out of the main app bundle.
+  const { jsPDF } = await import('jspdf')
   // A4 landscape: 297mm × 210mm
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
   const W = 297

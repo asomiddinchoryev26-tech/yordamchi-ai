@@ -22,7 +22,7 @@ import type { SidebarNavSection } from '@/components/layout/Sidebar'
 import { PATHS } from '@/routes/paths'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { AsomiddinAIMenuIcon } from '@/components/ai'
+import { LogoIcon } from '@/components/common/Logo'
 import { UserAvatar } from '@/components/identity'
 import { useProfile } from '@/hooks/useProfile'
 import StudentBottomNav from '@/components/student/StudentBottomNav'
@@ -57,7 +57,7 @@ export default function StudentLayout() {
       title: t.learningSection,
       items: [
         { label: t.dashboard,       to: PATHS.STUDENT.ROOT,         icon: Home               },
-        { label: '🤖 Yordamchi AI', to: PATHS.STUDENT.AI_ASSISTANT, icon: AsomiddinAIMenuIcon},
+        { label: 'Yordamchi AI',    to: PATHS.STUDENT.AI_ASSISTANT, icon: LogoIcon           },
         { label: t.myCourses,    to: PATHS.STUDENT.LESSONS,      icon: BookOpen           },
         { label: 'Darslar',      to: PATHS.STUDENT.LESSONS,      icon: Video              },
         { label: t.tests,        to: PATHS.STUDENT.TESTS,        icon: FileText           },
@@ -73,7 +73,7 @@ export default function StudentLayout() {
       title: t.otherSection,
       items: [
         { label: t.profile,   to: PATHS.STUDENT.PROFILE, icon: User     },
-        { label: t.settings,  to: PATHS.STUDENT.PROFILE, icon: Settings, tag: 'Soon' },
+        { label: t.settings,  to: PATHS.STUDENT.SETTINGS, icon: Settings },
       ],
     },
   ]
@@ -117,6 +117,7 @@ export default function StudentLayout() {
         attTotal: attData.length,
       })
     })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the user id changes, not on every auth.user identity change
   }, [auth.user?.id])
 
   // Joriy reja — premium badge + upsell holati uchun (on-demand, keshsiz)

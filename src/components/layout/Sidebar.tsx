@@ -12,8 +12,9 @@ import type { ComponentType, ReactNode } from 'react'
 import { X, LogOut, Settings } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import logoSrc from '@/assets/images/logo.svg'
+import { LogoIcon } from '@/components/common/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useOrgName } from '@/hooks/useOrgName'
 
 // ─── Public types (PRESERVED EXACTLY) ────────────────────────────────────────
 
@@ -192,8 +193,9 @@ export function Sidebar({
   isOpen, onClose, navSections, baseRoute,
   color = 'blue', userName, userRole, userInitial, avatarNode, summaryCard, onLogout,
 }: SidebarProps) {
-  const cfg   = COLOR_CFG[color]
-  const { t } = useLanguage()
+  const cfg     = COLOR_CFG[color]
+  const { t }   = useLanguage()
+  const orgName = useOrgName()
 
   const sidebarPanel = (
     <aside
@@ -211,24 +213,21 @@ export function Sidebar({
         className="flex items-center gap-3 px-5 h-[64px] flex-shrink-0"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.055)' }}
       >
-        {/* Brand mark */}
-        <div
-          className="w-[34px] h-[34px] rounded-[10px] overflow-hidden flex items-center justify-center flex-shrink-0"
-          style={{
-            background: 'linear-gradient(135deg, #5B7FFF 0%, #7C3AED 100%)',
-            boxShadow: '0 0 20px rgba(91,127,255,0.50), 0 4px 12px rgba(91,127,255,0.25)',
-          }}
-        >
-          <img src={logoSrc} alt="" className="w-5 h-5" aria-hidden="true" />
-        </div>
+        {/* Brand mark — transparent official logo (no box) */}
+        <LogoIcon className="w-[34px] h-[34px]" />
 
         <div className="min-w-0">
-          <p className="text-[14.5px] font-black text-white tracking-tight leading-none">YordamchiAI</p>
-          <div
-            className="inline-flex items-center mt-1 px-1.5 py-0.5 rounded-[5px] text-[9.5px] font-bold"
-            style={{ background: 'rgba(91,127,255,0.16)', color: '#93BBFF', border: '1px solid rgba(91,127,255,0.24)' }}
-          >
-            {userRole}
+          <p className="text-[14.5px] font-black text-white tracking-tight leading-none truncate">
+            {orgName ?? 'YordamchiAI'}
+          </p>
+          <div className="flex items-center gap-1.5 mt-1 min-w-0">
+            {orgName && <span className="text-[9.5px] font-semibold text-white/45 flex-shrink-0">YordamchiAI</span>}
+            <span
+              className="inline-flex items-center px-1.5 py-0.5 rounded-[5px] text-[9.5px] font-bold flex-shrink-0"
+              style={{ background: 'rgba(91,127,255,0.16)', color: '#93BBFF', border: '1px solid rgba(91,127,255,0.24)' }}
+            >
+              {userRole}
+            </span>
           </div>
         </div>
 

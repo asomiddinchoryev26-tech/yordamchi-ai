@@ -6,6 +6,7 @@ import {
   Award, Trophy, Star, Medal, Clock, CheckCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { useNavigate } from 'react-router-dom'
@@ -161,6 +162,7 @@ export default function TeacherDashboardPage() {
   useEffect(() => {
     if (!auth.user?.id) return
     void load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load() unmemoized by design; re-run only on user id change
   }, [auth.user?.id])
 
   async function load() {
@@ -342,7 +344,7 @@ export default function TeacherDashboardPage() {
         .slice(0, 5)
       setTopStudents(top)
     } catch (e) {
-      console.error(e)
+      logger.error(e)
     } finally {
       setLoading(false)
     }

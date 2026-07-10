@@ -44,6 +44,7 @@ export default function AdminSettingsPage() {
   const [error,     setError]     = useState<string | null>(null)
   const [saved,     setSaved]     = useState(false)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
 
   async function load() {

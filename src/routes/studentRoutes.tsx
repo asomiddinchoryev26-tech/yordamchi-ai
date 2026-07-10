@@ -15,6 +15,7 @@ const AchievementsPage     = lazy(() => import('@/pages/student/AchievementsPage
 const MyProgressPage       = lazy(() => import('@/pages/student/MyProgressPage'))
 const CertificatesPage     = lazy(() => import('@/pages/student/CertificatesPage'))
 const LeaderboardPage      = lazy(() => import('@/pages/student/LeaderboardPage'))
+const SettingsPage         = lazy(() => import('@/pages/student/SettingsPage'))
 const AIAssistantPage      = lazy(() => import('@/pages/student/AIAssistantPage'))
 // AIVisionPage removed from routing (Sprint 3.3 — merged into AI Assistant)
 
@@ -39,6 +40,7 @@ export const studentRoutes: RouteObject[] = [
               { path: 'progress',       element: <MyProgressPage />       },
               { path: 'certificates',   element: <CertificatesPage />     },
               { path: 'leaderboard',    element: <LeaderboardPage />      },
+              { path: 'settings',       element: <SettingsPage />         },
               { path: 'ai-assistant',   element: <AIAssistantPage />      },
               // ai-vision route removed — functionality lives in AI Assistant
             ],

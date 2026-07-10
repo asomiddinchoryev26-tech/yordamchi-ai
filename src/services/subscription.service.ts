@@ -65,9 +65,20 @@ export const PLAN_LABELS: Record<PlanType, string> = {
 }
 
 export const subscriptionService = {
-  /** Foydalanuvchining faol rejasi — yozuv yo'q bo'lsa 'free'. */
+  /**
+   * Foydalanuvchining faol rejasi. Endi TASHKILOT rejasidan keladi (per-org billing):
+   * bir tashkilotning barcha a'zolari org rejasini meros oladi. Org rejasi 'free'
+   * bo'lsa — eski per-user obunaga qaytiladi (org'siz / eski foydalanuvchilar uchun).
+   */
   getPlan: async (userId: string): Promise<PlanType> => {
     try {
+      // 1) Organization plan (source of truth for billing)
+      const { data: orgPlan } = await (supabase as unknown as {
+        rpc: (fn: string) => Promise<{ data: string | null }>
+      }).rpc('my_org_plan')
+      if (orgPlan && orgPlan !== 'free') return orgPlan as PlanType
+
+      // 2) Fallback — legacy per-user subscription
       const { data, error } = await sb
         .from('subscriptions')
         .select('plan_type, status, expires_at')

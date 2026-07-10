@@ -16,7 +16,6 @@ import {
   Camera, ImageIcon, FileText as FileIcon, X as XIcon,
   Upload,
 } from 'lucide-react'
-import { IllustrationImage, ILLUS } from '@/components/illustration'
 import { AITeacherPanel }   from '@/components/ai-teacher'
 import { useVoiceInput }    from '@/hooks/useVoiceInput'
 import { supabase }                   from '@/lib/supabase'
@@ -31,6 +30,7 @@ import { aiProvider, loadStudentContext } from '@/services/ai-provider.service'
 import { intelligenceService }            from '@/ai-brain/services/intelligence-service'
 import {
   AsomiddinAvatar,
+  AICore,
   UserAvatar,
   MessageFooter,
   ThinkingCard,
@@ -267,28 +267,10 @@ function EmptyState({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.45 }}
     >
-      {/* AI Chat illustration — PNG when available, avatar fallback */}
-      <motion.div
-        className="relative mb-6"
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        <div
-          className="absolute -inset-12 rounded-full blur-3xl pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(91,127,255,0.32) 0%, transparent 65%)' }}
-          aria-hidden="true"
-        />
-        <div className="relative z-10">
-          <IllustrationImage
-            src={ILLUS.AI_CHAT}
-            alt="Yordamchi AI — Sun'iy intellekt yordamchisi"
-            width={200}
-            height={220}
-            glow="0 0 40px rgba(91,127,255,0.45)"
-            fallback={<AsomiddinAvatar size="xl" showStatus />}
-          />
-        </div>
-      </motion.div>
+      {/* AI intelligence core — holographic YordamchiAI brand identity */}
+      <div className="relative mb-6">
+        <AICore size={216} />
+      </div>
 
       <motion.h1
         className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight"
@@ -547,11 +529,13 @@ function ConvItem({
   const { t } = useLanguage()
   return (
     <motion.div variants={CONV_ITEM} layout>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onSelect}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect() } }}
         className={cn(
-          'w-full text-left px-3 py-2.5 rounded-xl group relative flex items-center gap-2.5 transition-all duration-150 border',
+          'w-full text-left cursor-pointer px-3 py-2.5 rounded-xl group relative flex items-center gap-2.5 transition-all duration-150 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
           active
             ? 'text-brand-light border-brand/25 font-semibold'
             : 'text-white/50 border-transparent hover:text-white/75 hover:border-white/[0.06]',
@@ -587,7 +571,7 @@ function ConvItem({
             {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
           </button>
         </div>
-      </button>
+      </div>
     </motion.div>
   )
 }
@@ -683,7 +667,7 @@ export default function AIAssistantPage() {
     if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl)
   }, [])  // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { if (studentId) void init(); else setConvLoading(false) }, [studentId])
+  useEffect(() => { if (studentId) void init(); else setConvLoading(false) }, [studentId])  // eslint-disable-line react-hooks/exhaustive-deps -- init() runs on studentId change; unmemoized by design
 
   async function init() {
     setConvLoading(true); setError(null)
@@ -706,6 +690,7 @@ export default function AIAssistantPage() {
     try   { setMessages(await aiChatService.getMessages(id)) }
     catch { setError(t.aiMsgsLoadErr) }
     finally { setMsgLoading(false) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable callback; t.* affects error text only
   }, [])
 
   async function handleNewConversation() {
@@ -825,7 +810,7 @@ export default function AIAssistantPage() {
     setPinnedIds(prev => {
       const next    = new Set(prev)
       const pinned  = !next.has(convId)
-      pinned ? next.add(convId) : next.delete(convId)
+      if (pinned) next.add(convId); else next.delete(convId)
       // Optimistic UI — update local state immediately
       setConversations(p => p.map(c => c.id === convId ? { ...c, is_pinned: pinned } : c))
       setFallbackPinned(next)  // persist to localStorage for offline
@@ -834,7 +819,7 @@ export default function AIAssistantPage() {
         // Revert on failure
         setPinnedIds(prev2 => {
           const revert = new Set(prev2)
-          pinned ? revert.delete(convId) : revert.add(convId)
+          if (pinned) revert.delete(convId); else revert.add(convId)
           setFallbackPinned(revert)
           return revert
         })

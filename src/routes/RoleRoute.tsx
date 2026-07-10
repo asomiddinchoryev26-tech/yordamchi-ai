@@ -20,6 +20,11 @@ export default function RoleRoute({ allowedRoles }: RoleRouteProps) {
   // Autentifikatsiyadan o'tmagan (odatda PrivateRoute ushlaydi) → login
   if (!user) return <Navigate to={PATHS.LOGIN} replace />
 
+  // Tashkilotga qo'shilmagan foydalanuvchi → onboarding (tashkilot yaratish / qo'shilish)
+  if (!user.organizationId) {
+    return <Navigate to={PATHS.ONBOARDING} replace />
+  }
+
   // Boshqa rolning marshrutiga kirishga urinish → o'z dashboard'iga qaytariladi
   // (masalan: student /admin ni ocholmaydi)
   if (!allowedRoles.includes(user.role)) {

@@ -30,6 +30,7 @@ export default function AdminAttendancePage() {
   const [dateTo,   setDateTo]   = useState('')
   const [search,   setSearch]   = useState('')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
 
   async function load(filters?: { groupId?: string; dateFrom?: string; dateTo?: string }) {

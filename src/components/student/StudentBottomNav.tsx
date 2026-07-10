@@ -12,7 +12,8 @@
  */
 
 import { NavLink } from 'react-router-dom'
-import { Home, BookOpen, BarChart3, User, Bot, type LucideIcon } from 'lucide-react'
+import { Home, BookOpen, BarChart3, User, type LucideIcon } from 'lucide-react'
+import { LogoIcon } from '@/components/common/Logo'
 import { PATHS } from '@/routes/paths'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 
@@ -94,15 +95,34 @@ export default function StudentBottomNav() {
                   style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.9) 0%, rgba(91,127,255,0.45) 52%, transparent 72%)', transform: 'scale(1.4)' }}
                   aria-hidden="true"
                 />
-                {/* Elevated circular AI button */}
+                {/* Elevated premium glass AI core — YordamchiAI logo mark */}
                 <span
                   className="relative w-16 h-16 rounded-full flex items-center justify-center transition-transform active:scale-95"
                   style={{
-                    background: 'linear-gradient(135deg,#6D8BFF 0%,#7C3AED 100%)',
-                    boxShadow: `0 12px 30px rgba(124,58,237,0.7), 0 0 24px rgba(91,127,255,0.7), 0 0 0 5px rgba(8,10,20,0.92), inset 0 1px 0 rgba(255,255,255,0.30)${isActive ? ', 0 0 0 2px rgba(160,196,255,0.8)' : ''}`,
+                    background:
+                      'radial-gradient(circle at 34% 26%, rgba(255,255,255,0.16) 0%, rgba(124,58,237,0.16) 44%, rgba(59,130,246,0.10) 70%, rgba(11,15,28,0.55) 100%)',
+                    border: '1px solid rgba(255,255,255,0.16)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    boxShadow: `0 12px 30px rgba(124,58,237,0.55), 0 0 22px rgba(91,127,255,0.5), 0 0 0 5px rgba(8,10,20,0.92), inset 0 1px 0 rgba(255,255,255,0.22)${isActive ? ', 0 0 0 2px rgba(160,196,255,0.85), 0 0 26px rgba(124,58,237,0.85)' : ''}`,
                   }}
                 >
-                  <Bot className="w-7 h-7 text-white" strokeWidth={2} aria-hidden="true" />
+                  {/* subtle hologram sweep */}
+                  <span
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{ background: 'radial-gradient(circle at 50% 118%, rgba(147,187,255,0.20), transparent 62%)' }}
+                    aria-hidden="true"
+                  />
+                  {/* active soft energy pulse */}
+                  {isActive && (
+                    <span
+                      className="absolute inset-0 rounded-full animate-ping pointer-events-none"
+                      style={{ border: '1px solid rgba(147,187,255,0.6)' }}
+                      aria-hidden="true"
+                    />
+                  )}
+                  {/* Official YordamchiAI logo = AI core (inactive + active) */}
+                  <LogoIcon className="w-9 h-9 relative" />
                 </span>
               </span>
               <span className="text-[10px] font-bold mt-1" style={{ color: isActive ? ACTIVE : 'rgba(255,255,255,0.55)' }}>{t.navAI}</span>

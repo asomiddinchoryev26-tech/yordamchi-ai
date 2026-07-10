@@ -57,6 +57,7 @@ export default function MyProgressPage() {
   useEffect(() => {
     if (!auth.user?.id) return
     void load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load() unmemoized by design; re-run only on user id change
   }, [auth.user?.id])
 
   async function load() {

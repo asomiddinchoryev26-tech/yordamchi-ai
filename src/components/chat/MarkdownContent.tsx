@@ -75,7 +75,7 @@ function MathInline({ src }: { src: string }) {
   return (
     <span
       className="align-middle"
-      // eslint-disable-next-line react/no-danger
+      // KaTeX-rendered math markup — safe, not user-supplied HTML
       dangerouslySetInnerHTML={{ __html: renderMath(src, false) }}
     />
   )
@@ -86,7 +86,7 @@ function MathBlock({ src }: { src: string }) {
   return (
     <div
       className="overflow-x-auto py-2 text-center"
-      // eslint-disable-next-line react/no-danger
+      // KaTeX-rendered math markup — safe, not user-supplied HTML
       dangerouslySetInnerHTML={{ __html: renderMath(src, true) }}
     />
   )
@@ -317,9 +317,9 @@ function TextBlock({ text }: { text: string }) {
       continue
     }
     // ── Bullet list ─
-    if (/^[\-\*\+] /.test(line)) {
+    if (/^[-*+] /.test(line)) {
       const items: string[] = []
-      while (i < lines.length && /^[\-\*\+] /.test(lines[i])) { items.push(lines[i].slice(2)); i++ }
+      while (i < lines.length && /^[-*+] /.test(lines[i])) { items.push(lines[i].slice(2)); i++ }
       nodes.push(
         <ul key={`ul-${i}`} className="space-y-1 my-0.5">
           {items.map((item, j) => (

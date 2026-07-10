@@ -17,13 +17,18 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="YordamchiAI — AI-Powered Education Platform" />
     <meta name="twitter:description" content="The AI assistant built for students and teachers. Powered by Gemini 2.5 Flash." />
+    <!-- FOUC guard: paint the brand background BEFORE the CSS bundle loads (no white flash) -->
+    <style>
+      html { background-color: #0A0D1F; color-scheme: dark; }
+      html:not(.dark) { background-color: #FCFDFE; color-scheme: light; }
+      body { margin: 0; }
+    </style>
     <script>
       (function () {
         try {
           var t = localStorage.getItem('theme') || 'system';
-          if (t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-          }
+          var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
         } catch (_) {}
       })();
     </script>

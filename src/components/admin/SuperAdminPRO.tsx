@@ -71,16 +71,24 @@ function PaymentCenter() {
   useEffect(() => { reload() }, [reload])
   const fmtMoney = (n: number) => `${n.toLocaleString()} ${t.saSum}`
 
-  const handleApprove = async (id: string) => {
-    setBusyId(id)
-    try { await paymentAdminService.approve(id); reload() }
-    catch { /* xatolik — holat o'zgarmaydi */ }
+  // Org to'lovi (organization_id bor) → org RPC; aks holda per-user RPC
+  const orgOf = (p: PaymentRecord) => (p as unknown as { organization_id?: string | null; organization?: { name?: string } | null })
+  const handleApprove = async (p: PaymentRecord) => {
+    setBusyId(p.id)
+    try {
+      if (orgOf(p).organization_id) await paymentAdminService.approveOrg(p.id)
+      else                          await paymentAdminService.approve(p.id)
+      reload()
+    } catch { /* xatolik — holat o'zgarmaydi */ }
     finally { setBusyId(null) }
   }
-  const handleReject = async (id: string) => {
-    setBusyId(id)
-    try { await paymentAdminService.reject(id); reload() }
-    catch { /* xatolik */ }
+  const handleReject = async (p: PaymentRecord) => {
+    setBusyId(p.id)
+    try {
+      if (orgOf(p).organization_id) await paymentAdminService.rejectOrg(p.id)
+      else                          await paymentAdminService.reject(p.id)
+      reload()
+    } catch { /* xatolik */ }
     finally { setBusyId(null) }
   }
   return (
@@ -118,8 +126,11 @@ function PaymentCenter() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   {fmtMoney(Number(p.amount))} · <span className="uppercase text-[11px] text-amber-600 dark:text-amber-400">{p.plan_type ?? 'premium'}</span>
+                  {orgOf(p).organization_id && <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">TASHKILOT</span>}
                 </p>
-                <p className="text-[10.5px] text-gray-400 truncate">{p.user_id}</p>
+                <p className="text-[10.5px] text-gray-400 truncate">
+                  {orgOf(p).organization_id ? `🏢 ${orgOf(p).organization?.name ?? 'Tashkilot'}` : p.user_id}
+                </p>
               </div>
               {p.receipt_url && (
                 <a href={p.receipt_url} target="_blank" rel="noopener noreferrer"
@@ -127,11 +138,11 @@ function PaymentCenter() {
                   <Receipt className="w-3 h-3" /> {t.saViewReceipt}
                 </a>
               )}
-              <button type="button" disabled={busyId === p.id} onClick={() => void handleApprove(p.id)}
+              <button type="button" disabled={busyId === p.id} onClick={() => void handleApprove(p)}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold disabled:opacity-50">
                 {busyId === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} {t.saApprove}
               </button>
-              <button type="button" disabled={busyId === p.id} onClick={() => void handleReject(p.id)}
+              <button type="button" disabled={busyId === p.id} onClick={() => void handleReject(p)}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-[11px] font-semibold disabled:opacity-50">
                 <X className="w-3 h-3" /> {t.saReject}
               </button>

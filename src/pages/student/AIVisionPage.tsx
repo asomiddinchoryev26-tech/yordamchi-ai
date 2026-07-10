@@ -21,8 +21,7 @@ import { visionService }   from '@/ai-brain/vision/visionService'
 import { loadStudentContext } from '@/services/ai-provider.service'
 import { UniversalInput }  from '@/components/vision/UniversalInput'
 import MarkdownContent     from '@/components/chat/MarkdownContent'
-import { AsomiddinAvatar } from '@/components/ai'
-import { IllustrationImage, ILLUS } from '@/components/illustration'
+import { AsomiddinAvatar, AICore } from '@/components/ai'
 import type { VisionHistoryEntry } from '@/ai-brain/vision/types'
 import type { Language }   from '@/ai-brain/core/types'
 import type { UniversalMessage } from '@/hooks/useUniversalAI'
@@ -396,13 +395,7 @@ function IdleHero({ language, onPrompt }: { language: Language; onPrompt: (text:
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.55, ease: EASE }}
           >
-            <IllustrationImage
-              src={ILLUS.AI_CHAT}
-              alt="YordamchiAI Vision — sun'iy intellekt ko'rish imkoniyati"
-              width={220}
-              height={220}
-              glow="0 0 50px rgba(99,102,241,0.55)"
-            />
+            <AICore size={216} />
           </motion.div>
         </div>
       </div>

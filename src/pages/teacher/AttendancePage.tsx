@@ -55,6 +55,7 @@ export default function TeacherAttendancePage() {
   useEffect(() => {
     if (!auth.user?.id) return
     void loadGroups()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadGroups() unmemoized by design; re-run only on user id change
   }, [auth.user?.id])
 
   async function loadGroups() {
@@ -72,6 +73,7 @@ export default function TeacherAttendancePage() {
   useEffect(() => {
     if (!groupId || !date) { setEntries([]); return }
     void loadAttendance()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadAttendance() unmemoized by design; re-run only on groupId/date change
   }, [groupId, date])
 
   async function loadAttendance() {

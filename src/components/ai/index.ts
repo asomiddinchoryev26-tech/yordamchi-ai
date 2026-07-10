@@ -4,6 +4,8 @@
 export { AsomiddinAvatar, AsomiddinAIMenuIcon } from './AsomiddinAvatar'
 export type { AvatarSize } from './AsomiddinAvatar'
 
+export { AICore } from './AICore'
+
 export { UserAvatar } from './UserAvatar'
 export type { UserAvatarSize } from './UserAvatar'
 

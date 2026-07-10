@@ -63,6 +63,7 @@ export default function TeacherTestsPage() {
 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; loadAll() is intentionally unmemoized
   useEffect(() => { void loadAll() }, [])
 
   async function loadAll() {

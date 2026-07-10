@@ -132,8 +132,9 @@ export function buildLearningStats(courses: StudentCourse[]): StudentLearningSta
   const totalLessons     = courses.reduce((a, c) => a + c.total_lessons, 0)
   return {
     completedLessons,
-    // TODO(Supabase): kunlik faollikni real jadvaldan oling
-    weeklyActivity: [40, 62, 30, 78, 52, 70, 45],
+    // Per-day activity needs a `study_sessions` table; until then return zeros
+    // (UI shows an empty sparkline + "—") rather than fabricated bars.
+    weeklyActivity: [0, 0, 0, 0, 0, 0, 0],
     streakDays:     completedLessons > 0 ? Math.min(7, Math.max(1, Math.round(completedLessons / 3))) : 0,
     studyHours:     Math.round(totalLessons * 0.75),
   }

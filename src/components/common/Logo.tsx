@@ -102,6 +102,22 @@ function LogoMark() {
   )
 }
 
+// ─── Icon-only logo (shared across header · sidebar · mobile nav · auth) ──────
+// Transparent official mark + a subtle blue/purple premium glow — NO box/tile
+// container. Size via className. Do not wrap this in a colored square anywhere.
+export function LogoIcon({ className = 'w-8 h-8' }: { className?: string }) {
+  return (
+    <span className={`relative inline-block leading-none flex-shrink-0 ${className}`} aria-hidden="true">
+      {/* Subtle premium glow (replaces the old solid box) */}
+      <span
+        className="absolute inset-0 rounded-full blur-md pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.50) 0%, rgba(91,127,255,0.28) 46%, transparent 70%)', transform: 'scale(1.4)' }}
+      />
+      <span className="relative block w-full h-full"><LogoMark /></span>
+    </span>
+  )
+}
+
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 
 export default function Logo({ showText = true, showSubtitle = true, className = '' }: LogoProps) {

@@ -13,6 +13,7 @@ import {
   FileText, Upload,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { logger } from '@/lib/logger'
 import { useLanguage, type Translations } from '@/contexts/LanguageContext'
 import { groupService } from '@/services/group.service'
 import { subjectService } from '@/services/subject.service'
@@ -79,7 +80,7 @@ export default function TeacherAssignmentsPage() {
       setGroups(grp.filter(g => g.teacher_id === teacherId))
       setSubjects(subs)
     } catch (e) {
-      console.error('[TeacherAssignments] load error:', e)
+      logger.error('[TeacherAssignments] load error:', e)
       setError(true)
     } finally {
       setLoading(false)
@@ -91,12 +92,12 @@ export default function TeacherAssignmentsPage() {
   const onDelete = async (id: string) => {
     if (!window.confirm(t.tapConfirmDelete)) return
     try { await assignmentService.remove(id); await load() }
-    catch (e) { console.error(e) }
+    catch (e) { logger.error(e) }
   }
 
   const onPublish = async (a: TeacherAssignment) => {
     try { await assignmentService.update(a.id, { status: 'published' }); await load() }
-    catch (e) { console.error(e) }
+    catch (e) { logger.error(e) }
   }
 
   return (
@@ -268,7 +269,7 @@ function AssignmentFormModal({ teacherId, groups, subjects, initial, onClose, on
       else         await assignmentService.create(teacherId, payload)
       await onSaved()
     } catch (e) {
-      console.error('[TeacherAssignments] save failed:', e)
+      logger.error('[TeacherAssignments] save failed:', e)
       setErr(t.tcSaveErr)
     } finally {
       setSaving(false)
@@ -411,7 +412,7 @@ function SubmissionsModal({ assignment, graderId, onClose, onGraded }: {
     try {
       await assignmentService.gradeSubmission(s.id, graderId, score, feedback || null, assignment.max_score)
       await load(); await onGraded()
-    } catch (e) { console.error(e) } finally { setBusy(null) }
+    } catch (e) { logger.error(e) } finally { setBusy(null) }
   }
 
   return (

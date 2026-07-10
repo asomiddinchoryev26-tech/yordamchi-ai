@@ -29,6 +29,7 @@ export default function AdminLessonsPage() {
   const [attachments,       setAttachments]       = useState<Record<string, AttachmentRow[]>>({})
   const [attachmentsLoaded, setAttachmentsLoaded] = useState<Set<string>>(new Set())
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
 
   async function load() {

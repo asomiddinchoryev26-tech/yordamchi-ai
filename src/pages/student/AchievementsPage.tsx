@@ -11,6 +11,7 @@ import { motion } from 'framer-motion'
 import { AlertCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 import { generateCertificatePDF, buildPeriodLabel, type CertificateData } from '@/services/certificate.service'
 import { progressService, type StudentProgress } from '@/services/progress.service'
 import {
@@ -51,11 +52,12 @@ export default function StudentAchievementsPage() {
       setData(progress)
       setEarned((achRes.data ?? []) as unknown as EarnedRow[])
     } catch (e) {
-      console.error('[Achievements] load error:', e)
+      logger.error('[Achievements] load error:', e)
       setError(t.mpLoadErr)
     } finally {
       setLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-create only on user id change; t.* affects error text only
   }, [auth.user?.id])
 
   useEffect(() => { void load() }, [load])
@@ -68,7 +70,7 @@ export default function StudentAchievementsPage() {
     emoji: e.achievement?.icon_emoji ?? '🏅',
   }))
 
-  const handleDownload = (id: string) => {
+  const handleDownload = async (id: string) => {
     const item = earned.find(e => e.id === id)
     if (!item) return
     setDownloadingId(id)
@@ -82,7 +84,7 @@ export default function StudentAchievementsPage() {
         certId:           item.id,
         periodLabel:      buildPeriodLabel(item.period_year, item.period_month),
       }
-      generateCertificatePDF(cert)
+      await generateCertificatePDF(cert)
     } catch {
       setError(t.mpLoadErr)
     } finally {

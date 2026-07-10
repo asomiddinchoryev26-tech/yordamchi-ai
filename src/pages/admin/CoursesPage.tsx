@@ -47,6 +47,7 @@ export default function AdminCoursesPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [subjectFilter, setSubjectFilter] = useState('all')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only load; load() is intentionally unmemoized
   useEffect(() => { void load() }, [])
 
   async function load() {

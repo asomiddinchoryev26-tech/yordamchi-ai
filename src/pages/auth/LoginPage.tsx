@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { PATHS } from '@/routes/paths'
 import type { UserRole } from '@/types/auth.types'
-import logoSrc from '@/assets/images/logo.svg'
+import { LogoIcon } from '@/components/common/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { IllustrationImage, ILLUS } from '@/components/illustration'
 
@@ -130,12 +130,7 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col h-full px-10 xl:px-12 py-10">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-[12px] flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)', boxShadow: '0 0 20px rgba(91,127,255,0.5)' }}
-            >
-              <img src={logoSrc} alt="Y" className="w-7 h-7" />
-            </div>
+            <LogoIcon className="w-10 h-10" />
             <span className="text-[18px] font-black text-white tracking-tight">YordamchiAI</span>
           </div>
 
@@ -201,12 +196,7 @@ export default function LoginPage() {
           className="lg:hidden flex items-center gap-3 px-4 py-4 flex-shrink-0"
           style={{ background: 'rgba(11,15,28,0.90)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}
         >
-          <div
-            className="w-8 h-8 rounded-[10px] flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)' }}
-          >
-            <img src={logoSrc} alt="Y" className="w-5 h-5" />
-          </div>
+          <LogoIcon className="w-8 h-8" />
           <span className="text-[15px] font-black text-white">YordamchiAI</span>
         </div>
 

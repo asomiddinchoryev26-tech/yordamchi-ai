@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom'
 import { AlertCircle, CheckCircle, Mail, ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { PATHS } from '@/routes/paths'
-import logoSrc from '@/assets/images/logo.svg'
+import { LogoIcon } from '@/components/common/Logo'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 // ─── V6 design tokens ─────────────────────────────────────────────────────────
@@ -122,12 +122,7 @@ export default function ForgotPasswordPage() {
 
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-7">
-          <div
-            className="w-9 h-9 rounded-[11px] flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)', boxShadow: '0 0 18px rgba(91,127,255,0.45)' }}
-          >
-            <img src={logoSrc} alt="Y" className="w-6 h-6" />
-          </div>
+          <LogoIcon className="w-9 h-9" />
           <span className="text-[17px] font-black text-white tracking-tight">YordamchiAI</span>
         </div>
 
