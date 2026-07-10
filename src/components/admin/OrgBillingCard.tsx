@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react'
 import { Crown, Check, Loader2, Clock, Upload } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import { paymentGatewayService } from '@/services/paymentGateway.service'
 
 type Plan = { key: string; name: string; price_uzs: string }
 
@@ -72,6 +73,15 @@ export function OrgBillingCard() {
     setChosen(''); setReceipt(''); setBusy(false); void load()
   }
 
+  // Click / Payme shlyuzi orqali to'lash — buyurtma ochib checkout'ga yo'naltiradi
+  async function payVia(provider: 'click' | 'payme') {
+    if (!chosen || (chosen !== 'premium' && chosen !== 'pro')) return
+    setBusy(true); setErr(null)
+    try { await paymentGatewayService.startCheckout(chosen, provider) }
+    catch { setErr("To'lovni boshlashda xatolik."); setBusy(false) }
+  }
+  const hasGateway = paymentGatewayService.isConfigured('click') || paymentGatewayService.isConfigured('payme')
+
   const isPaid  = plan !== 'free'
   const upgrades = plans.filter(p => p.key !== 'free' && p.key !== plan)
 
@@ -103,8 +113,32 @@ export function OrgBillingCard() {
       ) : chosen ? (
         <div className="space-y-3">
           <p className="text-sm text-gray-600">
-            <b className="uppercase">{chosen}</b> rejaga o'tish uchun to'lov chekini yuklang.
+            <b className="uppercase">{chosen}</b> rejaga o'tish uchun to'lov usulini tanlang.
           </p>
+
+          {/* Click / Payme shlyuzi (merchant kalitlari o'rnatilgan bo'lsa) */}
+          {hasGateway && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {paymentGatewayService.isConfigured('click') && (
+                  <button type="button" onClick={() => void payVia('click')} disabled={busy}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#00A6E9] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+                    {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Click orqali to'lash
+                  </button>
+                )}
+                {paymentGatewayService.isConfigured('payme') && (
+                  <button type="button" onClick={() => void payVia('payme')} disabled={busy}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#33CCCC] text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+                    {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Payme orqali to'lash
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-[11px] text-gray-400">
+                <span className="flex-1 h-px bg-gray-200" /> yoki chek yuklang <span className="flex-1 h-px bg-gray-200" />
+              </div>
+            </>
+          )}
+
           <label className="flex items-center justify-center gap-2 w-full px-3.5 py-3 rounded-xl border border-dashed border-gray-300 text-sm text-gray-500 cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-colors">
             {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : receipt ? <Check className="w-4 h-4 text-emerald-500" /> : <Upload className="w-4 h-4" />}
             {uploading ? 'Yuklanmoqda…' : receipt ? 'Chek yuklandi ✓' : "To'lov chekini yuklash (rasm)"}
