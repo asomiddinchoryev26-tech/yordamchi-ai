@@ -5,7 +5,7 @@ import {
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { logger } from '@/lib/logger'
-import type { AuthState, User, UserRole, LoginCredentials, RegisterPayload } from '@/types/auth.types'
+import type { AuthState, User, UserRole, OrgType, LoginCredentials, RegisterPayload } from '@/types/auth.types'
 
 // ─── Supabase xato → O'zbek ──────────────────────────────────────────────────
 
@@ -51,7 +51,7 @@ async function resolveUser(sbUser: SupabaseUser): Promise<User | null> {
     from: (t: string) => {
       select: (c: string) => {
         eq: (k: string, v: string) => {
-          maybeSingle: () => Promise<{ data: { full_name?: string | null; organization_id?: string | null; is_super_admin?: boolean | null; status?: string | null } | null }>
+          maybeSingle: () => Promise<{ data: { full_name?: string | null; organization_id?: string | null; is_super_admin?: boolean | null; status?: string | null; org_type?: string | null } | null }>
         }
       }
     }
@@ -62,12 +62,14 @@ async function resolveUser(sbUser: SupabaseUser): Promise<User | null> {
     .eq('id', sbUser.id)
     .maybeSingle()
 
-  // Tashkilot bloklangan bo'lsa — foydalanuvchi kira olmaydi (super-admin bundan mustasno).
-  // Xatolik bo'lsa "fail-open": hech kimni qulflab qo'ymaymiz, faqat aniq 'suspended' bloklaydi.
+  // Tashkilot: turini olamiz (atama moslashuvi uchun) + bloklangan bo'lsa kira olmaydi
+  // (super-admin bundan mustasno). Xatolik bo'lsa "fail-open".
   const orgId = profile?.organization_id ?? null
-  if (orgId && !profile?.is_super_admin) {
-    const { data: org } = await sbLoose.from('organizations').select('status').eq('id', orgId).maybeSingle()
-    if (org?.status === 'suspended') {
+  let orgType: OrgType | null = null
+  if (orgId) {
+    const { data: org } = await sbLoose.from('organizations').select('status, org_type').eq('id', orgId).maybeSingle()
+    orgType = (org?.org_type as OrgType | undefined) ?? null
+    if (!profile?.is_super_admin && org?.status === 'suspended') {
       logger.warn('[resolveUser] organization suspended — blocking sign-in')
       await supabase.auth.signOut()
       return null
@@ -83,6 +85,7 @@ async function resolveUser(sbUser: SupabaseUser): Promise<User | null> {
     avatarUrl:      typeof meta['avatar_url'] === 'string' ? meta['avatar_url'] : undefined,
     createdAt:      sbUser.created_at,
     organizationId: profile?.organization_id ?? null,
+    orgType,
   }
 }
 

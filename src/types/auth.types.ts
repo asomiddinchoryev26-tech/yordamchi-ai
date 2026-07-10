@@ -1,4 +1,5 @@
 export type UserRole = 'student' | 'teacher' | 'admin'
+export type OrgType  = 'school' | 'institute' | 'center'
 
 export interface User {
   id:             string
@@ -8,6 +9,7 @@ export interface User {
   avatarUrl?:     string
   createdAt:      string
   organizationId: string | null   // null → user has not joined/created an org yet (onboarding)
+  orgType:        OrgType | null   // tashkilot turi (atama moslashuvi uchun); null → onboarding/super
 }
 
 export interface AuthState {

@@ -13,6 +13,7 @@ import type { SidebarNavSection } from '@/components/layout/Sidebar'
 import { PATHS } from '@/routes/paths'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useOrgTerms } from '@/lib/orgTerms'
 import { UserAvatar } from '@/components/identity'
 import { useProfile } from '@/hooks/useProfile'
 
@@ -22,6 +23,7 @@ export default function AdminLayout() {
   const { profile } = useProfile()
   const navigate    = useNavigate()
   const { t }       = useLanguage()
+  const term        = useOrgTerms()
   const userName    = profile?.fullName ?? auth.user?.name ?? 'Administrator'
   const initial     = userName.charAt(0).toUpperCase()
 
@@ -44,9 +46,9 @@ export default function AdminLayout() {
     {
       title: t.studentsSection,
       items: [
-        { label: t.students,  to: PATHS.ADMIN.STUDENTS, icon: Users         },
-        { label: t.teachers,  to: PATHS.ADMIN.TEACHERS, icon: GraduationCap },
-        { label: t.groups,    to: PATHS.ADMIN.GROUPS,   icon: Layers        },
+        { label: term.students, to: PATHS.ADMIN.STUDENTS, icon: Users         },
+        { label: t.teachers,    to: PATHS.ADMIN.TEACHERS, icon: GraduationCap },
+        { label: term.groups,   to: PATHS.ADMIN.GROUPS,   icon: Layers        },
       ],
     },
     {
