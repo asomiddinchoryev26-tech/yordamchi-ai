@@ -5,8 +5,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { GraduationCap, Plus, Trash2, Loader2, Check, CalendarDays, BookMarked, X, Users, ChevronDown, UserPlus, UserMinus } from 'lucide-react'
-import { academicService, type Semester, type Course, type TeacherOpt } from '@/services/academic.service'
+import { GraduationCap, Plus, Trash2, Loader2, Check, CalendarDays, BookMarked, X, Users, ChevronDown, UserPlus, UserMinus, Landmark } from 'lucide-react'
+import { academicService, type Semester, type Course, type Department, type TeacherOpt } from '@/services/academic.service'
 
 const CARD = 'bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm'
 const INPUT = 'px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500'
@@ -54,6 +54,7 @@ function CourseEnrollment({ courseId, students }: { courseId: string; students: 
 export default function AcademicPage() {
   const [semesters, setSemesters] = useState<Semester[]>([])
   const [courses,   setCourses]   = useState<Course[]>([])
+  const [depts,     setDepts]     = useState<Department[]>([])
   const [teachers,  setTeachers]  = useState<TeacherOpt[]>([])
   const [students,  setStudents]  = useState<TeacherOpt[]>([])
   const [expanded,  setExpanded]  = useState<string | null>(null)
@@ -63,18 +64,24 @@ export default function AcademicPage() {
   const [semName, setSemName] = useState('')
   const [semBusy, setSemBusy] = useState(false)
 
+  // department form
+  const [depName, setDepName] = useState('')
+  const [depHead, setDepHead] = useState('')
+  const [depBusy, setDepBusy] = useState(false)
+
   // course form
   const [cName, setCName] = useState('')
   const [cCode, setCCode] = useState('')
   const [cCredits, setCCredits] = useState('6')
   const [cSem, setCSem] = useState('')
   const [cTeacher, setCTeacher] = useState('')
+  const [cDept, setCDept] = useState('')
   const [cBusy, setCBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const [s, c, t, st] = await Promise.all([academicService.listSemesters(), academicService.listCourses(), academicService.listTeachers(), academicService.listStudents()])
-    setSemesters(s); setCourses(c); setTeachers(t); setStudents(st); setLoading(false)
+    const [s, c, t, st, d] = await Promise.all([academicService.listSemesters(), academicService.listCourses(), academicService.listTeachers(), academicService.listStudents(), academicService.listDepartments()])
+    setSemesters(s); setCourses(c); setTeachers(t); setStudents(st); setDepts(d); setLoading(false)
   }, [])
   useEffect(() => { void load() }, [load])
 
@@ -84,12 +91,20 @@ export default function AcademicPage() {
     try { await academicService.createSemester(semName); setSemName(''); await load() }
     catch (e) { setErr(e instanceof Error ? e.message : 'Xatolik') } finally { setSemBusy(false) }
   }
+  const addDepartment = async () => {
+    if (!depName.trim()) return
+    setDepBusy(true); setErr(null)
+    try { await academicService.createDepartment(depName, depHead); setDepName(''); setDepHead(''); await load() }
+    catch (e) { setErr(e instanceof Error ? e.message : 'Xatolik') } finally { setDepBusy(false) }
+  }
+  const delDepartment = async (id: string) => { try { await academicService.deleteDepartment(id); await load() } catch { /* */ } }
+
   const addCourse = async () => {
     if (!cName.trim()) return
     setCBusy(true); setErr(null)
     try {
-      await academicService.createCourse({ name: cName, code: cCode, credits: Number(cCredits) || 0, semester_id: cSem, teacher_id: cTeacher })
-      setCName(''); setCCode(''); setCCredits('6'); setCSem(''); setCTeacher(''); await load()
+      await academicService.createCourse({ name: cName, code: cCode, credits: Number(cCredits) || 0, semester_id: cSem, teacher_id: cTeacher, department_id: cDept })
+      setCName(''); setCCode(''); setCCredits('6'); setCSem(''); setCTeacher(''); setCDept(''); await load()
     } catch (e) { setErr(e instanceof Error ? e.message : 'Xatolik') } finally { setCBusy(false) }
   }
   const delCourse = async (id: string) => { try { await academicService.deleteCourse(id); await load() } catch { /* */ } }
@@ -97,6 +112,7 @@ export default function AcademicPage() {
 
   const semName_ = (id: string | null) => semesters.find(s => s.id === id)?.name ?? '—'
   const teacherName = (id: string | null) => teachers.find(t => t.id === id)?.full_name ?? '—'
+  const deptName = (id: string | null) => depts.find(d => d.id === id)?.name ?? null
 
   return (
     <div className="space-y-5 pb-8 max-w-3xl">
@@ -130,6 +146,34 @@ export default function AcademicPage() {
         )}
       </div>
 
+      {/* Kafedralar / fakultetlar */}
+      <div className={CARD}>
+        <div className="flex items-center gap-2 mb-3"><Landmark className="w-4 h-4 text-amber-500" /><h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Kafedralar / fakultetlar</h2></div>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <input value={depName} onChange={e => setDepName(e.target.value)} placeholder="Masalan: Oliy matematika kafedrasi" className={`${INPUT} flex-1 min-w-[200px]`} />
+          <select value={depHead} onChange={e => setDepHead(e.target.value)} className={INPUT}>
+            <option value="">Mudir (ixtiyoriy)</option>
+            {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
+          </select>
+          <button type="button" onClick={() => void addDepartment()} disabled={depBusy || !depName.trim()} className={BTN} style={BTN_BG}>
+            {depBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Qo‘shish
+          </button>
+        </div>
+        {loading ? <div className="h-10 rounded-xl bg-gray-50 dark:bg-gray-700 animate-pulse" />
+          : depts.length === 0 ? <p className="text-sm text-gray-400">Hali kafedra yo‘q</p> : (
+          <div className="space-y-1.5">
+            {depts.map(d => (
+              <div key={d.id} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                <Landmark className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                <span className="text-sm text-gray-800 dark:text-gray-100 flex-1">{d.name}</span>
+                {d.head_id && <span className="text-[11px] text-gray-500 dark:text-gray-400">👤 {teacherName(d.head_id)}</span>}
+                <button type="button" onClick={() => void delDepartment(d.id)} className="text-red-500 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Kurslar */}
       <div className={CARD}>
         <div className="flex items-center gap-2 mb-3"><BookMarked className="w-4 h-4 text-indigo-500" /><h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Kurslar</h2></div>
@@ -145,6 +189,10 @@ export default function AcademicPage() {
             <option value="">O‘qituvchi tanlang</option>
             {teachers.map(t => <option key={t.id} value={t.id}>{t.full_name}</option>)}
           </select>
+          <select value={cDept} onChange={e => setCDept(e.target.value)} className={INPUT}>
+            <option value="">Kafedra (ixtiyoriy)</option>
+            {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+          </select>
           <button type="button" onClick={() => void addCourse()} disabled={cBusy || !cName.trim()} className={BTN} style={BTN_BG}>
             {cBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Kurs qo‘shish
           </button>
@@ -158,7 +206,7 @@ export default function AcademicPage() {
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-xs font-bold">{c.credits}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name} {c.code && <span className="text-gray-400 font-normal">· {c.code}</span>}</p>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400">{c.credits} kredit · 📅 {semName_(c.semester_id)} · 👨‍🏫 {teacherName(c.teacher_id)}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">{c.credits} kredit · 📅 {semName_(c.semester_id)} · 👨‍🏫 {teacherName(c.teacher_id)}{deptName(c.department_id) && <> · 🏛 {deptName(c.department_id)}</>}</p>
                   </div>
                   <button type="button" onClick={() => setExpanded(expanded === c.id ? null : c.id)}
                     className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-[11px] font-semibold text-gray-600 dark:text-gray-300 flex-shrink-0">

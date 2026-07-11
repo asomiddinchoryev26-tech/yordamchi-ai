@@ -14,8 +14,9 @@ export type Semester = {
 }
 export type Course = {
   id: string; name: string; code: string | null; credits: number
-  semester_id: string | null; teacher_id: string | null; status: string; created_at: string
+  semester_id: string | null; teacher_id: string | null; department_id: string | null; status: string; created_at: string
 }
+export type Department = { id: string; name: string; head_id: string | null; created_at: string }
 export type TeacherOpt = { id: string; full_name: string | null }
 
 export const academicService = {
@@ -38,16 +39,30 @@ export const academicService = {
     try { const { data } = await sb.from('courses').select('*').order('created_at', { ascending: false }); return (data ?? []) as Course[] }
     catch { return [] }
   },
-  createCourse: async (c: { name: string; code?: string | null; credits: number; semester_id?: string | null; teacher_id?: string | null }): Promise<void> => {
+  createCourse: async (c: { name: string; code?: string | null; credits: number; semester_id?: string | null; teacher_id?: string | null; department_id?: string | null }): Promise<void> => {
     const { error } = await sb.from('courses').insert({
       name: c.name.trim(), code: c.code?.trim() || null, credits: c.credits,
-      semester_id: c.semester_id || null, teacher_id: c.teacher_id || null,
+      semester_id: c.semester_id || null, teacher_id: c.teacher_id || null, department_id: c.department_id || null,
     })
     if (error) throw new Error(error.message ?? 'Kurs yaratishda xatolik')
   },
   deleteCourse: async (id: string): Promise<void> => {
     const { error } = await sb.from('courses').delete().eq('id', id)
     if (error) throw new Error(error.message ?? 'O‘chirishda xatolik')
+  },
+
+  // ── Kafedralar / fakultetlar ──
+  listDepartments: async (): Promise<Department[]> => {
+    try { const { data } = await sb.from('departments').select('*').order('created_at', { ascending: false }); return (data ?? []) as Department[] }
+    catch { return [] }
+  },
+  createDepartment: async (name: string, headId?: string | null): Promise<void> => {
+    const { error } = await sb.from('departments').insert({ name: name.trim(), head_id: headId || null })
+    if (error) throw new Error(error.message ?? 'Kafedra yaratishda xatolik')
+  },
+  deleteDepartment: async (id: string): Promise<void> => {
+    const { error } = await sb.from('departments').delete().eq('id', id)
+    if (error) throw new Error(error.message ?? 'O‘chirishда xatolik')
   },
 
   // ── Kurs uchun o'qituvchilar ro'yxati (o'z tashkiloti, RLS) ──
