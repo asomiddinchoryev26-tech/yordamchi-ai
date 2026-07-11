@@ -24,6 +24,7 @@ export default function AdminLayout() {
   const navigate    = useNavigate()
   const { t }       = useLanguage()
   const term        = useOrgTerms()
+  const isInstitute = auth.user?.orgType === 'institute'
   const userName    = profile?.fullName ?? auth.user?.name ?? 'Administrator'
   const initial     = userName.charAt(0).toUpperCase()
 
@@ -54,6 +55,7 @@ export default function AdminLayout() {
     {
       title: t.learningSection,
       items: [
+        ...(isInstitute ? [{ label: 'Kurslar', to: '/admin/academic', icon: GraduationCap }] : []),
         { label: t.subjects,    to: PATHS.ADMIN.SUBJECTS,   icon: BookMarked  },
         { label: t.lessons,     to: PATHS.ADMIN.LESSONS,    icon: BookOpen    },
         { label: t.attendance,  to: PATHS.ADMIN.ATTENDANCE, icon: CheckSquare },

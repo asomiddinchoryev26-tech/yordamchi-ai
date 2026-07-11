@@ -17,6 +17,7 @@ const ReportsPage        = lazy(() => import('@/pages/admin/ReportsPage'))
 const SubjectsPage       = lazy(() => import('@/pages/admin/SubjectsPage'))
 const SettingsPage       = lazy(() => import('@/pages/admin/SettingsPage'))
 const AchievementsPage   = lazy(() => import('@/pages/admin/AchievementsPage'))
+const AcademicPage       = lazy(() => import('@/pages/admin/AcademicPage'))
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -38,6 +39,7 @@ export const adminRoutes: RouteObject[] = [
               { path: 'attendance', element: <AttendancePage />     },
               { path: 'tests',      element: <TestsPage />          },
               { path: 'subjects',   element: <SubjectsPage />       },
+              { path: 'academic',   element: <AcademicPage />       },
               { path: 'reports',    element: <ReportsPage />        },
               { path: 'settings',      element: <SettingsPage />      },
               { path: 'achievements', element: <AchievementsPage /> },
