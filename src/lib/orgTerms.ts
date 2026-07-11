@@ -26,10 +26,11 @@ const TERMS: Record<OrgType, Record<Lang, [string, string, string, string]>> = {
     ru: ['Класс', 'Классы', 'Ученик', 'Ученики'],
     en: ['Class', 'Classes', 'Student', 'Students'],
   },
+  // Institutда "guruh" = talaba guruhi (kredit-kurslar alohida "Kurslar" sahifasida)
   institute: {
-    uz: ['Kurs', 'Kurslar', 'Talaba', 'Talabalar'],
-    ru: ['Курс', 'Курсы', 'Студент', 'Студенты'],
-    en: ['Course', 'Courses', 'Student', 'Students'],
+    uz: ['Guruh', 'Guruhlar', 'Talaba', 'Talabalar'],
+    ru: ['Группа', 'Группы', 'Студент', 'Студенты'],
+    en: ['Group', 'Groups', 'Student', 'Students'],
   },
   center: {
     uz: ['Guruh', 'Guruhlar', 'Tinglovchi', 'Tinglovchilar'],
