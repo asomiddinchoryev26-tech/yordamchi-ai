@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { GraduationCap, Plus, Trash2, Loader2, Check, CalendarDays, BookMarked, X } from 'lucide-react'
+import { GraduationCap, Plus, Trash2, Loader2, Check, CalendarDays, BookMarked, X, Users, ChevronDown, UserPlus, UserMinus } from 'lucide-react'
 import { academicService, type Semester, type Course, type TeacherOpt } from '@/services/academic.service'
 
 const CARD = 'bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 shadow-sm'
@@ -13,10 +13,50 @@ const INPUT = 'px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 
 const BTN = 'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white text-sm font-semibold disabled:opacity-50'
 const BTN_BG = { background: 'linear-gradient(135deg,#5B7FFF,#7C3AED)' }
 
+// Kursга talaba yozish/o'chirish (kengaytiriladigan)
+function CourseEnrollment({ courseId, students }: { courseId: string; students: TeacherOpt[] }) {
+  const [enrolled, setEnrolled] = useState<string[]>([])
+  const [pick, setPick] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const load = useCallback(async () => { setEnrolled(await academicService.listEnrollments(courseId)); setLoading(false) }, [courseId])
+  useEffect(() => { void load() }, [load])
+  const add = async () => { if (!pick) return; setBusy(true); try { await academicService.enroll(courseId, pick); setPick(''); await load() } catch { /* */ } finally { setBusy(false) } }
+  const remove = async (sid: string) => { try { await academicService.unenroll(courseId, sid); await load() } catch { /* */ } }
+  const nameOf = (id: string) => students.find(s => s.id === id)?.full_name ?? '—'
+  const available = students.filter(s => !enrolled.includes(s.id))
+  return (
+    <div className="mt-2.5 pt-2.5 border-t border-gray-100 dark:border-gray-700 space-y-2">
+      <div className="flex flex-wrap gap-2">
+        <select value={pick} onChange={e => setPick(e.target.value)} className={`${INPUT} flex-1 min-w-[160px]`}>
+          <option value="">Talaba tanlang</option>
+          {available.map(s => <option key={s.id} value={s.id}>{s.full_name}</option>)}
+        </select>
+        <button type="button" onClick={() => void add()} disabled={busy || !pick} className={BTN} style={BTN_BG}>
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />} Yozish
+        </button>
+      </div>
+      {loading ? <div className="h-6 rounded bg-gray-50 dark:bg-gray-700 animate-pulse" />
+        : enrolled.length === 0 ? <p className="text-[11px] text-gray-400">Hali talaba yozilmagan</p> : (
+        <div className="flex flex-wrap gap-1.5">
+          {enrolled.map(sid => (
+            <span key={sid} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 text-[12px] text-gray-700 dark:text-gray-200">
+              {nameOf(sid)}
+              <button type="button" onClick={() => void remove(sid)} className="text-red-500 hover:text-red-600"><UserMinus className="w-3 h-3" /></button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AcademicPage() {
   const [semesters, setSemesters] = useState<Semester[]>([])
   const [courses,   setCourses]   = useState<Course[]>([])
   const [teachers,  setTeachers]  = useState<TeacherOpt[]>([])
+  const [students,  setStudents]  = useState<TeacherOpt[]>([])
+  const [expanded,  setExpanded]  = useState<string | null>(null)
   const [loading,   setLoading]   = useState(true)
 
   // semester form
@@ -33,8 +73,8 @@ export default function AcademicPage() {
   const [err, setErr] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const [s, c, t] = await Promise.all([academicService.listSemesters(), academicService.listCourses(), academicService.listTeachers()])
-    setSemesters(s); setCourses(c); setTeachers(t); setLoading(false)
+    const [s, c, t, st] = await Promise.all([academicService.listSemesters(), academicService.listCourses(), academicService.listTeachers(), academicService.listStudents()])
+    setSemesters(s); setCourses(c); setTeachers(t); setStudents(st); setLoading(false)
   }, [])
   useEffect(() => { void load() }, [load])
 
@@ -113,13 +153,20 @@ export default function AcademicPage() {
           : courses.length === 0 ? <p className="text-sm text-gray-400">Hali kurs yo‘q</p> : (
           <div className="space-y-2">
             {courses.map(c => (
-              <div key={c.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-xs font-bold">{c.credits}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name} {c.code && <span className="text-gray-400 font-normal">· {c.code}</span>}</p>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400">{c.credits} kredit · 📅 {semName_(c.semester_id)} · 👨‍🏫 {teacherName(c.teacher_id)}</p>
+              <div key={c.id} className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 text-xs font-bold">{c.credits}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name} {c.code && <span className="text-gray-400 font-normal">· {c.code}</span>}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400">{c.credits} kredit · 📅 {semName_(c.semester_id)} · 👨‍🏫 {teacherName(c.teacher_id)}</p>
+                  </div>
+                  <button type="button" onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-[11px] font-semibold text-gray-600 dark:text-gray-300 flex-shrink-0">
+                    <Users className="w-3.5 h-3.5" /> Talabalar <ChevronDown className={`w-3 h-3 transition-transform ${expanded === c.id ? 'rotate-180' : ''}`} />
+                  </button>
+                  <button type="button" onClick={() => void delCourse(c.id)} className="w-7 h-7 rounded-lg flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 flex-shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
-                <button type="button" onClick={() => void delCourse(c.id)} className="w-7 h-7 rounded-lg flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-100 flex-shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
+                {expanded === c.id && <CourseEnrollment courseId={c.id} students={students} />}
               </div>
             ))}
           </div>

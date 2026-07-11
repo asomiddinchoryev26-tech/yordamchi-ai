@@ -55,4 +55,23 @@ export const academicService = {
     try { const { data } = await sb.from('profiles').select('id, full_name').eq('role', 'teacher').order('full_name'); return (data ?? []) as TeacherOpt[] }
     catch { return [] }
   },
+
+  // ── Kursга yozilish ──
+  listStudents: async (): Promise<TeacherOpt[]> => {
+    try { const { data } = await sb.from('profiles').select('id, full_name').eq('role', 'student').order('full_name'); return (data ?? []) as TeacherOpt[] }
+    catch { return [] }
+  },
+  listEnrollments: async (courseId: string): Promise<string[]> => {
+    try { const { data } = await sb.from('course_enrollments').select('student_id').eq('course_id', courseId)
+      return (data ?? []).map((r: { student_id: string }) => r.student_id) }
+    catch { return [] }
+  },
+  enroll: async (courseId: string, studentId: string): Promise<void> => {
+    const { error } = await sb.from('course_enrollments').insert({ course_id: courseId, student_id: studentId })
+    if (error) throw new Error(error.message ?? 'Yozishда xatolik')
+  },
+  unenroll: async (courseId: string, studentId: string): Promise<void> => {
+    const { error } = await sb.from('course_enrollments').delete().eq('course_id', courseId).eq('student_id', studentId)
+    if (error) throw new Error(error.message ?? 'O‘chirishда xatolik')
+  },
 }
