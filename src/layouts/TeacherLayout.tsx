@@ -11,6 +11,7 @@ import type { SidebarNavSection } from '@/components/layout/Sidebar'
 import { PATHS } from '@/routes/paths'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useOrgTerms } from '@/lib/orgTerms'
 import { UserAvatar } from '@/components/identity'
 import { useProfile } from '@/hooks/useProfile'
 
@@ -20,6 +21,7 @@ export default function TeacherLayout() {
   const { profile } = useProfile()
   const navigate    = useNavigate()
   const { t }       = useLanguage()
+  const term        = useOrgTerms()
   const userName    = profile?.fullName ?? auth.user?.name ?? t.teacherRole
   const initial     = userName.charAt(0).toUpperCase()
 
@@ -42,8 +44,8 @@ export default function TeacherLayout() {
     {
       title: t.learningProcessSection,
       items: [
-        { label: t.students,   to: PATHS.TEACHER.STUDENTS,   icon: GraduationCap },
-        { label: t.groups,     to: PATHS.TEACHER.GROUPS,     icon: Users         },
+        { label: term.students, to: PATHS.TEACHER.STUDENTS,   icon: GraduationCap },
+        { label: term.groups,   to: PATHS.TEACHER.GROUPS,     icon: Users         },
         { label: t.lessons,    to: PATHS.TEACHER.COURSES,    icon: BookOpen      },
         { label: 'Topshiriqlar', to: PATHS.TEACHER.ASSIGNMENTS, icon: ClipboardList },
         { label: t.attendance, to: PATHS.TEACHER.ATTENDANCE, icon: CheckSquare   },
